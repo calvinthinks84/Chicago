@@ -47,8 +47,8 @@ header p{margin:3px 0;font-size:13.5px;line-height:1.45;color:var(--mut)}
 #map{height:clamp(300px,52dvh,520px);border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:1}
 .leaflet-tile-pane{filter:grayscale(1)}
 .bar{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px;align-items:center}
-.locRow{display:flex;gap:8px;flex-wrap:nowrap;width:100%}
-.locRow .btn{flex:0 1 auto}
+.locRow{display:flex;gap:8px;flex-wrap:nowrap;width:100%;justify-content:center}
+.locRow .btn{flex:1 1 0;max-width:220px}
 .btn{border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer;font-size:14px;font-weight:600;box-shadow:0 1px 2px rgba(16,27,38,.06);transition:background .15s,border-color .15s,transform .05s}
 .btn:active{transform:scale(.98)}
 .btn.go{background:var(--sel);color:#fff;border-color:var(--sel)}
