@@ -47,11 +47,11 @@ header .chip{background:rgba(255,255,255,.92);border-color:rgba(255,255,255,.6);
 .poi{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
 .poi:last-child{border-bottom:0}.poi .d{color:var(--muted);white-space:nowrap}
 .tag{font-size:11.5px;background:var(--tag-bg);border-radius:6px;padding:1px 6px;color:var(--tag-ink)}
-#toast{display:none;background:var(--toast-bg);border:2px solid #f0b429;border-radius:12px;padding:12px 14px;margin:10px 0;font-size:14.5px}
-#toast h3{margin:0 0 4px;font-size:16px}
+
+
 .pop h3{margin:0 0 3px;font-size:15px}.pop p{margin:3px 0;font-size:13px}
 .pop a{font-weight:700;color:var(--link)}
-#toast a{color:var(--link)}
+
 #status{font-size:13px;color:var(--muted)}
 .legend{font-size:13px;color:var(--ink)}
 html{-webkit-text-size-adjust:100%}
@@ -105,7 +105,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 <p style="margin:4px 0"><button class="btn" id="gpsRetryBtn" style="font-size:13px;padding:6px 11px">↻ Try GPS again</button> <button class="btn" id="gpsHelpClose" style="font-size:13px;padding:6px 11px">Dismiss</button></p>
 </div>
 <div id="map"></div>
-<div id="toast"></div>
+<div class="panel" id="pinInfo"><h2>📍 Pin details</h2><div id="pinInfoBody"><p class="legend">Tap any pin on the map — its ⭐ must-try, 🏛️ history, and 🧭 Getting there (bus/train board &amp; exit) show here, below the map.</p></div></div>
 <div class="panel"><h2>🏛️ Chicago history &amp; architecture — the 2-minute version</h2>
 <p><strong>The Fire and the rebuild (1871):</strong> The Great Chicago Fire destroyed downtown, and the city rebuilt in brick, stone, and steel — which is why so many neighborhoods on this trip (River North, Lincoln Park, the Gold Coast) date from the 1870s–90s.</p>
 <p><strong>The skyscraper was born here:</strong> Chicago builders pioneered the steel-frame Chicago School tower in the 1880s–90s, then the neo-Gothic Tribune Tower (1925) and the Art Deco Merchandise Mart (1930), then modern glass — the river tour on Wed is the best seat for all three eras at once.</p>
@@ -242,7 +242,7 @@ var ROUTE=["Fairfield Inn — your hotel (base)","Al's #1 Italian Beef + Chicago
 /* ---------- Map + behaviour ---------- */
 var ICONS={stop:"📍",coffee:"☕",boba:"🧋",snack:"🍩",dog:"🌭",food:"🍽️",landmark:"🏛️"};
 var COLORS={stop:"#0b5cad",coffee:"#6f4e37",boba:"#e84393",snack:"#e67e22",dog:"#c0392b",food:"#2a9d8f",landmark:"#a67c00"};
-var statusEl=document.getElementById("status"), toast=document.getElementById("toast"), nearList=document.getElementById("nearList");
+var statusEl=document.getElementById("status"), pinInfo=document.getElementById("pinInfoBody"), nearList=document.getElementById("nearList");
 var map=null, markers={}, walker=null, radius=+document.getElementById("radSel").value;
 var myPos=null, alerted={}, simTimer=null, simSeg=0, simT=0;
 var gpsWatchId=null, tapMode=false, gpsHasFix=false;
@@ -263,10 +263,14 @@ function popHTML(p){
  +rideHTML(p)
  +"<p><a target='_blank' rel='noopener' href='"+gmaps(p)+"'>Location</a> · <a target='_blank' rel='noopener' href='"+gdir(p)+"'>Directions</a></p></div>";
 }
+function showPin(i,scroll){
+ var p=POIS[i]; if(!p||!pinInfo) return;
+ pinInfo.innerHTML=popHTML(p);
+ if(scroll) document.getElementById("pinInfo").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
 function showToast(p,d){
- toast.style.display="block";
- toast.innerHTML="<h3>📣 You're near: "+p.n+"</h3><p><strong>"+fmtD(d)+" away</strong> · "+p.addr+(p.rate?" · "+p.rate:"")+"</p><p>"+p.note+"</p>"+(p.must?"<p>⭐ <strong>"+(p.cat==="landmark"?"Must-see:":"Must-try:")+"</strong> "+p.must+"</p>":"")+(p.hist?"<p>🏛️ <strong>History:</strong> "+p.hist+"</p>":"")+(p.arch?"<p>🏗️ <strong>Architecture:</strong> "+p.arch+"</p>":"")+"<p>✅ Fits your criteria: "+p.fits+"</p>"+rideHTML(p)+"<p><a target='_blank' rel='noopener' href='"+gdir(p)+"'>🧭 Get directions</a></p>";
- toast.scrollIntoView({behavior:"smooth",block:"nearest"});
+ if(!pinInfo) return;
+ pinInfo.innerHTML="<p style='margin:2px 0'><strong>\uD83D\uDCE3 You're near — "+fmtD(d)+" away:</strong></p>"+popHTML(p);
 }
 function visible(p){
  var dv=document.getElementById("daySel").value, cv=document.getElementById("catSel").value;
@@ -278,7 +282,7 @@ function refreshMarkers(){
    var show=visible(p);
    if(show&&!markers[i]){
      var ic=L.divIcon({className:"",html:"<div style='background:"+COLORS[p.cat]+";color:#fff;border-radius:50%;width:30px;height:30px;line-height:30px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)'>"+(ICONS[p.cat]||"📍")+"</div>",iconSize:[30,30],iconAnchor:[15,15]});
-     markers[i]=L.marker([p.lat,p.lng],{icon:ic}).addTo(map).bindPopup(popHTML(p));
+     markers[i]=L.marker([p.lat,p.lng],{icon:ic}).addTo(map).on("click",function(){ showPin(i,true); });
    } else if(!show&&markers[i]){ map.removeLayer(markers[i]); delete markers[i]; }
  });
 }
@@ -291,7 +295,7 @@ function checkProximity(pos){
    var d=distM(pos,p);
    rows.push({p:p,d:d});
    if(d<=radius){
-     if(!alerted[i]){ alerted[i]=true; showToast(p,d); if(map&&markers[i])markers[i].openPopup(); if(userInteracted && navigator.vibrate){ try{navigator.vibrate(60);}catch(_){}} }
+     if(!alerted[i]){ alerted[i]=true; showToast(p,d); if(userInteracted && navigator.vibrate){ try{navigator.vibrate(60);}catch(_){}} }
    } else if(d>radius*1.6){ alerted[i]=false; }
  });
  rows.sort(function(a,b){return a.d-b.d;});
@@ -437,8 +441,7 @@ document.querySelectorAll(".itgo").forEach(function(b){ b.addEventListener("clic
  var nm=b.getAttribute("data-pin"); var idx=-1;
  for(var i=0;i<POIS.length;i++){ if(POIS[i].n===nm){ idx=i; break; } }
  if(idx<0) return; var p=POIS[idx];
- document.getElementById("map").scrollIntoView({behavior:"smooth"});
- if(typeof map!=="undefined"&&map){ map.setView([p.lat,p.lng],16); if(markers&&markers[idx]) setTimeout(function(){ markers[idx].openPopup(); },350); }
+  if(typeof map!=="undefined"&&map){ map.setView([p.lat,p.lng],16); } setTimeout(function(){ showPin(idx,true); },200);
 });});
 </script>
 </body></html>
