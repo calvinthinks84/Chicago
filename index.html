@@ -133,6 +133,9 @@ html,body{overflow-x:clip}
   .itgo{padding:2px 0}
 }
 @media print{#map,.bar{display:none}}
+.addList{list-style:none;margin:4px 0;padding:0}
+.addList li{padding:9px 10px;border:1px solid var(--line);border-radius:10px;margin:4px 0;background:var(--panel);cursor:pointer;font-size:14px}
+.addList li:active{background:var(--hover)}
 </style></head><body>
 <header><div class="wrap"><h1>🗺️ Chicago Trip App</h1>
 <p><strong>Tue Oct 13 – Sat Oct 17, 2026</strong></p>
@@ -165,11 +168,13 @@ html,body{overflow-x:clip}
 <div class="bar" id="filterBar" style="margin:10px 0 8px"><button class="fchip on" data-f="all">All locations</button><button class="fchip" data-f="food">🍽️ Food</button><button class="fchip" data-f="drinks">🥤 Drinks</button><button class="fchip" data-f="landmark">🏛️ Landmarks</button><button class="fchip" data-f="saved">⭐ Saved</button><button class="fchip" data-f="stop">📍 Stops</button></div>
 <div class="panel" id="pinInfo"><h2>📍 Pin details</h2><div id="pinInfoBody"><p class="legend">Tap any pin on the map — its ⭐ must-try, 🏛️ history, and 🧭 show here, below the map.</p></div></div>
 <div class="panel"><h2>🗓️ Itinerary — day by day</h2><p class="legend">Tap any underlined stop to jump to it on the map — its card has the ⭐ must-try, 🏛️ history, and 🧭 bus/train board &amp; exit.</p><details class="itday" open><summary>Tue Oct 13 — Arrival</summary><p class="itrow"><span class="itt">11:45am PT</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Fly Delta LAX → O'Hare</button></p><p class="itrow"><span class="itt">~5:45pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Land at ORD</button></p><p class="itrow"><span class="itt">~5:50pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Blue Line to Grand station, check in at the Fairfield Inn (~7pm)</button></p><p class="itrow"><span class="itt">~7:15pm</span> <button type="button" class="itgo" data-pin="Al's #1 Italian Beef + Chicago Dog">Dinner — Al's #1 Italian Beef + a Chicago dog</button></p></details><details class="itday"><summary>Wed Oct 14 — 🎂 Birthday day</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Millennium Park — The Bean">Millennium Park & The Bean first (fewest crowds)</button></p><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Maggie Daley Park — Play Garden">Maggie Daley Park Play Garden</button></p><p class="itrow"><span class="itt">~10:00am</span> <button type="button" class="itgo" data-pin="Molly's Cupcakes — River East 🎂">Birthday cupcakes — Molly's Cupcakes, River East</button></p><p class="itrow"><span class="itt">11:45am</span> <button type="button" class="itgo" data-pin="Chicago River Architecture Tour">Chicago River architecture tour (your booking)</button></p><p class="itrow"><span class="itt">After tour</span> <button type="button" class="itgo" data-pin="Devil Dawgs — Gold Coast">Chicago dog snack — Devil Dawgs, Gold Coast</button></p><p class="itrow"><span class="itt">1:30–3:30pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">Afternoon</span> <button type="button" class="itgo" data-pin="DuSable Bridge — Michigan Ave">Riverwalk stroll</button></p><p class="itrow"><span class="itt">Evening</span> <button type="button" class="itgo" data-pin="Pizz'Amici — birthday dinner 🎂">Birthday dinner — Pizz'Amici (reserved)</button></p></details><details class="itday"><summary>Thu Oct 15 — Zoo day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Lincoln Park Zoo (free, opens 10)</button></p><p class="itrow"><span class="itt">Bonus</span> <button type="button" class="itgo" data-pin="Peggy Notebaert Nature Museum">Peggy Notebaert Nature Museum — Butterfly Haven, 5 min away</button></p><p class="itrow"><span class="itt">Lunch</span> <button type="button" class="itgo" data-pin="The Wieners Circle — Lincoln Park">Chicago dogs — The Wieners Circle (main pick)</button></p><p class="itrow"><span class="itt">1:00–3:00pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">5:00pm</span> <button type="button" class="itgo" data-pin="Lou Malnati's — River North">Early dinner — Lou Malnati's deep dish (order a salad/apps right away, pies take ~45 min)</button></p><p class="itrow"><span class="itt">After</span> <button type="button" class="itgo" data-pin="Rainbow Cone at Gino's East">Rainbow Cone at Gino's East</button></p></details><details class="itday"><summary>Fri Oct 16 — Navy Pier day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Chicago Children's Museum — Navy Pier">Chicago Children's Museum — Pritzker Playspace first (toddlers-only, morning)</button></p><p class="itrow"><span class="itt">Also today</span> <button type="button" class="itgo" data-pin="Butterfly House — Navy Pier">Butterfly House — Incredible Insects, same pier</button></p><p class="itrow"><span class="itt">Midday</span> <span>Nap: stroller on the pier or a hotel reset (~15 min)</span></p><p class="itrow"><span class="itt">Early dinner</span> <button type="button" class="itgo" data-pin="Beatrix — River North">Beatrix or Eataly — walk-in, your call</button></p><p class="itrow"><span class="itt">Flex</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Fall Fest at Lincoln Park Zoo (Fri–Sun), if energy allows</button></p></details><details class="itday"><summary>Sat Oct 17 — Departure</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Eataly Chicago">Pack up, easy breakfast (Beatrix / Eataly)</button></p><p class="itrow"><span class="itt">11:45am–12pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Leave the hotel — Blue Line Grand → O'Hare (~45 min), arrive ~1:00pm</button></p><p class="itrow"><span class="itt">2:30pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Flight home from ORD</button></p></details></div>
+<div class="panel" id="addPanel"><h2>➕ Add a place</h2><p class="legend">Search any place in Chicago — the app gathers its details (address, phone, hours, website) and saves it as one of your pins, on this device.</p><input id="addQ" class="planIn" type="text" placeholder="Type a place name — e.g. Shake Shack" autocomplete="off"><ul id="addList" class="addList"></ul><p id="addStatus" class="legend"></p><p><button type="button" class="btn" id="addExport">📤 Export my added pins</button> <span id="addCount" class="legend"></span></p></div>
 <div class="panel"><h2>📍 Nearest to you / the walker</h2><div id="nearList"><p class="legend">Start GPS (or drop the walker on the map) and this list sorts itself by distance.</p></div></div>
 </div>
 <footer>Built from your Chicago Toddler Trip Pack — Oct 13–17, 2026. Nothing here was booked by Forky.</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="pins.js?v=prc1"></script>
+<script>try{var __up=JSON.parse(localStorage.getItem("chiUserPins")||"[]");if(Array.isArray(__up))__up.forEach(function(p){if(p&&p.n&&isFinite(p.lat)&&isFinite(p.lng))POIS.push(p);});}catch(e){}</script>
 <script>
 "use strict";
 /* ---------- Data: itinerary stops + suggestions. fits = why it matches the trip criteria ---------- */
@@ -243,7 +248,7 @@ function popHTML(p){
  +(p.hist?"<p>🏛️ <strong>History:</strong> "+p.hist+"</p>":"")
  +(p.arch?"<p>🏗️ <strong>Architecture:</strong> "+p.arch+"</p>":"")
  +"<p>✅ Fits your criteria: "+p.fits+"</p>"
- +"<p>"+(p.web?"<a target='_blank' rel='noopener' href='"+p.web+"'>Website</a>":"<a target='_blank' rel='noopener' href='"+gmaps(p)+"'>Location</a>")+" · <a target='_blank' rel='noopener' href='"+gdir(p)+"'>Directions</a></p></div>";
+ +"<p>"+(p.web?"<a target='_blank' rel='noopener' href='"+p.web+"'>Website</a>":"<a target='_blank' rel='noopener' href='"+gmaps(p)+"'>Location</a>")+" · <a target='_blank' rel='noopener' href='"+gdir(p)+"'>Directions</a></p>"+(p.user?"<p><button type='button' class='btn rmUserPin' data-n='"+encodeURIComponent(p.n)+"'>🗑 Remove this pin</button></p>":"")+"</div>";
 }
 function showPin(i,scroll){
  var p=POIS[i]; if(!p||!pinInfo) return;
@@ -656,7 +661,8 @@ function plnEnrich(g,out){
  }catch(e){}
 }
 function plnCardHTML(g){
- return "<div style='margin-top:8px;border-top:1px solid var(--line);padding-top:8px'><p style='margin:2px 0'><strong>"+plnEsc(g.n)+"</strong>"+(g.kind?" \u00B7 "+plnEsc(g.kind):"")+" <span style='color:var(--mut);font-size:12px'>(live lookup \u2014 not one of your saved pins)</span></p><p style='margin:2px 0'>"+plnEsc(g.full||g.n)+"</p><span class='plnLiveExtra'>"+plnExtraHTML(g)+"</span></div>";
+ window.__lastLive=g;
+ return "<div style='margin-top:8px;border-top:1px solid var(--line);padding-top:8px'><p style='margin:2px 0'><strong>"+plnEsc(g.n)+"</strong>"+(g.kind?" \u00B7 "+plnEsc(g.kind):"")+" <span style='color:var(--mut);font-size:12px'>(live lookup \u2014 not one of your saved pins)</span></p><p style='margin:2px 0'>"+plnEsc(g.full||g.n)+"</p><span class='plnLiveExtra'>"+plnExtraHTML(g)+"</span><p style='margin:6px 0'><button type='button' class='btn' data-savelive='1'>➕ Save to my pins</button></p></div>";
 }
 function plnFeatureToPlace(ft,fallbackName){
  var pr=(ft&&ft.properties)||{}, co=(ft&&ft.geometry&&ft.geometry.coordinates)||[0,0];
@@ -825,6 +831,128 @@ function plnGo(){
  document.addEventListener("touchstart",function(e){ if(e.touches.length!==1){ startY=null; return; } var t=e.target; if(t&&t.closest&&t.closest("#map")){ startY=null; return; } startY=e.touches[0].clientY; dy=0; active=(window.scrollY<=0); },{passive:true});
  document.addEventListener("touchmove",function(e){ if(startY===null||!active) return; dy=e.touches[0].clientY-startY; if(dy>0&&window.scrollY<=0){ if(e.cancelable) e.preventDefault(); setInd(dy*0.55, dy>THRESH); } else setInd(0,false); },{passive:false});
  document.addEventListener("touchend",function(){ if(startY!==null&&active&&dy>THRESH){ ind.textContent="\u27F3 Refreshing\u2026"; location.reload(); return; } setInd(0,false); startY=null; dy=0; },{passive:true});
+})();
+</script>
+<script>
+(function(){
+ var LSKEY="chiUserPins";
+ function loadUserPins(){ try{ var a=JSON.parse(localStorage.getItem(LSKEY)||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+ function storeUserPins(a){ try{ localStorage.setItem(LSKEY,JSON.stringify(a)); }catch(e){} }
+ function esc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+ function webU(u){ u=String(u||"").split(";")[0].trim(); if(!u) return ""; if(!/^https?:\/\//i.test(u)) u="https://"+u; return u; }
+ function catFor(osmValue,cuisine){
+   var v=String(osmValue||"").toLowerCase(), cu=String(cuisine||"").toLowerCase();
+   if(cu.indexOf("bubble_tea")>=0||v==="bubble_tea"||v==="tea") return "boba";
+   if(v==="cafe") return "coffee";
+   if(["restaurant","fast_food","bar","pub","food_court","biergarten"].indexOf(v)>=0) return "food";
+   if(["bakery","ice_cream","confectionery","pastry","donut","dessert"].indexOf(v)>=0) return "snack";
+   return "saved";
+ }
+ function dupOf(pin){ if(typeof POIS==="undefined") return null; for(var i=0;i<POIS.length;i++){ var p=POIS[i]; if(p.n&&p.n.toLowerCase()===pin.n.toLowerCase()){ var d=Math.sqrt(Math.pow((p.lat-pin.lat)*69,2)+Math.pow((p.lng-pin.lng)*51,2)); if(d<0.12) return p; } } return null; }
+ function updCount(){ var el=document.getElementById("addCount"); if(el){ var n=loadUserPins().length; el.textContent=n?("· "+n+" added on this device"):""; } }
+ function finishAdd(pin,statusEl){
+   var d=dupOf(pin);
+   if(d){ if(statusEl) statusEl.textContent="Already in your pins: "+d.n; var ix0=(typeof POIS!=="undefined")?POIS.indexOf(d):-1; if(ix0>=0&&typeof showPin==="function") showPin(ix0,true); return false; }
+   var arr=loadUserPins(); arr.push(pin); storeUserPins(arr);
+   if(typeof POIS!=="undefined") POIS.push(pin);
+   if(typeof refreshMarkers==="function") refreshMarkers();
+   if(statusEl) statusEl.textContent="\u2713 Saved \u201C"+pin.n+"\u201D \u2014 it is one of your pins now.";
+   var ix=(typeof POIS!=="undefined")?POIS.indexOf(pin):-1;
+   if(ix>=0&&typeof showPin==="function") showPin(ix,true);
+   updCount();
+   return true;
+ }
+ function gather(pin,osmValue,done){
+   var cuisine="";
+   function fin(){
+     pin.cat=catFor(osmValue,cuisine);
+     pin.note=(cuisine?("Cuisine: "+cuisine.replace(/;/g,", ")+" \u00B7 "):"")+"Added by you \u2014 details gathered live.";
+     pin.fits="Added by you \u2014 not run through the trip criteria check.";
+     done(pin);
+   }
+   try{
+     var nm=String(pin.n||"").replace(/["\\]/g," ");
+     var q='[out:json][timeout:8];(node["name"~"^'+nm+'$",i](around:400,'+pin.lat+','+pin.lng+');way["name"~"^'+nm+'$",i](around:400,'+pin.lat+','+pin.lng+'););out tags center 3;';
+     var ctl=(typeof AbortController!=="undefined")?new AbortController():null;
+     var to=ctl?setTimeout(function(){ try{ctl.abort();}catch(_){} },9000):null;
+     fetch("https://overpass-api.de/api/interpreter",{method:"POST",body:"data="+encodeURIComponent(q),signal:ctl?ctl.signal:undefined})
+      .then(function(r){ return r.json(); })
+      .then(function(oj){
+        if(to) clearTimeout(to);
+        if(oj&&oj.elements&&oj.elements.length){
+          var best=null,bs=-1;
+          oj.elements.forEach(function(el){ var t=el.tags||{}; var sc=(t["contact:phone"]||t.phone?1:0)+(t["contact:website"]||t.website?1:0)+(t.opening_hours?1:0)+(t.cuisine?1:0); if(sc>bs){ bs=sc; best=t; } });
+          if(best){
+            pin.tel=best["contact:phone"]||best.phone||"";
+            pin.web=webU(best["contact:website"]||best.website||"");
+            pin.hours=best.opening_hours||"";
+            cuisine=best.cuisine||"";
+          }
+        }
+        fin();
+      }).catch(function(){ if(to) clearTimeout(to); fin(); });
+   }catch(e){ fin(); }
+ }
+ // --- Add panel wiring ---
+ var qEl=document.getElementById("addQ"), listEl=document.getElementById("addList"), stEl=document.getElementById("addStatus");
+ var feats=[], timer=null, token=0;
+ function renderFeats(){
+   if(!listEl) return;
+   listEl.innerHTML=feats.map(function(ft,i){ var pr=ft.properties||{}; var det=[pr.housenumber,pr.street,pr.city].filter(Boolean).join(" "); return "<li data-addpick='"+i+"'>\uD83D\uDCCD "+esc(pr.name||"")+" <span class='pa-addr'>"+esc(det)+"</span></li>"; }).join("");
+ }
+ if(qEl){
+   qEl.addEventListener("input",function(){
+     var q=(qEl.value||"").trim();
+     clearTimeout(timer);
+     if(q.length<3){ feats=[]; renderFeats(); return; }
+     var tk=++token;
+     timer=setTimeout(function(){
+       fetch("https://photon.komoot.io/api/?limit=6&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(q+" Chicago"))
+        .then(function(r){ return r.json(); })
+        .then(function(pj){ if(tk!==token||!pj||!pj.features) return; feats=pj.features.filter(function(f){ return f.properties&&f.properties.name&&f.geometry&&f.geometry.coordinates; }); renderFeats(); })
+        .catch(function(){});
+     },300);
+   });
+ }
+ document.addEventListener("click",function(e){
+   var t=e.target;
+   if(!t||!t.getAttribute) return;
+   var ap=t.getAttribute("data-addpick");
+   if(ap!==null&&ap!==undefined&&feats[parseInt(ap,10)]){
+     var ft=feats[parseInt(ap,10)], pr=ft.properties||{}, co=ft.geometry.coordinates;
+     var pin={n:pr.name||"",lat:co[1],lng:co[0],cat:"saved",day:"all",user:1,tel:"",web:"",hours:""};
+     pin.addr=[pr.housenumber,pr.street,pr.city,pr.state,pr.postcode].filter(Boolean).join(" ")||pr.name||"";
+     if(stEl) stEl.textContent="Gathering details for \u201C"+pin.n+"\u201D\u2026";
+     listEl.innerHTML="";
+     gather(pin,(pr.osm_value||""),function(donePin){ finishAdd(donePin,stEl); });
+     return;
+   }
+   if(t.getAttribute("data-savelive")){
+     var g=window.__lastLive;
+     if(!g||!g.n){ return; }
+     var pin2={n:g.n,lat:g.lat,lng:g.lng,cat:"saved",day:"all",user:1,addr:g.full||g.n,tel:g.tel||"",web:g.web||"",hours:g.hours||""};
+     var ok=finishAdd(pin2,null);
+     t.textContent=ok?"\u2713 Saved to my pins":"Already in your pins";
+     return;
+   }
+   if(t.classList&&t.classList.contains("rmUserPin")){
+     var nm=decodeURIComponent(t.getAttribute("data-n")||"");
+     var arr=loadUserPins().filter(function(p){ return p.n!==nm; });
+     storeUserPins(arr);
+     location.reload();
+     return;
+   }
+ });
+ var exBtn=document.getElementById("addExport");
+ if(exBtn) exBtn.addEventListener("click",function(){
+   var arr=loadUserPins();
+   if(!arr.length){ if(stEl) stEl.textContent="No added pins yet on this device."; return; }
+   var txt=JSON.stringify(arr);
+   function doneMsg(){ if(stEl) stEl.textContent="Copied "+arr.length+" added pin(s) \u2014 paste them to Forky in chat and they can be baked into the app permanently."; }
+   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(doneMsg).catch(function(){ window.prompt("Copy your added pins:",txt); }); }
+   else window.prompt("Copy your added pins:",txt);
+ });
+ updCount();
 })();
 </script>
 </body></html>
