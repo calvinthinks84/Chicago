@@ -118,8 +118,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px}
 </style></head><body>
 <header><div class="wrap"><h1>🗺️ Chicago Trip Map — Walk-Near Pop-ups</h1>
 <p><strong>Tue Oct 13 – Sat Oct 17, 2026</strong></p>
-<p>Criteria for all items: 👶 toddler-friendly · 🚶 easy walking · 🚇 CTA, no car · ⏱️ fast, no long lines · 🔊 loud &amp; spacious · 🌅 early or lunch · 🧋 boba = adults only</p>
-<div id="wxStrip"><span class="wxd">🌦️ Loading the Chicago forecast for Oct 13–17…</span></div>
+<div id="wxStrip"><span class="wxd">🌦️ Loading Chicago weather…</span></div>
 </div></header>
 <div class="wrap">
 
@@ -664,17 +663,26 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  var el=document.getElementById("wxStrip"); if(!el) return;
  var EM={0:"\u2600\uFE0F",1:"\uD83C\uDF24\uFE0F",2:"\uD83C\uDF24\uFE0F",3:"\u2601\uFE0F",45:"\uD83C\uDF2B\uFE0F",48:"\uD83C\uDF2B\uFE0F",51:"\uD83C\uDF26\uFE0F",53:"\uD83C\uDF26\uFE0F",55:"\uD83C\uDF26\uFE0F",56:"\uD83C\uDF27\uFE0F",57:"\uD83C\uDF27\uFE0F",61:"\uD83C\uDF27\uFE0F",63:"\uD83C\uDF27\uFE0F",65:"\uD83C\uDF27\uFE0F",66:"\uD83C\uDF27\uFE0F",67:"\uD83C\uDF27\uFE0F",71:"\uD83C\uDF28\uFE0F",73:"\uD83C\uDF28\uFE0F",75:"\uD83C\uDF28\uFE0F",77:"\uD83C\uDF28\uFE0F",80:"\uD83C\uDF26\uFE0F",81:"\uD83C\uDF26\uFE0F",82:"\uD83C\uDF27\uFE0F",85:"\uD83C\uDF28\uFE0F",86:"\uD83C\uDF28\uFE0F",95:"\u26C8\uFE0F",96:"\u26C8\uFE0F",99:"\u26C8\uFE0F"};
  var DN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
- fetch("https://api.open-meteo.com/v1/forecast?latitude=41.8908&longitude=-87.6296&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&temperature_unit=fahrenheit&timezone=America%2FChicago&start_date=2026-10-13&end_date=2026-10-17")
+ function chiDateStr(addDays){
+   var dt=new Date(Date.now()+addDays*86400000);
+   var parts=new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(dt);
+   var y="",m="",dd="";
+   parts.forEach(function(x){ if(x.type==="year")y=x.value; if(x.type==="month")m=x.value; if(x.type==="day")dd=x.value; });
+   return y+"-"+m+"-"+dd;
+ }
+ fetch("https://api.open-meteo.com/v1/forecast?latitude=41.8908&longitude=-87.6296&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&temperature_unit=fahrenheit&timezone=America%2FChicago&forecast_days=7")
  .then(function(r){ return r.json(); })
  .then(function(j){
    var d=j.daily; if(!d||!d.time) throw new Error("no daily");
+   var want=[["Today",chiDateStr(0)],["Tomorrow",chiDateStr(1)]];
    var h="";
-   for(var i=0;i<d.time.length;i++){
+   want.forEach(function(w){
+     var i=d.time.indexOf(w[1]); if(i<0) return;
      var parts=d.time[i].split("-"); var dt=new Date(+parts[0],+parts[1]-1,+parts[2]);
      var bday=(d.time[i]==="2026-10-14")?" \uD83C\uDF82":"";
-     h+="<span class='wxd'><b>"+DN[dt.getDay()]+" "+(+parts[2])+"</b>"+bday+" "+(EM[d.weathercode[i]]||"\uD83C\uDF21\uFE0F")+" "+Math.round(d.temperature_2m_max[i])+"\u00B0/"+Math.round(d.temperature_2m_min[i])+"\u00B0"+((d.precipitation_probability_max&&d.precipitation_probability_max[i]!=null)?"<br>\uD83D\uDCA7 "+d.precipitation_probability_max[i]+"%":"")+"</span>";
-   }
-   el.innerHTML=h;
+     h+="<span class='wxd'><b>"+w[0]+" · "+DN[dt.getDay()]+" "+(+parts[2])+"</b>"+bday+" "+(EM[d.weathercode[i]]||"\uD83C\uDF21\uFE0F")+" "+Math.round(d.temperature_2m_max[i])+"\u00B0/"+Math.round(d.temperature_2m_min[i])+"\u00B0"+((d.precipitation_probability_max&&d.precipitation_probability_max[i]!=null)?"<br>\uD83D\uDCA7 "+d.precipitation_probability_max[i]+"%":"")+"</span>";
+   });
+   el.innerHTML=h||"<span class='wxd'>\uD83C\uDF26\uFE0F Chicago weather unavailable right now.</span>";
  })
  .catch(function(){ el.innerHTML="<span class='wxd'>\uD83C\uDF26\uFE0F Forecast unavailable right now — it loads when you're online.</span>"; });
 })();
