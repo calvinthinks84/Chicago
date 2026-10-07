@@ -625,6 +625,53 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  }
  function plnEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function plnWeb(u){ u=String(u||"").split(";")[0].trim(); if(!u) return ""; if(!/^https?:\/\//i.test(u)) u="https://"+u; return u; }
+function plnExtraHTML(g){
+ return (g.tel?"<p style='margin:2px 0'>\uD83D\uDCDE <a href='tel:+1"+String(g.tel).replace(/[^0-9]/g,"").replace(/^1(?=\d{10}$)/,"")+"'>"+plnEsc(g.tel)+"</a></p>":"")
+ + (g.web?"<p style='margin:2px 0'>\uD83C\uDF10 <a target='_blank' rel='noopener' href='"+plnEsc(g.web)+"'>Website</a></p>":"")
+ + (g.hours?"<p style='margin:2px 0'>\uD83D\uDD50 "+plnEsc(g.hours)+"</p>":"")
+ + (g.cuisine?"<p style='margin:2px 0'>\uD83C\uDF7D\uFE0F "+plnEsc(g.cuisine)+"</p>":"");
+}
+function plnEnrich(g,out){
+ try{
+  var nm=String(g.n||"").replace(/[\\"]/g," ").replace(/[.*+?^${}()|[\]]/g," ");
+  if(!nm.trim()) return;
+  var q='[out:json][timeout:8];(node["name"~"^'+nm+'$",i](around:400,'+g.lat+','+g.lng+');way["name"~"^'+nm+'$",i](around:400,'+g.lat+','+g.lng+'););out tags center 3;';
+  var ctl=(typeof AbortController!=="undefined")?new AbortController():null;
+  var to=ctl?setTimeout(function(){ try{ctl.abort();}catch(_){} },9000):null;
+  fetch("https://overpass-api.de/api/interpreter",{method:"POST",body:"data="+encodeURIComponent(q),signal:ctl?ctl.signal:undefined})
+   .then(function(r){ return r.json(); })
+   .then(function(oj){
+     if(to) clearTimeout(to);
+     if(!oj||!oj.elements||!oj.elements.length) return;
+     var best=null,bs=-1;
+     oj.elements.forEach(function(el){ var t=el.tags||{}; var sc=(t["contact:phone"]||t.phone?1:0)+(t["contact:website"]||t.website?1:0)+(t.opening_hours?1:0)+(t.cuisine?1:0); if(sc>bs){ bs=sc; best=t; } });
+     if(!best) return;
+     if(!g.tel) g.tel=best["contact:phone"]||best.phone||"";
+     if(!g.web) g.web=plnWeb(best["contact:website"]||best.website||"");
+     if(!g.hours) g.hours=best.opening_hours||"";
+     if(!g.cuisine&&best.cuisine) g.cuisine=best.cuisine.replace(/_/g," ").replace(/;/g,", ");
+     var sp=out.querySelector?out.querySelector(".plnLiveExtra"):null;
+     if(sp) sp.innerHTML=plnExtraHTML(g);
+   }).catch(function(){ if(to) clearTimeout(to); });
+ }catch(e){}
+}
+function plnPhoton(f,txt,out){
+ fetch("https://photon.komoot.io/api/?limit=1&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(txt.trim()+" Chicago"))
+  .then(function(r){ return r.json(); })
+  .then(function(pj){
+    var ft=pj&&pj.features&&pj.features[0];
+    if(!ft){ out.innerHTML="<p>Couldn\u2019t find \u201C"+plnEsc(txt.trim())+"\u201D in Chicago \u2014 check the spelling, or pick from the day dropdown.</p>"; return; }
+    var pr=ft.properties||{}, co=ft.geometry.coordinates;
+    var g={n:pr.name||txt.trim(),lat:co[1],lng:co[0]};
+    g.full=[pr.name,pr.housenumber,pr.street,pr.city,pr.state,pr.postcode].filter(Boolean).join(" ");
+    if(!g.full) g.full=pr.name||txt.trim();
+    g.tel=""; g.web=""; g.hours=""; g.kind=(pr.osm_value||"").replace(/_/g," ");
+    plnRender(f,g);
+    out.innerHTML+="<div style='margin-top:8px;border-top:1px solid var(--line);padding-top:8px'><p style='margin:2px 0'><strong>"+plnEsc(g.n)+"</strong>"+(g.kind?" \u00B7 "+plnEsc(g.kind):"")+" <span style='color:var(--mut);font-size:12px'>(live lookup \u2014 not one of your saved pins)</span></p><p style='margin:2px 0'>"+plnEsc(g.full)+"</p><span class='plnLiveExtra'>"+plnExtraHTML(g)+"</span></div>";
+    plnEnrich(g,out);
+  })
+  .catch(function(){ out.innerHTML="<p>Place search needs an internet connection \u2014 try again in a moment, or pick from the day dropdown (works offline).</p>"; });
+}
 function plnGo(){
    var out=document.getElementById("planOut");
    if(!(typeof myPos!=="undefined"&&myPos)){ out.innerHTML="<p>No live location yet — tap \u201CCurrent location\u201D, or tap the map / drag the \uD83D\uDEB6 walker to set where you are, then try again.</p>"; return; }
@@ -637,7 +684,7 @@ function plnGo(){
    fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&extratags=1&namedetails=1&countrycodes=us&viewbox=-87.95,42.05,-87.50,41.60&q="+encodeURIComponent(txt.trim()+", Chicago, IL"))
      .then(function(r){ return r.json(); })
      .then(function(j){
-       if(!j||!j.length){ out.innerHTML="<p>Couldn\u2019t find \u201C"+txt.trim()+"\u201D in Chicago — check the spelling, or pick from the day dropdown.</p>"; return; }
+       if(!j||!j.length){ plnPhoton(f,txt,out); return; }
        var r0=j[0], xt=r0.extratags||{};
        var g={n:(r0.namedetails&&r0.namedetails.name)||r0.display_name.split(",").slice(0,2).join(","),lat:parseFloat(r0.lat),lng:parseFloat(r0.lon)};
        g.full=r0.display_name;
@@ -646,12 +693,9 @@ function plnGo(){
        g.hours=xt.opening_hours||"";
        g.kind=(r0.type||"").replace(/_/g," ");
        plnRender(f,g);
-       var card="<div style='margin-top:8px;border-top:1px solid var(--line);padding-top:8px'><p style='margin:2px 0'><strong>"+plnEsc(g.n)+"</strong>"+(g.kind?" \u00B7 "+plnEsc(g.kind):"")+" <span style='color:var(--mut);font-size:12px'>(live lookup \u2014 not one of your saved pins)</span></p><p style='margin:2px 0'>"+plnEsc(g.full)+"</p>"
-         +(g.tel?"<p style='margin:2px 0'>\uD83D\uDCDE <a href='tel:+1"+g.tel.replace(/[^0-9]/g,"").replace(/^1(?=\d{10}$)/,"")+"'>"+plnEsc(g.tel)+"</a></p>":"")
-         +(g.web?"<p style='margin:2px 0'>\uD83C\uDF10 <a target='_blank' rel='noopener' href='"+plnEsc(g.web)+"'>Website</a></p>":"")
-         +(g.hours?"<p style='margin:2px 0'>\uD83D\uDD50 "+plnEsc(g.hours)+"</p>":"")
-         +"</div>";
+       var card="<div style='margin-top:8px;border-top:1px solid var(--line);padding-top:8px'><p style='margin:2px 0'><strong>"+plnEsc(g.n)+"</strong>"+(g.kind?" \u00B7 "+plnEsc(g.kind):"")+" <span style='color:var(--mut);font-size:12px'>(live lookup \u2014 not one of your saved pins)</span></p><p style='margin:2px 0'>"+plnEsc(g.full)+"</p><span class='plnLiveExtra'>"+plnExtraHTML(g)+"</span></div>";
        out.innerHTML+=card;
+       plnEnrich(g,out);
      })
      .catch(function(){ out.innerHTML="<p>Place search needs an internet connection — try again in a moment, or pick from the day dropdown (works offline).</p>"; });
  }
