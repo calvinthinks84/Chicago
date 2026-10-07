@@ -87,9 +87,9 @@ select,.rad{font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid 
 .itgo{background:none;border:none;padding:0;font:inherit;color:var(--link);text-decoration:underline;text-underline-offset:2px;text-align:left;cursor:pointer}
 .planBtns{display:flex;flex-wrap:wrap;gap:8px}
 .planBtns .btn{flex:1 1 42%;min-width:0}
-.planIn{width:100%;padding:10px 12px;border:1px solid #c6ced6;border-radius:10px;background:#edf0f3;color:#1c2733;font:inherit;font-size:16px}
+.planIn{width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid #c6ced6;border-radius:11px;font:inherit;margin:3px 0 8px;background:#edf0f3;color:#1c2733;-webkit-text-fill-color:#1c2733}
 .planIn::placeholder{color:#71808e}
-@media (prefers-color-scheme: dark){.planIn{background:#2a323d;color:#e8edf2;border-color:#3a4552}.planIn::placeholder{color:#93a1b0}}
+@media (prefers-color-scheme: dark){.planIn{background:#2a323d;color:#e8edf2;-webkit-text-fill-color:#e8edf2;border-color:#3a4552}.planIn::placeholder{color:#93a1b0}}
 .planIn::placeholder{color:#68737d;-webkit-text-fill-color:#68737d;opacity:1}
 #planOut{font-size:14.5px;line-height:1.5}
 #planOut ol{margin:6px 0;padding-left:22px}
