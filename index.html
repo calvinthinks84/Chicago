@@ -74,12 +74,15 @@ button,select{touch-action:manipulation}
 .itrow{margin:4px 0 4px 6px}
 .itt{display:inline-block;min-width:104px;font-weight:700;color:var(--muted)}
 .itgo{background:none;border:none;padding:0;font:inherit;color:var(--link,#0b5cad);text-decoration:underline;text-align:left;cursor:pointer}
+.planIn{width:100%;box-sizing:border-box;padding:9px 10px;border:1.5px solid #b9c4cc;border-radius:9px;font:inherit;margin:3px 0 8px;background:var(--surface,#fff);color:inherit}
+#planOut ol{margin:6px 0;padding-left:22px}
+#planOut li{margin:6px 0}
 footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 @media print{#map,.bar{display:none}}
 </style></head><body>
 <header><div class="wrap"><h1>🗺️ Chicago Trip Map — Walk-Near Pop-ups</h1>
 <p><strong>Tue Oct 13 – Sat Oct 17, 2026</strong> · Base: Fairfield Inn, 60 W Illinois St · Walk near a pin and its recommendation pops up.</p>
-<p>Trip criteria baked into every suggestion: <span class="chip">👶 toddler-friendly</span> <span class="chip">🚶 easy walking</span> <span class="chip">🚇 CTA, no car</span> <span class="chip">⚡ fast / no long lines</span> <span class="chip">🔊 loud &amp; spacious OK</span> <span class="chip">🕐 early or lunch</span> <span class="chip">🧋 boba = adults only (pearls are a choking risk under 4)</span></p></div></header>
+</div></header>
 <div class="wrap">
 
 <div class="bar">
@@ -102,6 +105,13 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 </ol>
 <p style="margin:4px 0"><button class="btn" id="gpsRetryBtn" style="font-size:13px;padding:6px 11px">↻ Try GPS again</button> <button class="btn" id="gpsHelpClose" style="font-size:13px;padding:6px 11px">Dismiss</button></p>
 </div>
+<div class="panel" id="planPanel"><h2>🧭 Plan a ride — which bus or train?</h2>
+<p class="legend">Search a start and a destination — any pin on this trip, or your current location — and get the exact bus or train to board, and where to get off.</p>
+<label>From <input class="planIn" id="planFrom" list="pinNames" placeholder="📍 My current location" autocomplete="off"></label>
+<label>To <input class="planIn" id="planTo" list="pinNames" placeholder="Where to? Type a place…" autocomplete="off"></label>
+<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn" id="planSwap">⇄ Swap</button></p>
+<datalist id="pinNames"><option value="📍 My current location"></option></datalist>
+<div id="planOut"></div></div>
 <div id="map"></div>
 <div class="panel" id="pinInfo"><h2>📍 Pin details</h2><div id="pinInfoBody"><p class="legend">Tap any pin on the map — its ⭐ must-try, 🏛️ history, and 🧭 Getting there (bus/train board &amp; exit) show here, below the map.</p></div></div>
 <div class="panel"><h2>🗓️ Itinerary — day by day</h2><p class="legend">Tap any underlined stop to jump to it on the map — its card has the ⭐ must-try, 🏛️ history, and 🧭 bus/train board &amp; exit.</p><details class="itday" open><summary>Tue Oct 13 — Arrival</summary><p class="itrow"><span class="itt">11:45am PT</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Fly Delta LAX → O'Hare</button></p><p class="itrow"><span class="itt">~5:45pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Land at ORD</button></p><p class="itrow"><span class="itt">~5:50pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Blue Line to Grand station, check in at the Fairfield Inn (~7pm)</button></p><p class="itrow"><span class="itt">~7:15pm</span> <button type="button" class="itgo" data-pin="Al's #1 Italian Beef + Chicago Dog">Dinner — Al's #1 Italian Beef + a Chicago dog</button></p></details><details class="itday"><summary>Wed Oct 14 — 🎂 Birthday day</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Millennium Park — The Bean">Millennium Park & The Bean first (fewest crowds)</button></p><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Maggie Daley Park — Play Garden">Maggie Daley Park Play Garden</button></p><p class="itrow"><span class="itt">~10:00am</span> <button type="button" class="itgo" data-pin="Molly's Cupcakes — River East 🎂">Birthday cupcakes — Molly's Cupcakes, River East</button></p><p class="itrow"><span class="itt">11:45am</span> <button type="button" class="itgo" data-pin="Chicago River Architecture Tour">Chicago River architecture tour (your booking)</button></p><p class="itrow"><span class="itt">After tour</span> <button type="button" class="itgo" data-pin="Devil Dawgs — Gold Coast">Chicago dog snack — Devil Dawgs, Gold Coast</button></p><p class="itrow"><span class="itt">1:30–3:30pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">Afternoon</span> <button type="button" class="itgo" data-pin="DuSable Bridge — Michigan Ave">Riverwalk stroll</button></p><p class="itrow"><span class="itt">Evening</span> <button type="button" class="itgo" data-pin="Pizz'Amici — birthday dinner 🎂">Birthday dinner — Pizz'Amici (reserved)</button></p></details><details class="itday"><summary>Thu Oct 15 — Zoo day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Lincoln Park Zoo (free, opens 10)</button></p><p class="itrow"><span class="itt">Bonus</span> <button type="button" class="itgo" data-pin="Peggy Notebaert Nature Museum">Peggy Notebaert Nature Museum — Butterfly Haven, 5 min away</button></p><p class="itrow"><span class="itt">Lunch</span> <button type="button" class="itgo" data-pin="The Wieners Circle — Lincoln Park">Chicago dogs — The Wieners Circle (main pick)</button></p><p class="itrow"><span class="itt">1:00–3:00pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">5:00pm</span> <button type="button" class="itgo" data-pin="Lou Malnati's — River North">Early dinner — Lou Malnati's deep dish (order a salad/apps right away, pies take ~45 min)</button></p><p class="itrow"><span class="itt">After</span> <button type="button" class="itgo" data-pin="Rainbow Cone at Gino's East">Rainbow Cone at Gino's East</button></p></details><details class="itday"><summary>Fri Oct 16 — Navy Pier day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Chicago Children's Museum — Navy Pier">Chicago Children's Museum — Pritzker Playspace first (toddlers-only, morning)</button></p><p class="itrow"><span class="itt">Also today</span> <button type="button" class="itgo" data-pin="Butterfly House — Navy Pier">Butterfly House — Incredible Insects, same pier</button></p><p class="itrow"><span class="itt">Midday</span> <span>Nap: stroller on the pier or a hotel reset (~15 min)</span></p><p class="itrow"><span class="itt">Early dinner</span> <button type="button" class="itgo" data-pin="Beatrix — River North">Beatrix or Eataly — walk-in, your call</button></p><p class="itrow"><span class="itt">Flex</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Fall Fest at Lincoln Park Zoo (Fri–Sun), if energy allows</button></p></details><details class="itday"><summary>Sat Oct 17 — Departure</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Eataly Chicago">Pack up, easy breakfast (Beatrix / Eataly)</button></p><p class="itrow"><span class="itt">11:45am–12pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Leave the hotel — Blue Line Grand → O'Hare (~45 min), arrive ~1:00pm</button></p><p class="itrow"><span class="itt">2:30pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Flight home from ORD</button></p></details></div>
@@ -114,8 +124,8 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 /* ---------- Data: itinerary stops + suggestions. fits = why it matches the trip criteria ---------- */
 var POIS=[
 /* Itinerary stops */
-{n:"Fairfield Inn — your hotel (base)",ride:"Your stations: Grand (Blue Line, 3 blocks NW), Chicago (Brown/Purple, 4 blocks N), Grand (Red Line, 4 blocks E) — pick by direction below.",must:"A first-morning coffee run — Blue Bottle Wolf Point is a 10-min walk, Xoco is steps away on Illinois St",lat:41.8908,lng:-87.6296,cat:"stop",day:"all",addr:"60 W Illinois St",note:"Base for every day. Blue Line Grand, Red Line Chicago, Brown/Purple Merchandise Mart all within a few blocks.",fits:"CTA in every direction · stroller-friendly streets"},
-{n:"✈️ O'Hare (ORD)",ride:"Blue Line: board at O'Hare station inside the terminal (follow 'Trains to City' signs) → exit Grand (Blue) → 3-min walk to the hotel. Going back: board Grand (Blue) → exit O'Hare, ~45 min.",must:"The Blue Line train straight from the ORD station — no traffic gamble with a toddler",lat:41.9742,lng:-87.9073,cat:"stop",day:"tue",addr:"10000 W Balmoral Ave",note:"Arrive Tue ~5:45pm CT · depart Sat 2:30pm. Blue Line to Grand ~45 min, no traffic risk with a toddler.",fits:"Direct CTA to hotel"},
+{n:"Fairfield Inn — your hotel (base)",ride:"Your stations: Grand (Red Line, 2 blocks E), Chicago (Brown/Purple, ~8-min walk N), Grand (Blue Line, ~13-min walk W) — pick by direction below.",must:"A first-morning coffee run — Blue Bottle Wolf Point is a 10-min walk, Xoco is steps away on Illinois St",lat:41.8908,lng:-87.6296,cat:"stop",day:"all",addr:"60 W Illinois St",note:"Base for every day. Blue Line Grand, Red Line Chicago, Brown/Purple Merchandise Mart all within a few blocks.",fits:"CTA in every direction · stroller-friendly streets"},
+{n:"✈️ O'Hare (ORD)",ride:"Blue Line: board at O'Hare station inside the terminal (follow 'Trains to City' signs) → exit Grand (Blue) → ~13-min walk east to the hotel (or hop the #65 Grand bus to Grand & State, 2-min walk). Going back: board Grand (Blue) → exit O'Hare, ~45 min.",must:"The Blue Line train straight from the ORD station — no traffic gamble with a toddler",lat:41.9742,lng:-87.9073,cat:"stop",day:"tue",addr:"10000 W Balmoral Ave",note:"Arrive Tue ~5:45pm CT · depart Sat 2:30pm. Blue Line to Grand ~45 min, no traffic risk with a toddler.",fits:"Direct CTA to hotel"},
 {n:"Al's #1 Italian Beef + Chicago Dog",ride:"Walk 8 min from the hotel. Or Red Line: board Grand → exit Chicago (Red), then a 4-min walk west to Wells & Ohio.",must:"Italian beef dipped with sweet peppers + hot giardiniera — and a Chicago dog with the works, no ketchup",lat:41.8919,lng:-87.6328,cat:"dog",day:"tue",addr:"548 N Wells St",note:"Tue arrival dinner. Beef dipped with sweet peppers, hot giardiniera for adults, fries for the toddler. Chicago dog pick #1 — same menu.",fits:"Walk-in · fast · open Tue til midnight · short walk from hotel"},
 {n:"Millennium Park — The Bean",ride:"Blue Line: board Grand → exit Washington, 3-min walk east. (Red Line also works: exit Monroe.)",must:"The Bean (Cloud Gate) photo + the Crown Fountain faces — splash fun if it's warm",lat:41.8826,lng:-87.6233,cat:"stop",day:"wed",addr:"201 E Randolph St",note:"Wed morning first, while it's quiet for photos.",fits:"Easy walking · one Red Line stop or ~15 min walk"},
 {n:"Maggie Daley Park — Play Garden",ride:"Blue Line: board Grand → exit Washington, then walk east through Millennium Park, ~8 min.",must:"The Play Garden's tot lot and Enchanted Forest — sized for under-3s",lat:41.8825,lng:-87.6188,cat:"stop",day:"wed",addr:"337 E Randolph St",note:"Enclosed, tot-sized climbing and slides — best under-3 playground downtown. Also a Sat-morning energy burn option.",fits:"Enclosed play · toddler-sized"},
@@ -123,7 +133,7 @@ var POIS=[
 {n:"Chicago River Architecture Tour",ride:"Blue Line: board Grand → exit Clark/Lake, 5-min walk east along Wacker to the dock at Michigan Ave.",must:"Top-deck seats for the Marina City 'corn cob' towers and Merchandise Mart stretch",lat:41.8883,lng:-87.6240,cat:"stop",day:"wed",addr:"Dock at Michigan Ave & Wacker Dr",note:"Wed 11:45am, your booking, 90 min. Sit near the back / open top deck, snack cup + small toy, extra layer for river wind.",fits:"Booked · toddler can move on deck"},
 {n:"Devil Dawgs — Gold Coast",ride:"Red Line: board Grand → exit Chicago (Red), 2-min walk east to Rush St.",must:"Classic Chicago dog with the works + fresh-cut fries",lat:41.8970,lng:-87.6258,cat:"dog",day:"wed",addr:"804 N Rush St",note:"Chicago dog pick #2 — Wed after the river tour, before nap. Classic Chicago dog, no ketchup, plus fresh-cut fries.",fits:"Counter service · fast · outdoor seating · open Wed 10am–10pm"},
 {n:"Pizz'Amici — birthday dinner 🎂",ride:"#65 Grand bus: board at Grand & State → exit Grand & Racine, 2-min walk west. (Red Line alternative: exit Grand, then the same #65 bus west.)",must:"The tavern-style pie — ultra-thin crust, cut in squares",lat:41.8908,lng:-87.6572,cat:"food",day:"wed",addr:"1215 W Grand Ave",note:"Wed birthday dinner — your confirmed reservation. Ultra-thin tavern-style, square-cut.",fits:"Reserved · loud family room energy"},
-{n:"Lincoln Park Zoo",ride:"#151 Sheridan bus: board at Michigan & Hubbard (2 blocks from the hotel) → exit Stockton & Webster, 3-min walk to the zoo gate. (#22 Clark bus also works: exit Clark & Webster.)",must:"The Lionel train ride, the carousel, and the Children's Zoo",lat:41.9211,lng:-87.6437,cat:"stop",day:"thu",addr:"2001 N Clark St",note:"Thu 10am, free. Brown/Purple to Armitage + short bus/walk. Lionel train + carousel are toddler speed. Fall Fest runs Fri–Sun if you return.",fits:"Free · go at opening · stroller easy"},
+{n:"Lincoln Park Zoo",ride:"#151 Sheridan bus: board at Michigan & Hubbard (2 blocks from the hotel) → exit Stockton & Webster, 3-min walk to the zoo gate. (#22 Clark bus also works: exit Clark & Webster.)",must:"The Lionel train ride, the carousel, and the Children's Zoo",lat:41.9219,lng:-87.6345,cat:"stop",day:"thu",addr:"2001 N Clark St",note:"Thu 10am, free. Brown/Purple to Armitage + short bus/walk. Lionel train + carousel are toddler speed. Fall Fest runs Fri–Sun if you return.",fits:"Free · go at opening · stroller easy"},
 {n:"Peggy Notebaert Nature Museum",ride:"Same ride as the zoo — #151 bus, exit Stockton & Webster — then a 10-min walk north on Cannon Dr. It's right next to the zoo, so pair them.",must:"The Butterfly Haven — 1,000+ free-flying butterflies in one room",lat:41.9265,lng:-87.6350,cat:"stop",day:"thu",addr:"2430 N Cannon Dr",note:"Thu bonus, 5 min from the zoo. Butterfly Haven: 1,000+ free-flying butterflies in one warm room. Open 10am–4pm.",fits:"One big wow, then done · warm indoor break"},
 {n:"The Wieners Circle — Lincoln Park",ride:"#22 Clark bus: board at Clark & Division (or Washington & Clark) → exit Clark & Wrightwood — it's right on the corner.",must:"Char dog with the works on a poppy seed bun",lat:41.9300,lng:-87.6445,cat:"dog",day:"thu",addr:"2622 N Clark St",note:"Chicago dog pick #3 (main pick) — Thu lunch after the zoo. Char dog with the works on a poppy seed bun, no ketchup. Go daytime, not late-night.",fits:"Fast counter · opens 11am Thu · short walk from zoo"},
 {n:"Lou Malnati's — River North",ride:"Walk 7 min from the hotel. Or Brown/Purple Line: board Chicago → exit Merchandise Mart, 4-min walk north on Wells.",must:"Classic sausage deep dish (or 'The Lou') + the Malnati salad while you wait",lat:41.8900,lng:-87.6328,cat:"food",day:"thu",addr:"439 N Wells St",note:"Thu early dinner 5pm. Deep dish takes ~45 min — order a thin-crust appetizer or salad the moment you sit down.",fits:"Early seating · loud · short walk from hotel"},
@@ -421,5 +431,165 @@ document.querySelectorAll(".itgo").forEach(function(b){ b.addEventListener("clic
  if(idx<0) return; var p=POIS[idx];
   if(typeof map!=="undefined"&&map){ map.setView([p.lat,p.lng],16); } setTimeout(function(){ showPin(idx,true); },200);
 });});
+</script>
+<script>
+/*PLANNER-START*/
+var PLN_NODES={
+"ohare":["O'Hare station (Blue Line)",41.9742,-87.9073],
+"jeffpark":["Jefferson Park (Blue Line)",41.9706,-87.7606],
+"logan":["Logan Square (Blue Line)",41.9234,-87.7089],
+"division-blue":["Division (Blue Line)",41.9035,-87.6666],
+"chicago-blue":["Chicago station (Blue Line)",41.8968,-87.6552],
+"grand-blue":["Grand station (Blue Line)",41.8917,-87.6477],
+"clark-lake":["Clark/Lake station",41.8858,-87.6309],
+"washington-blue":["Washington (Blue Line)",41.8831,-87.6296],
+"monroe-blue":["Monroe (Blue Line)",41.8807,-87.6294],
+"jackson-blue":["Jackson (Blue Line)",41.8779,-87.6293],
+"clinton-blue":["Clinton (Blue Line)",41.8755,-87.6410],
+"grand-red":["Grand station (Red Line)",41.8917,-87.6281],
+"chicago-red":["Chicago station (Red Line)",41.8968,-87.6287],
+"clark-division":["Clark/Division (Red Line)",41.9039,-87.6309],
+"north-clybourn":["North/Clybourn (Red Line)",41.9108,-87.6490],
+"fullerton":["Fullerton station (Red/Brown/Purple)",41.9254,-87.6529],
+"belmont":["Belmont station (Red/Brown/Purple)",41.9398,-87.6533],
+"addison-red":["Addison station (Red Line)",41.9474,-87.6539],
+"lake-red":["Lake station (Red Line)",41.8847,-87.6278],
+"monroe-red":["Monroe (Red Line)",41.8803,-87.6277],
+"jackson-red":["Jackson (Red Line)",41.8778,-87.6277],
+"roosevelt":["Roosevelt station (Red/Orange/Green)",41.8672,-87.6279],
+"mart":["Merchandise Mart (Brown/Purple)",41.8885,-87.6354],
+"chicago-brown":["Chicago station (Brown/Purple)",41.8968,-87.6353],
+"sedgwick":["Sedgwick (Brown/Purple)",41.9104,-87.6388],
+"armitage":["Armitage station (Brown/Purple)",41.9185,-87.6522],
+"diversey":["Diversey (Brown/Purple)",41.9328,-87.6533],
+"southport":["Southport station (Brown Line)",41.9439,-87.6636],
+"washington-wabash":["Washington/Wabash station",41.8827,-87.6260],
+"adams-wabash":["Adams/Wabash station",41.8795,-87.6259],
+"clinton-green":["Clinton station (Green/Pink)",41.8856,-87.6417],
+"morgan":["Morgan station (Green/Pink)",41.8856,-87.6522],
+"ashland-green":["Ashland station (Green/Pink)",41.8853,-87.6669],
+"clark-washington":["Clark & Washington bus stop",41.8828,-87.6307],
+"clark-armitage":["Clark & Armitage bus stop",41.9182,-87.6345],
+"clark-webster":["Clark & Webster bus stop",41.9214,-87.6312],
+"clark-fullerton":["Clark & Fullerton bus stop",41.9253,-87.6310],
+"clark-wrightwood":["Clark & Wrightwood bus stop",41.9294,-87.6313],
+"clark-deming":["Clark & Deming bus stop",41.9320,-87.6313],
+"michigan-hubbard":["Michigan & Hubbard bus stop",41.8907,-87.6246],
+"stockton-armitage":["Stockton & Armitage bus stop",41.9182,-87.6353],
+"stockton-webster":["Stockton & Webster bus stop",41.9220,-87.6350],
+"stockton-fullerton":["Stockton & Fullerton bus stop",41.9256,-87.6356],
+"washington-state":["Washington & State bus stop",41.8831,-87.6277],
+"columbus-illinois":["Columbus & Illinois bus stop",41.8910,-87.6198],
+"illinois-mcclurg":["Illinois & McClurg bus stop",41.8912,-87.6175],
+"navy-pier-terminal":["Navy Pier Terminal",41.8917,-87.6057],
+"field-stop":["Museum Campus — Field Museum bus stop",41.8658,-87.6180],
+"shedd-stop":["Shedd Aquarium bus stop (Solidarity Dr)",41.8676,-87.6140],
+"adler-stop":["Adler Planetarium bus stop",41.8663,-87.6065],
+"grand-racine":["Grand & Racine bus stop",41.8910,-87.6571],
+"grand-halsted":["Grand & Halsted bus stop",41.8912,-87.6471],
+"ashland-cortland":["Ashland & Cortland bus stop",41.9160,-87.6660]
+};
+/* line: [name, mode, min-per-mile, wait-min, [stops in order], label if index increases, label if index decreases] */
+var PLN_LINES=[
+["Blue Line","train",3.4,3,["ohare","jeffpark","logan","division-blue","chicago-blue","grand-blue","clark-lake","washington-blue","monroe-blue","jackson-blue","clinton-blue"],"toward Forest Park","toward O'Hare"],
+["Red Line","train",3.4,3,["addison-red","belmont","fullerton","north-clybourn","clark-division","chicago-red","grand-red","lake-red","monroe-red","jackson-red","roosevelt"],"toward 95th/Dan Ryan","toward Howard"],
+["Brown/Purple Line","train",3.6,3,["southport","belmont","diversey","fullerton","armitage","sedgwick","chicago-brown","mart","washington-wabash","adams-wabash","clark-lake"],"toward the Loop","toward Kimball (Brown) / Linden (Purple)"],
+["Green/Pink Line","train",3.6,3,["ashland-green","morgan","clinton-green","clark-lake","washington-wabash","adams-wabash"],"toward the Loop / 63rd","toward Harlem (Green) / 54th (Pink)"],
+["#22 Clark bus","bus",5.5,4,["clark-washington","clark-division","clark-armitage","clark-webster","clark-fullerton","clark-wrightwood","clark-deming"],"toward Howard","toward downtown"],
+["#151 Sheridan bus","bus",5.5,4,["michigan-hubbard","stockton-armitage","stockton-webster","stockton-fullerton"],"toward Devon/Clark","toward Union Station (downtown)"],
+["#124 Navy Pier bus","bus",5.5,4,["washington-state","columbus-illinois","illinois-mcclurg","navy-pier-terminal"],"toward Navy Pier","toward Clinton/Quincy (downtown)"],
+["#146 Museum Campus bus","bus",5.5,4,["roosevelt","field-stop","shedd-stop","adler-stop"],"toward Museum Campus","toward downtown / Berwyn"],
+["#65 Grand bus","bus",5.5,4,["grand-racine","grand-halsted","grand-red"],"toward Navy Pier (east)","toward Harlem (west)"],
+["#9 Ashland bus","bus",5.5,4,["chicago-blue","ashland-cortland"],"toward Irving Park (north)","toward 95th (south)"]
+];
+var PLN_XFER=[["clark-lake","washington-wabash"],["washington-blue","washington-wabash"],["monroe-blue","monroe-red"],["lake-red","clark-lake"],["chicago-red","chicago-brown"],["michigan-hubbard","grand-red"],["clark-armitage","armitage"],["grand-halsted","grand-blue"],["clark-washington","clark-lake"],["washington-state","washington-blue"],["washington-state","washington-wabash"],["grand-red","washington-state"]];
+function plnDist(a,b){var R=3958.8,dLa=(b[0]-a[0])*Math.PI/180,dLo=(b[1]-a[1])*Math.PI/180;var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.sqrt(h));}
+function plnFmtD(mi){var ft=mi*5280; if(ft<1000) return Math.max(10,Math.round(ft/10)*10)+" ft"; return (mi<10?mi.toFixed(1):Math.round(mi))+" mi";}
+function planRoute(fromPin,toPin){
+ /* fromPin/toPin: {n,lat,lng}. Returns {steps:[strings], totalMin} or null */
+ var N={}; Object.keys(PLN_NODES).forEach(function(k){ N[k]={name:PLN_NODES[k][0],c:[PLN_NODES[k][1],PLN_NODES[k][2]]}; });
+ N["@from"]={name:fromPin.n,c:[fromPin.lat,fromPin.lng]};
+ N["@to"]={name:toPin.n,c:[toPin.lat,toPin.lng]};
+ var adj={}; Object.keys(N).forEach(function(k){ adj[k]=[]; });
+ function addEdge(a,b,min,kind,line,dir){ adj[a].push({to:b,min:min,kind:kind,line:line||null,dir:dir||null}); adj[b].push({to:a,min:min,kind:kind,line:line||null,dir:dir||null}); }
+ PLN_LINES.forEach(function(L){
+   for(var i=0;i<L[4].length-1;i++){
+     var A=L[4][i],B=L[4][i+1];
+     var d=plnDist(N[A].c,N[B].c), mins=Math.max(1,Math.round(d*L[2]));
+     adj[A].push({to:B,min:mins,kind:"ride",line:L,dir:L[5]});
+     adj[B].push({to:A,min:mins,kind:"ride",line:L,dir:L[6]});
+   }
+ });
+ PLN_XFER.forEach(function(pr){ var d=plnDist(N[pr[0]].c,N[pr[1]].c); addEdge(pr[0],pr[1],Math.max(2,Math.round(d*20)),"xfer"); });
+ [["@from",fromPin],["@to",toPin]].forEach(function(sp){
+   var cand=Object.keys(PLN_NODES).map(function(k){ return {k:k,d:plnDist([sp[1].lat,sp[1].lng],N[k].c)}; }).filter(function(x){ return x.d<=1.05; }).sort(function(a,b){ return a.d-b.d; }).slice(0,4);
+   cand.forEach(function(x){ addEdge(sp[0],x.k,Math.max(1,Math.round(x.d*20)),"walk"); });
+ });
+ var dd=plnDist([fromPin.lat,fromPin.lng],[toPin.lat,toPin.lng]);
+ if(dd<=0.9) addEdge("@from","@to",Math.max(1,Math.round(dd*20)),"walkall");
+ /* Dijkstra */
+ var dist={},prev={},Q=new Set(Object.keys(N));
+ Object.keys(N).forEach(function(k){ dist[k]=Infinity; }); dist["@from"]=0;
+ while(Q.size){
+   var u=null,best=Infinity; Q.forEach(function(k){ if(dist[k]<best){best=dist[k];u=k;} });
+   if(u===null||u==="@to") break; Q.delete(u);
+   adj[u].forEach(function(e){ var nd=dist[u]+e.min+(e.kind==="ride"&&(!prev[u]||prev[u].e.kind!=="ride"||prev[u].e.line!==e.line)?e.line[3]:0); if(nd<dist[e.to]){ dist[e.to]=nd; prev[e.to]={from:u,e:e}; } });
+ }
+ if(!isFinite(dist["@to"])) return null;
+ var path=[],cur="@to"; while(cur!=="@from"){ var pr=prev[cur]; if(!pr) return null; path.unshift({from:pr.from,to:cur,e:pr.e}); cur=pr.from; }
+ /* Merge ride runs */
+ var steps=[],i=0,total=0;
+ function walkText(aN,bN,mins){ return "🚶 Walk ~"+mins+" min ("+plnFmtD(plnDist(N[aN].c,N[bN].c))+")"; }
+ while(i<path.length){
+   var s=path[i];
+   if(s.e.kind==="ride"){
+     var line=s.e.line,dir=s.e.dir,board=s.from,exitN=s.to,mins=s.e.min+line[3]; i++;
+     while(i<path.length&&path[i].e.kind==="ride"&&path[i].e.line===line){ mins+=path[i].e.min; exitN=path[i].to; i++; }
+     total+=mins;
+     steps.push((line[1]==="bus"?"🚌":"🚇")+" Board the "+line[0]+" at "+N[board].name+" ("+dir+") → ride ~"+mins+" min → exit at "+N[exitN].name);
+   } else if(s.e.kind==="xfer"){
+     total+=s.e.min; steps.push("🚶 Transfer: walk ~"+s.e.min+" min to "+N[s.to].name); i++;
+   } else if(s.e.kind==="walkall"){
+     total+=s.e.min; steps.push("🚶 Walk the whole way — ~"+s.e.min+" min ("+plnFmtD(dd)+") to "+toPin.n); i++;
+   } else { /* walk */
+     total+=s.e.min;
+     if(s.from==="@from") steps.push(walkText(s.from,s.to,s.e.min)+" to "+N[s.to].name);
+     else steps.push(walkText(s.from,s.to,s.e.min)+" to "+toPin.n+" — you're there");
+     i++;
+   }
+ }
+ return {steps:steps,totalMin:total};
+}
+if(typeof document!=="undefined"&&document.getElementById&&document.getElementById("planBtn")){
+ var dl=document.getElementById("pinNames");
+ POIS.forEach(function(p){ var o=document.createElement("option"); o.value=p.n; dl.appendChild(o); });
+ function plnResolve(txt){
+   txt=(txt||"").trim();
+   if(!txt||txt.toLowerCase().indexOf("my current location")>=0||txt.toLowerCase().indexOf("my location")>=0){
+     if(typeof myPos!=="undefined"&&myPos) return {n:"📍 Your current location",lat:myPos.lat,lng:myPos.lng};
+     return {err:"No live location yet — tap “Use my location”, or tap the map / drag the 🚶 walker to set where you are. Or type a pin name as the start."};
+   }
+   var low=txt.toLowerCase(),i;
+   for(i=0;i<POIS.length;i++) if(POIS[i].n.toLowerCase()===low) return POIS[i];
+   for(i=0;i<POIS.length;i++) if(POIS[i].n.toLowerCase().indexOf(low)>=0) return POIS[i];
+   return {err:"Couldn't find “"+txt+"” — pick a name from the list that pops up as you type."};
+ }
+ function plnGo(){
+   var out=document.getElementById("planOut");
+   var f=plnResolve(document.getElementById("planFrom").value);
+   if(f.err){ out.innerHTML="<p>"+f.err+"</p>"; return; }
+   var t=plnResolve(document.getElementById("planTo").value);
+   if(t.err){ out.innerHTML="<p>"+t.err+"</p>"; return; }
+   if(f.n===t.n){ out.innerHTML="<p>Same place — no ride needed.</p>"; return; }
+   var r=planRoute(f,t);
+   if(!r){ out.innerHTML="<p>No simple bus/train route found between those two — check each pin's 🧭 Getting there card, or a rideshare may be easier for that pair.</p>"; return; }
+   out.innerHTML="<p style='margin:6px 0'><strong>"+f.n+" → "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(s){return "<li>"+s+"</li>";}).join("")+"</ol>";
+   out.scrollIntoView({behavior:"smooth",block:"nearest"});
+ }
+ document.getElementById("planBtn").addEventListener("click",plnGo);
+ document.getElementById("planSwap").addEventListener("click",function(){ var a=document.getElementById("planFrom"),b=document.getElementById("planTo"),v=a.value; a.value=b.value; b.value=v; });
+}
+/*PLANNER-END*/
+
 </script>
 </body></html>
