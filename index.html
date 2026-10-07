@@ -83,6 +83,8 @@ select,.rad{font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid 
 .itrow{margin:4px 0 6px 6px;font-size:14px;line-height:1.45}
 .itt{display:inline-block;min-width:104px;font-weight:700;color:var(--muted);font-size:13px}
 .itgo{background:none;border:none;padding:0;font:inherit;color:var(--link);text-decoration:underline;text-underline-offset:2px;text-align:left;cursor:pointer}
+.planBtns{display:flex;flex-wrap:wrap;gap:8px}
+.planBtns .btn{flex:1 1 0;min-width:0}
 .planIn{width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid #b9c4cc;border-radius:11px;font:inherit;margin:3px 0 8px;background:#fff;color:#1c2733;-webkit-text-fill-color:#1c2733;color-scheme:light}
 .planIn::placeholder{color:#68737d;-webkit-text-fill-color:#68737d;opacity:1}
 #planOut{font-size:14.5px;line-height:1.5}
@@ -98,16 +100,27 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px}
 /* Responsive — iOS first, adapts to other platforms */
 .wrap{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
 .planIn{font-size:16px}
-@media (max-width:400px){
+@media (max-width:480px){
   header h1{font-size:18px}
+  header p{font-size:13px}
   .wrap{padding:10px}
   .panel{padding:12px 13px}
   .btn{padding:8px 12px;font-size:13.5px}
   .fchip{padding:6px 11px;font-size:13px}
-  .itt{min-width:84px}
+  .itt{min-width:78px}
   .wxd{font-size:12px;padding:4px 7px}
   #planPick li{font-size:14.5px}
+  #map{height:clamp(300px,52dvh,520px)}
+  .planBtns .btn{flex:1 1 42%}
+  #filterBar .fchip{flex:1 1 28%;text-align:center}
+  .locRow .btn{padding:8px 6px;font-size:13.5px}
+  .poi{gap:6px}
+  .poi .d{font-size:13px}
+  .itrow{font-size:13.5px}
 }
+html,body{overflow-x:clip}
+.pop h3,.pop p{overflow-wrap:break-word}
+.poi>div:first-child{min-width:0}
 @media (min-width:768px){
   .wrap{max-width:1080px}
   #map{height:clamp(420px,62dvh,660px)}
@@ -145,7 +158,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px}
 <label>Day <select class="planIn" id="planDayPick"><option value="">📅 Pick a day…</option><option value="tue">Tue Oct 13</option><option value="wed">Wed Oct 14 🎂</option><option value="thu">Thu Oct 15</option><option value="fri">Fri Oct 16</option><option value="sat">Sat Oct 17</option><option value="all">Any day</option></select></label>
 <label>Activity <select class="planIn" id="planActPick"><option value="">Pick a day first…</option></select></label>
 <label>Or type a place</label><div class="planPickWrap"><input class="planIn" id="planTo" placeholder="Where to? Type a place…" autocomplete="off"><ul id="planPick"></ul></div>
-<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🗺️ Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
+<p class="planBtns" style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🗺️ Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
 <div id="planOut"></div></div>
 <div class="bar" id="filterBar" style="margin:10px 0 8px"><button class="fchip on" data-f="all">All locations</button><button class="fchip" data-f="food">🍽️ Food</button><button class="fchip" data-f="drinks">🥤 Drinks</button><button class="fchip" data-f="landmark">🏛️ Landmarks</button><button class="fchip" data-f="saved">⭐ Saved</button><button class="fchip" data-f="stop">📍 Stops</button></div>
 <div id="map"></div>
