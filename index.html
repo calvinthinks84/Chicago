@@ -36,18 +36,18 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;padding-bottom:env(safe-area-inset-bottom);overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent}
-header{background:transparent;color:var(--ink);border-bottom:1px solid var(--line);padding:calc(16px + env(safe-area-inset-top)) 16px 16px}
+header{background:transparent;color:var(--ink);border-bottom:1px solid var(--line);padding:calc(16px + env(safe-area-inset-top)) 16px 6px}
 header h1{margin:0 0 4px;font-size:20px;font-weight:700;letter-spacing:-.01em}
 header p{margin:3px 0;font-size:13.5px;line-height:1.45;color:var(--mut)}
 #wxStrip{display:flex;gap:6px;flex-wrap:nowrap;margin-top:9px}
 .wxd{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden}
 .wxd{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:5px 9px;font-size:12.5px;line-height:1.4;color:var(--ink);box-shadow:var(--shadow)}
-.wrap{max-width:1000px;margin:0 auto;padding:12px}
+.wrap{max-width:1000px;margin:0 auto;padding:4px 12px 12px}
 #map{height:clamp(320px,58dvh,560px);border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:1}
 .leaflet-tile-pane{filter:grayscale(1)}
-.bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;align-items:center}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px;align-items:center}
 .locRow{display:flex;gap:8px;flex-wrap:nowrap;width:100%}
-.locRow .btn{flex:1 1 0;min-width:0}
+.locRow .btn{flex:0 1 auto}
 .btn{border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer;font-size:14px;font-weight:600;box-shadow:0 1px 2px rgba(16,27,38,.06);transition:background .15s,border-color .15s,transform .05s}
 .btn:active{transform:scale(.98)}
 .btn.go{background:var(--sel);color:#fff;border-color:var(--sel)}
