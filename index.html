@@ -45,7 +45,6 @@ header p{margin:3px 0;font-size:13.5px;line-height:1.45;color:var(--mut)}
 .wxd{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:5px 9px;font-size:12.5px;line-height:1.4;color:var(--ink);box-shadow:var(--shadow)}
 .wrap{max-width:1000px;margin:0 auto;padding:4px 12px 12px}
 #map{height:clamp(300px,52dvh,520px);border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:1}
-.leaflet-tile-pane{filter:grayscale(1)}
 .bar{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px;align-items:center}
 .locRow{display:flex;gap:8px;flex-wrap:nowrap;width:100%;justify-content:center}
 .locRow .btn{flex:1 1 0;max-width:220px}
@@ -329,7 +328,14 @@ function hideGpsHelp(){ var h=document.getElementById("gpsHelp"); if(h) h.style.
 function initMap(){
  if(typeof L==="undefined"){ statusEl.textContent="Map library couldn't load (offline?). The nearest-list and pop-ups need the map library + internet."; return; }
  map=L.map("map").setView([41.8945,-87.6280],13);
- L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"}).addTo(map);
+ var darkMq=window.matchMedia("(prefers-color-scheme: dark)");
+ var baseOpts={maxZoom:20,subdomains:"abcd",attribution:"© OpenStreetMap contributors © CARTO"};
+ var baseLight=L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",baseOpts);
+ var baseDark=L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",baseOpts);
+ var baseCur=null;
+ function applyBase(){ var want=darkMq.matches?baseDark:baseLight; if(baseCur===want) return; if(baseCur) map.removeLayer(baseCur); want.addTo(map); if(want.bringToBack) want.bringToBack(); baseCur=want; }
+ applyBase();
+ if(darkMq.addEventListener) darkMq.addEventListener("change",applyBase);
  var pts=ROUTE.map(function(name){var p=POIS.filter(function(x){return x.n===name;})[0]; return [p.lat,p.lng];});
  L.polyline(pts,{color:"#0b5cad",weight:3,opacity:.55,dashArray:"6 6"}).addTo(map);
  map.on("click",function(e){
