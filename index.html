@@ -44,6 +44,7 @@ header p{margin:3px 0;font-size:13.5px;line-height:1.45;color:var(--mut)}
 .wxd{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:5px 9px;font-size:12.5px;line-height:1.4;color:var(--ink);box-shadow:var(--shadow)}
 .wrap{max-width:1000px;margin:0 auto;padding:12px}
 #map{height:clamp(320px,58dvh,560px);border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:1}
+.leaflet-tile-pane{filter:grayscale(1)}
 .bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;align-items:center}
 .locRow{display:flex;gap:8px;flex-wrap:nowrap;width:100%}
 .locRow .btn{flex:1 1 0;min-width:0}
@@ -167,7 +168,7 @@ html,body{overflow-x:clip}
 </div>
 <footer>Built from your Chicago Toddler Trip Pack — Oct 13–17, 2026. Nothing here was booked by Forky.</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="pins.js?v=fits1"></script>
+<script src="pins.js?v=web1"></script>
 <script>
 "use strict";
 /* ---------- Data: itinerary stops + suggestions. fits = why it matches the trip criteria ---------- */
@@ -241,7 +242,7 @@ function popHTML(p){
  +(p.hist?"<p>🏛️ <strong>History:</strong> "+p.hist+"</p>":"")
  +(p.arch?"<p>🏗️ <strong>Architecture:</strong> "+p.arch+"</p>":"")
  +"<p>✅ Fits your criteria: "+p.fits+"</p>"
- +"<p><a target='_blank' rel='noopener' href='"+gmaps(p)+"'>Location</a> · <a target='_blank' rel='noopener' href='"+gdir(p)+"'>Directions</a></p></div>";
+ +"<p>"+(p.web?"<a target='_blank' rel='noopener' href='"+p.web+"'>Website</a>":"<a target='_blank' rel='noopener' href='"+gmaps(p)+"'>Location</a>")+" · <a target='_blank' rel='noopener' href='"+gdir(p)+"'>Directions</a></p></div>";
 }
 function showPin(i,scroll){
  var p=POIS[i]; if(!p||!pinInfo) return;
