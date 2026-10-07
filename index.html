@@ -726,7 +726,7 @@ function plnGo(){
  var clearBtn=document.getElementById("planClear");
  if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; if(typeof plnFillActs==="function") plnFillActs(); document.getElementById("planOut").innerHTML=""; var hb2=document.getElementById("planHome"); if(hb2&&hb2.classList) hb2.classList.remove("on"); if(typeof unselectPin==="function") unselectPin(); });
  var toEl=document.getElementById("planTo"), pickEl=document.getElementById("planPick");
- var plnPickTimer=null, plnPickToken=0, plnPickBase=null, plnLiveFeats=[];
+ var plnPickTimer=null, plnPickToken=0, plnPickBase=null, plnLiveFeats=[], plnPickCtl=null;
  function hidePick(){ if(pickEl) pickEl.style.display="none"; }
  function renderPick(){
    if(!pickEl||!toEl) return;
@@ -738,17 +738,19 @@ function plnGo(){
      if(p.n.toLowerCase().indexOf(q)>=0||(p.addr&&p.addr.toLowerCase().indexOf(q)>=0)) nameHits.push(ix);
      else if(p.tags&&p.tags.toLowerCase().replace(/-/g," ").indexOf(qn)>=0) tagHits.push(ix);
    });
-   var hits=nameHits.map(function(ix){return {ix:ix,tag:false};}).concat(tagHits.map(function(ix){return {ix:ix,tag:true};})).slice(0,10);
+   var hits=nameHits.map(function(ix){return {ix:ix,tag:false};}).concat(tagHits.map(function(ix){return {ix:ix,tag:true};})).slice(0,5);
    var h="";
    hits.forEach(function(hit){ var p=POIS[hit.ix]; h+="<li data-i=\""+hit.ix+"\">"+((typeof ICONS!=="undefined"&&ICONS[p.cat])||"\uD83D\uDCCD")+" "+p.n+" <span class='pa-addr'>"+(hit.tag?("\uD83C\uDFF7\uFE0F "+p.tags):(p.addr||""))+"</span></li>"; });
    var rawQ=(toEl.value||"").trim();
    var searchRow="<li data-search=\"1\">\uD83D\uDD0E Search Chicago for \u201C"+plnEsc(rawQ)+"\u201D <span class='pa-addr'>any place \u2014 route + live info</span></li>";
    pickEl.innerHTML=h+searchRow; pickEl.style.display="block";
-   plnPickBase={pins:h,search:searchRow,q:q};
+   plnPickBase={pins:h,search:searchRow,q:q,cnt:hits.length};
    clearTimeout(plnPickTimer);
    var token=++plnPickToken;
    plnPickTimer=setTimeout(function(){
-     fetch("https://photon.komoot.io/api/?limit=6&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(rawQ+" Chicago"))
+     if(plnPickCtl){ try{ plnPickCtl.abort(); }catch(_){} }
+     plnPickCtl=(typeof AbortController!=="undefined")?new AbortController():null;
+     fetch("https://photon.komoot.io/api/?limit=8&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(rawQ+" Chicago"),{signal:plnPickCtl?plnPickCtl.signal:undefined})
       .then(function(r){ return r.json(); })
       .then(function(pj){
         if(token!==plnPickToken||!pj||!pj.features) return;
@@ -757,11 +759,12 @@ function plnGo(){
         if(curQ!==q) return;
         var pinNames={}; POIS.forEach(function(pp){ pinNames[pp.n.toLowerCase()]=1; });
         plnLiveFeats=[];
+        var room=Math.max(0,5-(plnPickBase.cnt||0));
         var lh="";
-        pj.features.forEach(function(ft){ var pr=ft.properties||{}; if(!pr.name) return; if(pinNames[pr.name.toLowerCase()]) return; var li2=plnLiveFeats.length; plnLiveFeats.push(ft); var det=[pr.housenumber,pr.street,pr.city].filter(Boolean).join(" "); var ic=(pr.osm_value==="restaurant"||pr.osm_value==="fast_food"||pr.osm_value==="cafe")?"\uD83C\uDF74":"\uD83D\uDCCD"; lh+="<li data-live=\""+li2+"\">"+ic+" "+plnEsc(pr.name)+" <span class='pa-addr'>"+plnEsc(det)+" \u00B7 outside your pins</span></li>"; });
+        pj.features.forEach(function(ft){ if(plnLiveFeats.length>=room) return; var pr=ft.properties||{}; if(!pr.name) return; if(pinNames[pr.name.toLowerCase()]) return; var li2=plnLiveFeats.length; plnLiveFeats.push(ft); var det=[pr.housenumber,pr.street,pr.city].filter(Boolean).join(" "); var ic=(pr.osm_value==="restaurant"||pr.osm_value==="fast_food"||pr.osm_value==="cafe")?"\uD83C\uDF74":"\uD83D\uDCCD"; lh+="<li data-live=\""+li2+"\">"+ic+" "+plnEsc(pr.name)+" <span class='pa-addr'>"+plnEsc(det)+" \u00B7 outside your pins</span></li>"; });
         if(lh) pickEl.innerHTML=plnPickBase.pins+lh+plnPickBase.search;
       }).catch(function(){});
-   },300);
+   },120);
  }
  if(toEl&&pickEl){
    toEl.addEventListener("input",renderPick);
@@ -895,7 +898,7 @@ function plnGo(){
  }
  // --- Add panel wiring ---
  var qEl=document.getElementById("addQ"), listEl=document.getElementById("addList"), stEl=document.getElementById("addStatus");
- var feats=[], timer=null, token=0;
+ var feats=[], timer=null, token=0, addCtl=null;
  function renderFeats(){
    if(!listEl) return;
    listEl.innerHTML=feats.map(function(ft,i){ var pr=ft.properties||{}; var det=[pr.housenumber,pr.street,pr.city].filter(Boolean).join(" "); return "<li data-addpick='"+i+"'>\uD83D\uDCCD "+esc(pr.name||"")+" <span class='pa-addr'>"+esc(det)+"</span></li>"; }).join("");
@@ -907,11 +910,13 @@ function plnGo(){
      if(q.length<3){ feats=[]; renderFeats(); return; }
      var tk=++token;
      timer=setTimeout(function(){
-       fetch("https://photon.komoot.io/api/?limit=6&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(q+" Chicago"))
+       if(addCtl){ try{ addCtl.abort(); }catch(_){} }
+       addCtl=(typeof AbortController!=="undefined")?new AbortController():null;
+       fetch("https://photon.komoot.io/api/?limit=8&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(q+" Chicago"),{signal:addCtl?addCtl.signal:undefined})
         .then(function(r){ return r.json(); })
-        .then(function(pj){ if(tk!==token||!pj||!pj.features) return; feats=pj.features.filter(function(f){ return f.properties&&f.properties.name&&f.geometry&&f.geometry.coordinates; }); renderFeats(); })
+        .then(function(pj){ if(tk!==token||!pj||!pj.features) return; feats=pj.features.filter(function(f){ return f.properties&&f.properties.name&&f.geometry&&f.geometry.coordinates; }).slice(0,5); renderFeats(); })
         .catch(function(){});
-     },300);
+     },120);
    });
  }
  document.addEventListener("click",function(e){
