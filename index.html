@@ -122,6 +122,9 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px}
 }
 html,body{overflow-x:clip}
 .pop h3,.pop p{overflow-wrap:break-word}
+.leaflet-control-attribution{background:rgba(255,255,255,.5)!important;font-size:9px!important;color:#5c6670!important;padding:0 4px}
+.leaflet-control-attribution a{color:#5c6670!important}
+@media (prefers-color-scheme: dark){.leaflet-control-attribution{background:rgba(20,24,30,.5)!important;color:#9aa6b2!important}.leaflet-control-attribution a{color:#9aa6b2!important}}
 .poi>div:first-child{min-width:0}
 @media (pointer:coarse){
   .btn,.fchip{min-height:40px}
@@ -328,6 +331,7 @@ function hideGpsHelp(){ var h=document.getElementById("gpsHelp"); if(h) h.style.
 function initMap(){
  if(typeof L==="undefined"){ statusEl.textContent="Map library couldn't load (offline?). The nearest-list and pop-ups need the map library + internet."; return; }
  map=L.map("map").setView([41.8945,-87.6280],13);
+ if(map.attributionControl) map.attributionControl.setPrefix(false);
  var darkMq=window.matchMedia("(prefers-color-scheme: dark)");
  var baseOpts={maxZoom:16,attribution:"Esri, HERE, Garmin, © OpenStreetMap contributors"};
  var esri="https://server.arcgisonline.com/ArcGIS/rest/services/";
