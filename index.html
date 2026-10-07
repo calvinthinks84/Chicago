@@ -655,19 +655,35 @@ function plnEnrich(g,out){
    }).catch(function(){ if(to) clearTimeout(to); });
  }catch(e){}
 }
+function plnCardHTML(g){
+ return "<div style='margin-top:8px;border-top:1px solid var(--line);padding-top:8px'><p style='margin:2px 0'><strong>"+plnEsc(g.n)+"</strong>"+(g.kind?" \u00B7 "+plnEsc(g.kind):"")+" <span style='color:var(--mut);font-size:12px'>(live lookup \u2014 not one of your saved pins)</span></p><p style='margin:2px 0'>"+plnEsc(g.full||g.n)+"</p><span class='plnLiveExtra'>"+plnExtraHTML(g)+"</span></div>";
+}
+function plnFeatureToPlace(ft,fallbackName){
+ var pr=(ft&&ft.properties)||{}, co=(ft&&ft.geometry&&ft.geometry.coordinates)||[0,0];
+ var g={n:pr.name||fallbackName||"",lat:co[1],lng:co[0]};
+ g.full=[pr.name,pr.housenumber,pr.street,pr.city,pr.state,pr.postcode].filter(Boolean).join(" ");
+ if(!g.full) g.full=g.n;
+ g.tel=""; g.web=""; g.hours=""; g.kind=(pr.osm_value||"").replace(/_/g," ");
+ return g;
+}
+function plnShowLive(ft){
+ var out=document.getElementById("planOut");
+ var g=plnFeatureToPlace(ft,((document.getElementById("planTo")||{}).value||"").trim());
+ document.getElementById("planTo").value=g.n;
+ if(typeof myPos!=="undefined"&&myPos){ plnRender({n:"\uD83D\uDCCD Your current location",lat:myPos.lat,lng:myPos.lng},g); }
+ else { out.innerHTML="<p>No live location yet \u2014 tap \u201CCurrent location\u201D, or tap the map / drag the \uD83D\uDEB6 walker to set where you are, and the route will show here.</p>"; }
+ out.innerHTML+=plnCardHTML(g);
+ plnEnrich(g,out);
+}
 function plnPhoton(f,txt,out){
  fetch("https://photon.komoot.io/api/?limit=1&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(txt.trim()+" Chicago"))
   .then(function(r){ return r.json(); })
   .then(function(pj){
     var ft=pj&&pj.features&&pj.features[0];
     if(!ft){ out.innerHTML="<p>Couldn\u2019t find \u201C"+plnEsc(txt.trim())+"\u201D in Chicago \u2014 check the spelling, or pick from the day dropdown.</p>"; return; }
-    var pr=ft.properties||{}, co=ft.geometry.coordinates;
-    var g={n:pr.name||txt.trim(),lat:co[1],lng:co[0]};
-    g.full=[pr.name,pr.housenumber,pr.street,pr.city,pr.state,pr.postcode].filter(Boolean).join(" ");
-    if(!g.full) g.full=pr.name||txt.trim();
-    g.tel=""; g.web=""; g.hours=""; g.kind=(pr.osm_value||"").replace(/_/g," ");
+    var g=plnFeatureToPlace(ft,txt.trim());
     plnRender(f,g);
-    out.innerHTML+="<div style='margin-top:8px;border-top:1px solid var(--line);padding-top:8px'><p style='margin:2px 0'><strong>"+plnEsc(g.n)+"</strong>"+(g.kind?" \u00B7 "+plnEsc(g.kind):"")+" <span style='color:var(--mut);font-size:12px'>(live lookup \u2014 not one of your saved pins)</span></p><p style='margin:2px 0'>"+plnEsc(g.full)+"</p><span class='plnLiveExtra'>"+plnExtraHTML(g)+"</span></div>";
+    out.innerHTML+=plnCardHTML(g);
     plnEnrich(g,out);
   })
   .catch(function(){ out.innerHTML="<p>Place search needs an internet connection \u2014 try again in a moment, or pick from the day dropdown (works offline).</p>"; });
@@ -693,8 +709,7 @@ function plnGo(){
        g.hours=xt.opening_hours||"";
        g.kind=(r0.type||"").replace(/_/g," ");
        plnRender(f,g);
-       var card="<div style='margin-top:8px;border-top:1px solid var(--line);padding-top:8px'><p style='margin:2px 0'><strong>"+plnEsc(g.n)+"</strong>"+(g.kind?" \u00B7 "+plnEsc(g.kind):"")+" <span style='color:var(--mut);font-size:12px'>(live lookup \u2014 not one of your saved pins)</span></p><p style='margin:2px 0'>"+plnEsc(g.full)+"</p><span class='plnLiveExtra'>"+plnExtraHTML(g)+"</span></div>";
-       out.innerHTML+=card;
+       out.innerHTML+=plnCardHTML(g);
        plnEnrich(g,out);
      })
      .catch(function(){ out.innerHTML="<p>Place search needs an internet connection — try again in a moment, or pick from the day dropdown (works offline).</p>"; });
@@ -705,6 +720,7 @@ function plnGo(){
  var clearBtn=document.getElementById("planClear");
  if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; if(typeof plnFillActs==="function") plnFillActs(); document.getElementById("planOut").innerHTML=""; var hb2=document.getElementById("planHome"); if(hb2&&hb2.classList) hb2.classList.remove("on"); if(typeof unselectPin==="function") unselectPin(); });
  var toEl=document.getElementById("planTo"), pickEl=document.getElementById("planPick");
+ var plnPickTimer=null, plnPickToken=0, plnPickBase=null, plnLiveFeats=[];
  function hidePick(){ if(pickEl) pickEl.style.display="none"; }
  function renderPick(){
    if(!pickEl||!toEl) return;
@@ -719,15 +735,38 @@ function plnGo(){
    var hits=nameHits.map(function(ix){return {ix:ix,tag:false};}).concat(tagHits.map(function(ix){return {ix:ix,tag:true};})).slice(0,10);
    var h="";
    hits.forEach(function(hit){ var p=POIS[hit.ix]; h+="<li data-i=\""+hit.ix+"\">"+((typeof ICONS!=="undefined"&&ICONS[p.cat])||"\uD83D\uDCCD")+" "+p.n+" <span class='pa-addr'>"+(hit.tag?("\uD83C\uDFF7\uFE0F "+p.tags):(p.addr||""))+"</span></li>"; });
-   pickEl.innerHTML=h; pickEl.style.display="block";
+   var rawQ=(toEl.value||"").trim();
+   var searchRow="<li data-search=\"1\">\uD83D\uDD0E Search Chicago for \u201C"+plnEsc(rawQ)+"\u201D <span class='pa-addr'>any place \u2014 route + live info</span></li>";
+   pickEl.innerHTML=h+searchRow; pickEl.style.display="block";
+   plnPickBase={pins:h,search:searchRow,q:q};
+   clearTimeout(plnPickTimer);
+   var token=++plnPickToken;
+   plnPickTimer=setTimeout(function(){
+     fetch("https://photon.komoot.io/api/?limit=6&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(rawQ+" Chicago"))
+      .then(function(r){ return r.json(); })
+      .then(function(pj){
+        if(token!==plnPickToken||!pj||!pj.features) return;
+        if(!pickEl||pickEl.style.display==="none") return;
+        var curQ=((toEl.value||"").trim().toLowerCase());
+        if(curQ!==q) return;
+        var pinNames={}; POIS.forEach(function(pp){ pinNames[pp.n.toLowerCase()]=1; });
+        plnLiveFeats=[];
+        var lh="";
+        pj.features.forEach(function(ft){ var pr=ft.properties||{}; if(!pr.name) return; if(pinNames[pr.name.toLowerCase()]) return; var li2=plnLiveFeats.length; plnLiveFeats.push(ft); var det=[pr.housenumber,pr.street,pr.city].filter(Boolean).join(" "); var ic=(pr.osm_value==="restaurant"||pr.osm_value==="fast_food"||pr.osm_value==="cafe")?"\uD83C\uDF74":"\uD83D\uDCCD"; lh+="<li data-live=\""+li2+"\">"+ic+" "+plnEsc(pr.name)+" <span class='pa-addr'>"+plnEsc(det)+" \u00B7 outside your pins</span></li>"; });
+        if(lh) pickEl.innerHTML=plnPickBase.pins+lh+plnPickBase.search;
+      }).catch(function(){});
+   },300);
  }
  if(toEl&&pickEl){
    toEl.addEventListener("input",renderPick);
+   toEl.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); hidePick(); plnGo(); } });
    toEl.addEventListener("focus",renderPick);
    pickEl.addEventListener("click",function(e){
      var li=e.target; while(li&&li.tagName!=="LI") li=li.parentNode;
      if(!li) return;
      if(li.getAttribute("data-search")){ hidePick(); plnGo(); return; }
+     var lv=li.getAttribute("data-live");
+     if(lv!==null&&lv!==undefined&&plnLiveFeats[parseInt(lv,10)]){ hidePick(); plnShowLive(plnLiveFeats[parseInt(lv,10)]); return; }
      var ix=parseInt(li.getAttribute("data-i"),10);
      if(!isNaN(ix)&&POIS[ix]){ toEl.value=POIS[ix].n; hidePick(); plnGo(); }
    });
