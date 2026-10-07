@@ -109,7 +109,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 <div class="panel" id="planPanel"><h2>🧭 Plan a ride — which bus or train?</h2>
 <label>Destination by day <select class="planIn" id="planDayPick"><option value="">📅 Pick from the itinerary…</option></select></label>
 <label>Or type a place <input class="planIn" id="planTo" list="pinNames" placeholder="Where to? Type a place…" autocomplete="off"></label>
-<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home</button></p>
+<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home</button> <button class="btn" id="planClear">🧹 Clear</button></p>
 <datalist id="pinNames"></datalist>
 <div id="planOut"></div></div>
 <div id="map"></div>
@@ -610,6 +610,8 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  document.getElementById("planBtn").addEventListener("click",plnGo);
  var homeBtn=document.getElementById("planHome");
  if(homeBtn) homeBtn.addEventListener("click",function(){ document.getElementById("planTo").value=POIS[0].n; plnGo(); });
+ var clearBtn=document.getElementById("planClear");
+ if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; document.getElementById("planOut").innerHTML=""; });
 }
 /*PLANNER-END*/
 </script>
