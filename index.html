@@ -107,10 +107,9 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 </div>
 <div class="panel" id="planPanel"><h2>🧭 Plan a ride — which bus or train?</h2>
 <p class="legend">Always starts from <strong>your current location</strong> (GPS, or wherever the 🚶 walker is). Pick a destination by day, or type a place — and get the exact bus or train to board, and where to get off.</p>
-<p style="margin:4px 0"><button class="btn go" id="planHome">🏠 Home — route to the hotel</button></p>
 <label>Destination by day <select class="planIn" id="planDayPick"><option value="">📅 Pick from the itinerary…</option></select></label>
 <label>Or type a place <input class="planIn" id="planTo" list="pinNames" placeholder="Where to? Type a place…" autocomplete="off"></label>
-<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button></p>
+<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home — route to the hotel</button></p>
 <datalist id="pinNames"></datalist>
 <div id="planOut"></div></div>
 <div id="map"></div>
@@ -250,8 +249,8 @@ var myPos=null, alerted={}, simTimer=null, simSeg=0, simT=0;
 var selectedIdx=-1;
 var gpsWatchId=null, tapMode=false, gpsHasFix=false;
 
-function gmaps(p){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(p.n+" "+p.addr+" Chicago IL");}
-function gdir(p){return "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(p.n+" "+p.addr+" Chicago IL");}
+function gmaps(p){return "https://maps.apple.com/?q="+encodeURIComponent(p.n+" "+p.addr+" Chicago IL");}
+function gdir(p){return "https://maps.apple.com/?daddr="+encodeURIComponent(p.n+" "+p.addr+" Chicago IL")+"&dirflg=t";}
 function distM(a,b){var R=6371000,dLa=(b.lat-a.lat)*Math.PI/180,dLo=(b.lng-a.lng)*Math.PI/180;var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.sqrt(h));}
 function fmtD(m){var ft=m*3.28084; if(ft<1000) return Math.max(10,Math.round(ft/10)*10)+" ft"; var mi=m/1609.344; return (mi<10?mi.toFixed(1):Math.round(mi))+" mi";}
 function fmtRad(m){return Math.round(m*3.28084/10)*10+" ft";}
@@ -568,9 +567,9 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  if(dayPick){
    var dayNames={tue:"Tue Oct 13",wed:"Wed Oct 14 \uD83C\uDF82",thu:"Thu Oct 15",fri:"Fri Oct 16",sat:"Sat Oct 17",all:"Any day — sights, food & more"};
    ["tue","wed","thu","fri","sat","all"].forEach(function(d){
-     var grp=document.createElement("optgroup"); grp.label=dayNames[d]; grp.children=[];
-     POIS.forEach(function(p){ if(p.day===d){ var o=document.createElement("option"); o.value=p.n; o.textContent=p.n; grp.children.push(o); } });
-     if(grp.children.length) dayPick.appendChild(grp);
+     var grp=document.createElement("optgroup"); grp.label=dayNames[d]; var cnt=0;
+     POIS.forEach(function(p){ if(p.day===d){ var o=document.createElement("option"); o.value=p.n; o.textContent=p.n; grp.appendChild(o); cnt++; } });
+     if(cnt>0) dayPick.appendChild(grp);
    });
    dayPick.addEventListener("change",function(){ if(dayPick.value){ document.getElementById("planTo").value=dayPick.value; plnGo(); } });
  }
@@ -597,6 +596,6 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  var homeBtn=document.getElementById("planHome");
  if(homeBtn) homeBtn.addEventListener("click",function(){ document.getElementById("planTo").value=POIS[0].n; plnGo(); });
 }
-
+/*PLANNER-END*/
 </script>
 </body></html>
