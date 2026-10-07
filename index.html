@@ -106,11 +106,12 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 <p style="margin:4px 0"><button class="btn" id="gpsRetryBtn" style="font-size:13px;padding:6px 11px">↻ Try GPS again</button> <button class="btn" id="gpsHelpClose" style="font-size:13px;padding:6px 11px">Dismiss</button></p>
 </div>
 <div class="panel" id="planPanel"><h2>🧭 Plan a ride — which bus or train?</h2>
-<p class="legend">Search a start and a destination — any pin on this trip, or your current location — and get the exact bus or train to board, and where to get off.</p>
-<label>From <input class="planIn" id="planFrom" list="pinNames" placeholder="📍 My current location" autocomplete="off"></label>
-<label>To <input class="planIn" id="planTo" list="pinNames" placeholder="Where to? Type a place…" autocomplete="off"></label>
-<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn" id="planSwap">⇄ Swap</button></p>
-<datalist id="pinNames"><option value="📍 My current location"></option></datalist>
+<p class="legend">Always starts from <strong>your current location</strong> (GPS, or wherever the 🚶 walker is). Pick a destination by day, or type a place — and get the exact bus or train to board, and where to get off.</p>
+<p style="margin:4px 0"><button class="btn go" id="planHome">🏠 Home — route to the hotel</button></p>
+<label>Destination by day <select class="planIn" id="planDayPick"><option value="">📅 Pick from the itinerary…</option></select></label>
+<label>Or type a place <input class="planIn" id="planTo" list="pinNames" placeholder="Where to? Type a place…" autocomplete="off"></label>
+<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button></p>
+<datalist id="pinNames"></datalist>
 <div id="planOut"></div></div>
 <div id="map"></div>
 <div class="panel" id="pinInfo"><h2>📍 Pin details</h2><div id="pinInfoBody"><p class="legend">Tap any pin on the map — its ⭐ must-try, 🏛️ history, and 🧭 Getting there (bus/train board &amp; exit) show here, below the map.</p></div></div>
@@ -563,33 +564,39 @@ function planRoute(fromPin,toPin){
 if(typeof document!=="undefined"&&document.getElementById&&document.getElementById("planBtn")){
  var dl=document.getElementById("pinNames");
  POIS.forEach(function(p){ var o=document.createElement("option"); o.value=p.n; dl.appendChild(o); });
- function plnResolve(txt){
+ var dayPick=document.getElementById("planDayPick");
+ if(dayPick){
+   var dayNames={tue:"Tue Oct 13",wed:"Wed Oct 14 \uD83C\uDF82",thu:"Thu Oct 15",fri:"Fri Oct 16",sat:"Sat Oct 17",all:"Any day — sights, food & more"};
+   ["tue","wed","thu","fri","sat","all"].forEach(function(d){
+     var grp=document.createElement("optgroup"); grp.label=dayNames[d]; grp.children=[];
+     POIS.forEach(function(p){ if(p.day===d){ var o=document.createElement("option"); o.value=p.n; o.textContent=p.n; grp.children.push(o); } });
+     if(grp.children.length) dayPick.appendChild(grp);
+   });
+   dayPick.addEventListener("change",function(){ if(dayPick.value){ document.getElementById("planTo").value=dayPick.value; plnGo(); } });
+ }
+ function plnResolveDest(txt){
    txt=(txt||"").trim();
-   if(!txt||txt.toLowerCase().indexOf("my current location")>=0||txt.toLowerCase().indexOf("my location")>=0){
-     if(typeof myPos!=="undefined"&&myPos) return {n:"📍 Your current location",lat:myPos.lat,lng:myPos.lng};
-     return {err:"No live location yet — tap “Use my location”, or tap the map / drag the 🚶 walker to set where you are. Or type a pin name as the start."};
-   }
+   if(!txt) return {err:"Pick a destination from the day dropdown, or type a place name."};
    var low=txt.toLowerCase(),i;
    for(i=0;i<POIS.length;i++) if(POIS[i].n.toLowerCase()===low) return POIS[i];
    for(i=0;i<POIS.length;i++) if(POIS[i].n.toLowerCase().indexOf(low)>=0) return POIS[i];
-   return {err:"Couldn't find “"+txt+"” — pick a name from the list that pops up as you type."};
+   return {err:"Couldn't find \u201C"+txt+"\u201D — pick a name from the dropdown or the list that pops up as you type."};
  }
  function plnGo(){
    var out=document.getElementById("planOut");
-   var f=plnResolve(document.getElementById("planFrom").value);
-   if(f.err){ out.innerHTML="<p>"+f.err+"</p>"; return; }
-   var t=plnResolve(document.getElementById("planTo").value);
+   if(!(typeof myPos!=="undefined"&&myPos)){ out.innerHTML="<p>No live location yet — tap \u201CUse my location\u201D, or tap the map / drag the \uD83D\uDEB6 walker to set where you are, then try again.</p>"; return; }
+   var f={n:"\uD83D\uDCCD Your current location",lat:myPos.lat,lng:myPos.lng};
+   var t=plnResolveDest(document.getElementById("planTo").value);
    if(t.err){ out.innerHTML="<p>"+t.err+"</p>"; return; }
-   if(f.n===t.n){ out.innerHTML="<p>Same place — no ride needed.</p>"; return; }
    var r=planRoute(f,t);
-   if(!r){ out.innerHTML="<p>No simple bus/train route found between those two — check each pin's 🧭 Getting there card, or a rideshare may be easier for that pair.</p>"; return; }
-   out.innerHTML="<p style='margin:6px 0'><strong>"+f.n+" → "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(s){return "<li>"+s+"</li>";}).join("")+"</ol>";
+   if(!r){ out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+" — check its \uD83E\uDDED Getting there card, or a rideshare may be easier for that pair.</p>"; return; }
+   out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(x){return "<li>"+x+"</li>";}).join("")+"</ol>";
    out.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
  document.getElementById("planBtn").addEventListener("click",plnGo);
- document.getElementById("planSwap").addEventListener("click",function(){ var a=document.getElementById("planFrom"),b=document.getElementById("planTo"),v=a.value; a.value=b.value; b.value=v; });
+ var homeBtn=document.getElementById("planHome");
+ if(homeBtn) homeBtn.addEventListener("click",function(){ document.getElementById("planTo").value=POIS[0].n; plnGo(); });
 }
-/*PLANNER-END*/
 
 </script>
 </body></html>
