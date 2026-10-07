@@ -48,6 +48,8 @@ header p{margin:3px 0;font-size:13.5px;line-height:1.45;opacity:.94}
 .btn.active{background:#111827;color:#fff;border-color:#111827}
 .fchip{border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
 .fchip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+#planHome{background:transparent;box-shadow:none}
+#planHome.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 1px 2px rgba(16,27,38,.06)}
 button,select{touch-action:manipulation}
 .btn:focus-visible,.itgo:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 select,.rad{font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink)}
@@ -115,7 +117,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px}
 <label>Day <select class="planIn" id="planDayPick"><option value="">📅 Pick a day…</option><option value="tue">Tue Oct 13</option><option value="wed">Wed Oct 14 🎂</option><option value="thu">Thu Oct 15</option><option value="fri">Fri Oct 16</option><option value="sat">Sat Oct 17</option><option value="all">Any day</option></select></label>
 <label>Activity <select class="planIn" id="planActPick"><option value="">Pick a day first…</option></select></label>
 <label>Or type a place</label><div class="planPickWrap"><input class="planIn" id="planTo" placeholder="Where to? Type a place…" autocomplete="off"><ul id="planPick"></ul></div>
-<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🗺️ Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
+<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🗺️ Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
 <div id="planOut"></div></div>
 <div class="bar" id="filterBar" style="margin:10px 0 8px"><button class="fchip on" data-f="all">All locations</button><button class="fchip" data-f="food">🍽️ Food</button><button class="fchip" data-f="drinks">🥤 Drinks</button><button class="fchip" data-f="landmark">🏛️ Landmarks</button><button class="fchip" data-f="saved">⭐ Saved</button><button class="fchip" data-f="stop">📍 Stops</button></div>
 <div id="map"></div>
@@ -209,6 +211,8 @@ function showPin(i,scroll){
  if(map) map.panTo([p.lat,p.lng]);
  pinInfo.innerHTML="<p style='margin:2px 0'><button class='btn' id='unselBtn2' style='font-size:13px;padding:6px 11px'>✕ Unselect — show all pins</button></p>"+popHTML(p);
  var b2=document.getElementById("unselBtn2"); if(b2) b2.addEventListener("click",unselectPin);
+ var pt=document.getElementById("planTo"); if(pt) pt.value=p.n;
+ if((typeof myPos!=="undefined"&&myPos)&&(typeof plnRender==="function")) plnRender({n:"📍 Your current location",lat:myPos.lat,lng:myPos.lng},p);
  if(scroll) document.getElementById("pinInfo").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 function unselectPin(){
@@ -539,11 +543,18 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  function plnDrawRoute(coords){
    if(typeof L==="undefined"||typeof map==="undefined"||!map||!coords||coords.length<2) return;
    plnClearRoute();
-   window.__routeLine=L.polyline(coords.map(function(c){ return [c[0],c[1]]; }),{color:"#0b5cad",weight:5,opacity:0.85}).addTo(map);
+   var pts=coords.map(function(c){ return [c[0],c[1]]; });
+   window.__routeLine=L.layerGroup([
+     L.polyline(pts,{color:"#ffffff",weight:9,opacity:0.9}),
+     L.polyline(pts,{color:"#0b5cad",weight:5,opacity:0.95}),
+     L.circleMarker(pts[0],{radius:7,color:"#0b5cad",weight:3,fillColor:"#ffffff",fillOpacity:1}),
+     L.circleMarker(pts[pts.length-1],{radius:7,color:"#ffffff",weight:3,fillColor:"#0b5cad",fillOpacity:1})
+   ]).addTo(map);
    try{ map.fitBounds(window.__routeLine.getBounds().pad(0.18)); }catch(_){ }
  }
  function plnRender(f,t){
    var out=document.getElementById("planOut");
+   var hb=document.getElementById("planHome"); if(hb&&hb.classList) hb.classList.toggle("on",!!(typeof POIS!=="undefined"&&POIS[0]&&t===POIS[0]));
    if(!t.cat&&typeof map!=="undefined"&&map) map.setView([t.lat,t.lng],15);
    var appleAddr=encodeURIComponent(t.n+(t.addr?" "+t.addr:"")+" Chicago IL");
    var r=planRoute(f,t);
@@ -575,7 +586,7 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  var homeBtn=document.getElementById("planHome");
  if(homeBtn) homeBtn.addEventListener("click",function(){ document.getElementById("planTo").value=POIS[0].n; plnGo(); });
  var clearBtn=document.getElementById("planClear");
- if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; if(typeof plnFillActs==="function") plnFillActs(); document.getElementById("planOut").innerHTML=""; if(typeof unselectPin==="function") unselectPin(); });
+ if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; if(typeof plnFillActs==="function") plnFillActs(); document.getElementById("planOut").innerHTML=""; var hb2=document.getElementById("planHome"); if(hb2&&hb2.classList) hb2.classList.remove("on"); if(typeof unselectPin==="function") unselectPin(); });
  var toEl=document.getElementById("planTo"), pickEl=document.getElementById("planPick");
  function hidePick(){ if(pickEl) pickEl.style.display="none"; }
  function renderPick(){
