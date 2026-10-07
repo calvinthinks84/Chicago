@@ -443,6 +443,7 @@ document.querySelectorAll(".itgo").forEach(function(b){ b.addEventListener("clic
 </script>
 <script>
 /*PLANNER-START*/
+/*PLANNER-START*/
 var PLN_NODES={
 "ohare":["O'Hare station (Blue Line)",41.9742,-87.9073],
 "jeffpark":["Jefferson Park (Blue Line)",41.9706,-87.7606],
@@ -622,7 +623,9 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
    plnDrawRoute(r.coords);
    out.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
- function plnGo(){
+ function plnEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function plnWeb(u){ u=String(u||"").split(";")[0].trim(); if(!u) return ""; if(!/^https?:\/\//i.test(u)) u="https://"+u; return u; }
+function plnGo(){
    var out=document.getElementById("planOut");
    if(!(typeof myPos!=="undefined"&&myPos)){ out.innerHTML="<p>No live location yet — tap \u201CCurrent location\u201D, or tap the map / drag the \uD83D\uDEB6 walker to set where you are, then try again.</p>"; return; }
    var f={n:"\uD83D\uDCCD Your current location",lat:myPos.lat,lng:myPos.lng};
@@ -631,12 +634,24 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
    if(t){ var six=POIS.indexOf(t); if(six>=0&&typeof showPin==="function") showPin(six,false); plnRender(f,t); return; }
    if(!txt.trim()){ out.innerHTML="<p>Pick a destination from the day dropdown, or type any business or place name.</p>"; return; }
    out.innerHTML="<p>\uD83D\uDD0E Searching for \u201C"+txt.trim()+"\u201D\u2026</p>";
-   fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&viewbox=-87.95,42.05,-87.50,41.60&q="+encodeURIComponent(txt.trim()+", Chicago, IL"))
+   fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&extratags=1&namedetails=1&countrycodes=us&viewbox=-87.95,42.05,-87.50,41.60&q="+encodeURIComponent(txt.trim()+", Chicago, IL"))
      .then(function(r){ return r.json(); })
      .then(function(j){
        if(!j||!j.length){ out.innerHTML="<p>Couldn\u2019t find \u201C"+txt.trim()+"\u201D in Chicago — check the spelling, or pick from the day dropdown.</p>"; return; }
-       var g={n:j[0].display_name.split(",").slice(0,2).join(","),lat:parseFloat(j[0].lat),lng:parseFloat(j[0].lon)};
+       var r0=j[0], xt=r0.extratags||{};
+       var g={n:(r0.namedetails&&r0.namedetails.name)||r0.display_name.split(",").slice(0,2).join(","),lat:parseFloat(r0.lat),lng:parseFloat(r0.lon)};
+       g.full=r0.display_name;
+       g.tel=xt["contact:phone"]||xt.phone||"";
+       g.web=plnWeb(xt["contact:website"]||xt.website||"");
+       g.hours=xt.opening_hours||"";
+       g.kind=(r0.type||"").replace(/_/g," ");
        plnRender(f,g);
+       var card="<div style='margin-top:8px;border-top:1px solid var(--line);padding-top:8px'><p style='margin:2px 0'><strong>"+plnEsc(g.n)+"</strong>"+(g.kind?" \u00B7 "+plnEsc(g.kind):"")+" <span style='color:var(--mut);font-size:12px'>(live lookup \u2014 not one of your saved pins)</span></p><p style='margin:2px 0'>"+plnEsc(g.full)+"</p>"
+         +(g.tel?"<p style='margin:2px 0'>\uD83D\uDCDE <a href='tel:+1"+g.tel.replace(/[^0-9]/g,"").replace(/^1(?=\d{10}$)/,"")+"'>"+plnEsc(g.tel)+"</a></p>":"")
+         +(g.web?"<p style='margin:2px 0'>\uD83C\uDF10 <a target='_blank' rel='noopener' href='"+plnEsc(g.web)+"'>Website</a></p>":"")
+         +(g.hours?"<p style='margin:2px 0'>\uD83D\uDD50 "+plnEsc(g.hours)+"</p>":"")
+         +"</div>";
+       out.innerHTML+=card;
      })
      .catch(function(){ out.innerHTML="<p>Place search needs an internet connection — try again in a moment, or pick from the day dropdown (works offline).</p>"; });
  }
@@ -684,6 +699,7 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
    window.open(url,"_blank");
  });
 }
+/*PLANNER-END*/
 /*PLANNER-END*/
 </script>
 <script>
