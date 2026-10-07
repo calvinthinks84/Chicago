@@ -88,6 +88,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 <button class="btn" id="tapLocBtn">👆 Tap map to set my location</button>
 <button class="btn" id="simBtn">▶️ Simulate walk</button>
 <button class="btn" id="simNext">⏭ Next stop</button>
+<button class="btn" id="unselBtn" style="display:none">✕ Unselect — show all pins</button>
 <label>Day <select id="daySel"><option value="all">All days</option><option value="tue">Tue 13</option><option value="wed">Wed 14 🎂</option><option value="thu">Thu 15</option><option value="fri">Fri 16</option><option value="sat">Sat 17</option></select></label>
 <label>Show <select id="catSel"><option value="all">Everything</option><option value="stop">Itinerary stops</option><option value="coffee">☕ Coffee</option><option value="boba">🧋 Boba</option><option value="snack">🍩 Snacks</option><option value="dog">🌭 Chicago dogs</option><option value="food">🍽️ Food</option><option value="landmark">🏛️ Landmarks</option></select></label>
 <label>Pop-up radius <select id="radSel"><option value="200">660 ft</option><option value="350" selected>1,150 ft</option><option value="600">1,970 ft</option></select></label>
@@ -240,6 +241,7 @@ var COLORS={stop:"#0b5cad",coffee:"#6f4e37",boba:"#e84393",snack:"#e67e22",dog:"
 var statusEl=document.getElementById("status"), pinInfo=document.getElementById("pinInfoBody"), nearList=document.getElementById("nearList");
 var map=null, markers={}, walker=null, radius=+document.getElementById("radSel").value;
 var myPos=null, alerted={}, simTimer=null, simSeg=0, simT=0;
+var selectedIdx=-1;
 var gpsWatchId=null, tapMode=false, gpsHasFix=false;
 
 function gmaps(p){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(p.n+" "+p.addr+" Chicago IL");}
@@ -260,9 +262,20 @@ function popHTML(p){
 }
 function showPin(i,scroll){
  var p=POIS[i]; if(!p||!pinInfo) return;
- pinInfo.innerHTML=popHTML(p);
+ selectedIdx=i; refreshMarkers();
+ var ub=document.getElementById("unselBtn"); if(ub) ub.style.display="";
+ if(map) map.panTo([p.lat,p.lng]);
+ pinInfo.innerHTML="<p style='margin:2px 0'><button class='btn' id='unselBtn2' style='font-size:13px;padding:6px 11px'>✕ Unselect — show all pins</button></p>"+popHTML(p);
+ var b2=document.getElementById("unselBtn2"); if(b2) b2.addEventListener("click",unselectPin);
  if(scroll) document.getElementById("pinInfo").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
+function unselectPin(){
+ selectedIdx=-1; refreshMarkers();
+ var ub=document.getElementById("unselBtn"); if(ub) ub.style.display="none";
+ if(pinInfo) pinInfo.innerHTML="<p class='legend'>All pins are back on the map. Tap any pin — its ⭐ must-try, 🏛️ notes, and 🧭 Getting there show here.</p>";
+ if(statusEl) statusEl.textContent="Selection cleared — showing all pins.";
+}
+var _ub=document.getElementById("unselBtn"); if(_ub) _ub.addEventListener("click",unselectPin);
 function showToast(p,d){
  if(!pinInfo) return;
  pinInfo.innerHTML="<p style='margin:2px 0'><strong>\uD83D\uDCE3 You're near — "+fmtD(d)+" away:</strong></p>"+popHTML(p);
@@ -274,7 +287,7 @@ function visible(p){
 function refreshMarkers(){
  if(!map)return;
  POIS.forEach(function(p,i){
-   var show=visible(p);
+   var show=(selectedIdx>=0)?(i===selectedIdx):visible(p);
    if(show&&!markers[i]){
      var ic=L.divIcon({className:"",html:"<div style='background:"+COLORS[p.cat]+";color:#fff;border-radius:50%;width:30px;height:30px;line-height:30px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)'>"+(ICONS[p.cat]||"📍")+"</div>",iconSize:[30,30],iconAnchor:[15,15]});
      markers[i]=L.marker([p.lat,p.lng],{icon:ic}).addTo(map).on("click",function(){ showPin(i,true); });
