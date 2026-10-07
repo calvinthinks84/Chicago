@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Chicago Map">
+<meta name="theme-color" content="#0b5cad">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" href="data:image/png;base64,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" type="image/png">
+<link rel="manifest" href="data:application/octet-stream;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBiNWNhZCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiaWNvbnMiOlt7InNpemVzIjoiMTkyeDE5MiIsInNyYyI6Imljb24tMTkyLnBuZyIsInR5cGUiOiJpbWFnZS9wbmcifSx7InNpemVzIjoiNTEyeDUxMiIsInNyYyI6Imljb24tNTEyLnBuZyIsInR5cGUiOiJpbWFnZS9wbmcifV0sIm5hbWUiOiJDaGljYWdvIFRyaXAgTWFwIiwic2hvcnRfbmFtZSI6IkNoaWNhZ28gTWFwIiwic3RhcnRfdXJsIjoiLi4vaW5kZXguaHRtbCIsInRoZW1lX2NvbG9yIjoiIzBiNWNhZCJ9">
+<title>Chicago Trip Map — Walk-Near Pop-ups · Oct 13–17, 2026</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{
+  --bg:#fff8f0; --ink:#222; --muted:#666; --panel:#fff; --line:#f0e6da;
+  --btn-bg:#fff; --btn-line:#bbb; --chip-bg:#eef4ff; --chip-line:#cfe0f7;
+  --tag-bg:#f3f3f3; --tag-ink:#555; --toast-bg:#fff8e1; --warn-bg:#fff3e0;
+  --link:#0b5cad; --accent:#0b5cad;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#16181d; --ink:#ece9e2; --muted:#a9a49a; --panel:#22252c; --line:#33363f;
+    --btn-bg:#262a33; --btn-line:#484e5c; --chip-bg:#1d2a44; --chip-line:#33466b;
+    --tag-bg:#2e333e; --tag-ink:#c9c4b8; --toast-bg:#3a3319; --warn-bg:#3d2f1a;
+    --link:#7db8f0; --accent:#4a9be0;
+  }
+  .leaflet-popup-content-wrapper{background:#22252c;color:#ece9e2}
+  .leaflet-popup-tip{background:#22252c}
+  .leaflet-bar a{background:#262a33;color:#ece9e2;border-color:#484e5c}
+}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(135deg,#0b5cad,#2a9d8f);color:#fff;padding:14px 16px}
+header h1{margin:0 0 4px;font-size:21px}header p{margin:3px 0;font-size:13.5px;opacity:.96}
+.wrap{max-width:1000px;margin:0 auto;padding:10px}
+#map{height:62dvh;min-height:340px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.15);z-index:1}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.btn{border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);border-radius:999px;padding:8px 13px;cursor:pointer;font-size:14px;font-weight:600}
+.btn.go{background:#0b5cad;color:#fff;border-color:#0b5cad}
+.btn.warn{background:var(--warn-bg)}
+select,.rad{font-size:14px;padding:7px;border-radius:8px;border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink)}
+.chip{display:inline-block;background:var(--chip-bg);border:1px solid var(--chip-line);border-radius:999px;padding:3px 9px;font-size:12.5px;margin:2px 2px 2px 0}
+header .chip{background:rgba(255,255,255,.92);border-color:rgba(255,255,255,.6);color:#14406b;font-weight:600}
+.panel{background:var(--panel);border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:12px 14px;margin:10px 0}
+.panel h2{margin:0 0 8px;font-size:16px}
+.poi{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.poi:last-child{border-bottom:0}.poi .d{color:var(--muted);white-space:nowrap}
+.tag{font-size:11.5px;background:var(--tag-bg);border-radius:6px;padding:1px 6px;color:var(--tag-ink)}
+#toast{display:none;background:var(--toast-bg);border:2px solid #f0b429;border-radius:12px;padding:12px 14px;margin:10px 0;font-size:14.5px}
+#toast h3{margin:0 0 4px;font-size:16px}
+.pop h3{margin:0 0 3px;font-size:15px}.pop p{margin:3px 0;font-size:13px}
+.pop a{font-weight:700;color:var(--link)}
+#toast a{color:var(--link)}
+#status{font-size:13px;color:var(--muted)}
+.legend{font-size:13px;color:var(--ink)}
+html{-webkit-text-size-adjust:100%}
+body{padding-bottom:env(safe-area-inset-bottom);overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent}
+header{padding-top:calc(14px + env(safe-area-inset-top))}
+button,select{touch-action:manipulation}
+#installTip{display:none;background:var(--chip-bg);border:1.5px solid var(--accent);border-radius:12px;padding:10px 14px;margin:10px 0;font-size:14px}
+#gpsHelp{display:none;background:var(--warn-bg);border:1.5px solid #e6a817;border-radius:12px;padding:12px 14px;margin:10px 0;font-size:14px;line-height:1.5}
+#gpsHelp h3{margin:0 0 6px;font-size:15px}
+#gpsHelp ol{margin:6px 0 6px 18px;padding:0}
+#gpsHelp li{margin:4px 0}
+.btn.active{background:#111;color:#fff;border-color:#111}
+.ctaGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+@media(max-width:560px){.ctaGrid{grid-template-columns:1fr}}
+.ctaLink{display:flex;align-items:center;gap:8px;min-height:48px;padding:10px 12px;border:1.5px solid var(--chip-line);background:var(--chip-bg);border-radius:10px;color:var(--ink);text-decoration:none;font-size:14px;font-weight:600;line-height:1.3}
+.ctaLink small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+.ctaLink:active{opacity:.75}
+.ctaLive{display:inline-block;background:#c0392b;color:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;letter-spacing:.4px;vertical-align:2px}
+.pop .ctaPin a{font-weight:700}
+footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
+@media print{#map,.bar{display:none}}
+</style></head><body>
+<header><div class="wrap"><h1>🗺️ Chicago Trip Map — Walk-Near Pop-ups</h1>
+<p><strong>Tue Oct 13 – Sat Oct 17, 2026</strong> · Base: Fairfield Inn, 60 W Illinois St · Walk near a pin and its recommendation pops up.</p>
+<p>Trip criteria baked into every suggestion: <span class="chip">👶 toddler-friendly</span> <span class="chip">🚶 easy walking</span> <span class="chip">🚇 CTA, no car</span> <span class="chip">⚡ fast / no long lines</span> <span class="chip">🔊 loud &amp; spacious OK</span> <span class="chip">🕐 early or lunch</span> <span class="chip">🧋 boba = adults only (pearls are a choking risk under 4)</span></p></div></header>
+<div class="wrap">
+<div id="installTip">📲 <strong>Make this an app:</strong> in Safari tap the <strong>Share</strong> button, then <strong>Add to Home Screen</strong>. It gets its own “Chicago Map” icon and opens full-screen — then allow location for the walk-near pop-ups.</div>
+<div class="bar">
+<button class="btn go" id="gpsBtn">📍 Use my location (live GPS)</button>
+<button class="btn" id="tapLocBtn">👆 Tap map to set my location</button>
+<button class="btn" id="simBtn">▶️ Simulate walk</button>
+<button class="btn" id="simNext">⏭ Next stop</button>
+<label>Day <select id="daySel"><option value="all">All days</option><option value="tue">Tue 13</option><option value="wed">Wed 14 🎂</option><option value="thu">Thu 15</option><option value="fri">Fri 16</option><option value="sat">Sat 17</option></select></label>
+<label>Show <select id="catSel"><option value="all">Everything</option><option value="stop">Itinerary stops</option><option value="coffee">☕ Coffee</option><option value="boba">🧋 Boba</option><option value="snack">🍩 Snacks</option><option value="dog">🌭 Chicago dogs</option><option value="food">🍽️ Food</option><option value="landmark">🏛️ Landmarks</option></select></label>
+<label>Pop-up radius <select id="radSel"><option value="200">660 ft</option><option value="350" selected>1,150 ft</option><option value="600">1,970 ft</option></select></label>
+</div>
+<p id="status">Map is centered on your hotel. Tap <strong>Simulate walk</strong> to preview how pop-ups fire as you move through the route, or use live GPS once you're in Chicago.</p>
+<div id="gpsHelp">
+<h3>📍 GPS is blocked in this view — here's how to get live location working</h3>
+<p style="margin:4px 0">The message <em>“Origin does not have permission to use Geolocation service”</em> means the preview frame around this page is blocking GPS — it's not your phone's GPS failing. Live GPS works when the page is opened <strong>directly in Safari or from your Home Screen icon</strong>, not inside the in-app preview.</p>
+<ol>
+<li><strong>Best fix:</strong> Open this app from your <strong>Home Screen “Chicago Map” icon</strong> (or open its link directly in Safari). Tap <strong>Use my location</strong> there and choose <strong>Allow While Using App</strong>.</li>
+<li><strong>Check iPhone settings:</strong> Settings → Privacy &amp; Security → Location Services → <strong>On</strong>, then Safari Websites → <strong>While Using the App</strong> and turn <strong>Precise Location</strong> on.</li>
+<li><strong>In Safari:</strong> tap <strong>aA</strong> in the address bar → Website Settings → Location → <strong>Allow</strong>, then reload and tap Use my location again.</li>
+<li><strong>Right now, without GPS:</strong> tap <strong>👆 Tap map to set my location</strong> above, then tap anywhere on the map — or drag the 🚶 walker — to trigger the same walk-near pop-ups. Simulate walk works too.</li>
+</ol>
+<p style="margin:4px 0"><button class="btn" id="gpsRetryBtn" style="font-size:13px;padding:6px 11px">↻ Try GPS again</button> <button class="btn" id="gpsHelpClose" style="font-size:13px;padding:6px 11px">Dismiss</button></p>
+</div>
+<div id="map"></div>
+<div id="toast"></div>
+<div class="panel" id="ctaPanel"><h2>🚇 Live CTA times — trains &amp; buses <span class="ctaLive">LIVE</span></h2>
+<p style="margin:4px 0 2px">Real-time arrivals live on CTA's own trackers — CTA doesn't offer a key-free feed this page can embed, so for trains each button below is a <strong>one-tap link straight to the official live page for that exact station</strong>, and bus buttons open Bus Tracker at route selection. Tap a train button and you see the same live countdowns as the station signs; for a bus, pick the route, then your direction and stop.</p>
+<h3 style="margin:12px 0 4px;font-size:14.5px">🚆 Trains — live Train Tracker arrivals by station</h3>
+<div class="ctaGrid">
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.transitchicago.com/station/grbl/">🔵 Grand — Blue Line<small>Your hotel station · O'Hare ↔ downtown · Text CTATRAIN GRBL to 41411</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://lapi.transitchicago.com/station/ord/">✈️ O'Hare — Blue Line<small>Airport trains to the city · ~45 min to Grand · Text CTATRAIN ORD to 41411</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://lapi.transitchicago.com/station/grre/">🔴 Grand — Red Line<small>Hotel / Navy Pier side · Howard ↔ 95th · Text CTATRAIN GRRE to 41411</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.transitchicago.com/station/mart/">🟤 Merchandise Mart — Brown / Purple<small>A few blocks west of the hotel · Text CTATRAIN MART to 41411</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="http://www.transitchicago.com/station/armi/">🟤 Armitage — Brown / Purple<small>Thu zoo day station · Text CTATRAIN ARMI to 41411</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.transitchicago.com/station/clkl/">🔵 Clark/Lake — Loop<small>Blue + Loop elevated lines, the big transfer · Text CTATRAIN CLKL to 41411</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.transitchicago.com/station/monb/">🔵 Monroe — Blue Line<small>Millennium Park / Loop · Text CTATRAIN MONB to 41411</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.transitchicago.com/station/monr/">🔴 Monroe — Red Line<small>Millennium Park / Loop · Text CTATRAIN MONR to 41411</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.transitchicago.com/station/chib/">🔵 Chicago — Blue Line<small>Milwaukee Ave, West Loop side · Text CTATRAIN CHIB to 41411</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.transitchicago.com/traintracker/maphelp/">🗺️ Train Tracker map<small>See live trains moving across the whole 'L' system</small></a>
+</div>
+<p style="margin:6px 0 2px;font-size:13.5px;color:var(--muted)">Also near the hotel: <strong>Chicago — Red Line</strong> (800 N State St) — text <strong>CTATRAIN CHIR</strong> to <strong>41411</strong> for live arrivals, or use Grand — Red Line above, one stop south.</p>
+<h3 style="margin:12px 0 4px;font-size:14.5px">🚌 Buses — live Bus Tracker arrivals by route</h3>
+<div class="ctaGrid">
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.ctabustracker.com/bustime/wireless/html/home.jsp">🚌 #22 Clark<small>Clark St — hotel ↔ Lincoln Park Zoo corridor · open Bus Tracker, pick route 22</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.ctabustracker.com/bustime/wireless/html/home.jsp">🚌 #36 Broadway<small>Broadway — Lincoln Park / zoo backup · pick route 36</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.ctabustracker.com/bustime/wireless/html/home.jsp">🚌 #151 Sheridan<small>Sheridan — zoo &amp; lakefront ↔ downtown · pick route 151</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="http://ctabustracker.com/bustime/wireless/html/eta.jsp?route=151&direction=Southbound&displaydirection=Southbound&stop=Sheridan%20%26%20Balmoral&id=1040&showAllBusses=on">⏱️ #151 live ETA example<small>Sheridan &amp; Balmoral, southbound — a real live Bus Tracker ETA page · Text CTABUS 1040 to 41411</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.ctabustracker.com/bustime/wireless/html/home.jsp">🚌 #146 Inner Lake Shore / Michigan<small>Michigan Ave &amp; lakefront ↔ Museum Campus (Field / Shedd / Adler) · pick route 146 — for Navy Pier itself use #124</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.ctabustracker.com/bustime/wireless/html/home.jsp">🚌 #124 Navy Pier<small>Direct to Navy Pier from the Loop / Union Station side · pick route 124</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.ctabustracker.com/bustime/wireless/html/home.jsp">🚌 #66 Chicago Ave<small>Chicago Ave crosstown — river tour / West Loop side · pick route 66</small></a>
+<a class="ctaLink" target="_blank" rel="noopener" href="https://www.ctabustracker.com/bustime/wireless/html/whatis.jsp">ℹ️ What is Bus Tracker?<small>How CTA's live bus ETAs work — GPS-based estimates</small></a>
+</div>
+<p style="margin:6px 0 2px;font-size:13.5px;color:var(--muted)">No data for a text? Every CTA bus stop sign shows a stop number — text <strong>CTABUS</strong> + that number to <strong>41411</strong> for live arrivals at that stop. Times on the CTA pages refresh live; if a page looks stale, reload it.</p>
+</div>
+<div class="panel"><h2>🏛️ Chicago history &amp; architecture — the 2-minute version</h2>
+<p><strong>The Fire and the rebuild (1871):</strong> The Great Chicago Fire destroyed downtown, and the city rebuilt in brick, stone, and steel — which is why so many neighborhoods on this trip (River North, Lincoln Park, the Gold Coast) date from the 1870s–90s.</p>
+<p><strong>The skyscraper was born here:</strong> Chicago builders pioneered the steel-frame Chicago School tower in the 1880s–90s, then the neo-Gothic Tribune Tower (1925) and the Art Deco Merchandise Mart (1930), then modern glass — the river tour on Wed is the best seat for all three eras at once.</p>
+<p><strong>The river runs backwards:</strong> In 1900 engineers reversed the Chicago River to protect Lake Michigan's drinking water — still one of the great civil-engineering feats, and the reason your tour boat passes under a parade of landmark movable bridges.</p>
+<p style="margin-bottom:2px"><strong>On every pin:</strong> tap any pin — or walk near one — and its card now includes a 🏛️ <strong>History</strong> note and a 🏗️ <strong>Architecture</strong> note for that exact place, alongside its ⭐ Must-try / Must-see. 🏛️ <strong>Landmark pins</strong> (gold, filterable under Show → Landmarks) pop up the same way when you're near one.</p></div>
+<div class="panel"><h2>📍 Nearest to you / the walker</h2><div id="nearList"><p class="legend">Start GPS or the simulated walk and this list sorts itself by distance.</p></div></div>
+<div class="panel legend"><h2>How it works on the trip</h2>
+<p>1) For live GPS, open this app from your <strong>Home Screen icon or directly in Safari</strong> (the in-app preview blocks GPS), tap <strong>Use my location</strong>, and allow location access. 2) As you walk within the pop-up radius of a pin, its recommendation card pops up on the map and in the amber box — with its ⭐ must-try, 🏛️ history and 🏗️ architecture notes, why it fits your criteria, its rating where checked, and a Directions link. 3) A pin won't re-pop until you've walked away and come back. <strong>No GPS?</strong> Tap <strong>Tap map to set my location</strong> and tap the map, or drag the 🚶 walker — the same pop-ups fire. Pins are placed from street addresses; a few are approximate to the block. Map tiles and GPS need internet + location permission. <strong>Live bus &amp; train times:</strong> use the 🚇 <strong>Live CTA times</strong> panel — every button opens CTA's official real-time Train Tracker / Bus Tracker page for the station or route by that part of the trip, and the hotel, airport, zoo, Navy Pier, and Millennium Park pins carry the same live links in their pop-ups.</p></div>
+</div>
+<footer>Built from your Chicago Toddler Trip Pack — Oct 13–17, 2026. Nothing here was booked by Forky.</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+"use strict";
+/* ---------- Data: itinerary stops + suggestions. fits = why it matches the trip criteria ---------- */
+var POIS=[
+/* Itinerary stops */
+{n:"Fairfield Inn — your hotel (base)",must:"A first-morning coffee run — Blue Bottle Wolf Point is a 10-min walk, Xoco is steps away on Illinois St",lat:41.8908,lng:-87.6296,cat:"stop",day:"all",addr:"60 W Illinois St",note:"Base for every day. Blue Line Grand, Red Line Chicago, Brown/Purple Merchandise Mart all within a few blocks.",fits:"CTA in every direction · stroller-friendly streets"},
+{n:"✈️ O'Hare (ORD)",must:"The Blue Line train straight from the ORD station — no traffic gamble with a toddler",lat:41.9742,lng:-87.9073,cat:"stop",day:"tue",addr:"10000 W Balmoral Ave",note:"Arrive Tue ~5:45pm CT · depart Sat 2:30pm. Blue Line to Grand ~45 min, no traffic risk with a toddler.",fits:"Direct CTA to hotel"},
+{n:"Al's #1 Italian Beef + Chicago Dog",must:"Italian beef dipped with sweet peppers + hot giardiniera — and a Chicago dog with the works, no ketchup",lat:41.8919,lng:-87.6328,cat:"dog",day:"tue",addr:"548 N Wells St",note:"Tue arrival dinner. Beef dipped with sweet peppers, hot giardiniera for adults, fries for the toddler. Chicago dog pick #1 — same menu.",fits:"Walk-in · fast · open Tue til midnight · short walk from hotel"},
+{n:"Millennium Park — The Bean",must:"The Bean (Cloud Gate) photo + the Crown Fountain faces — splash fun if it's warm",lat:41.8826,lng:-87.6233,cat:"stop",day:"wed",addr:"201 E Randolph St",note:"Wed morning first, while it's quiet for photos.",fits:"Easy walking · one Red Line stop or ~15 min walk"},
+{n:"Maggie Daley Park — Play Garden",must:"The Play Garden's tot lot and Enchanted Forest — sized for under-3s",lat:41.8825,lng:-87.6188,cat:"stop",day:"wed",addr:"337 E Randolph St",note:"Enclosed, tot-sized climbing and slides — best under-3 playground downtown. Also a Sat-morning energy burn option.",fits:"Enclosed play · toddler-sized"},
+{n:"Molly's Cupcakes — River East 🎂",must:"Crème Brûlée and Peach Cobbler center-filled cupcakes",lat:41.8915,lng:-87.6178,cat:"snack",day:"wed",addr:"419 E Illinois St",note:"Birthday cupcakes, moved up to Wed ~10am. Center-filled; Crème Brûlée and Peach Cobbler are signature, ~$4.55. Eat one, box the rest, then walk to the dock.",fits:"Walk-in · opens 9am Wed · on the way to the tour"},
+{n:"Chicago River Architecture Tour",must:"Top-deck seats for the Marina City 'corn cob' towers and Merchandise Mart stretch",lat:41.8883,lng:-87.6240,cat:"stop",day:"wed",addr:"Dock at Michigan Ave & Wacker Dr",note:"Wed 11:45am, your booking, 90 min. Sit near the back / open top deck, snack cup + small toy, extra layer for river wind.",fits:"Booked · toddler can move on deck"},
+{n:"Devil Dawgs — Gold Coast",must:"Classic Chicago dog with the works + fresh-cut fries",lat:41.8970,lng:-87.6258,cat:"dog",day:"wed",addr:"804 N Rush St",note:"Chicago dog pick #2 — Wed after the river tour, before nap. Classic Chicago dog, no ketchup, plus fresh-cut fries.",fits:"Counter service · fast · outdoor seating · open Wed 10am–10pm"},
+{n:"Pizz'Amici — birthday dinner 🎂",must:"The tavern-style pie — ultra-thin crust, cut in squares",lat:41.8908,lng:-87.6572,cat:"food",day:"wed",addr:"1215 W Grand Ave",note:"Wed birthday dinner — your confirmed reservation. Ultra-thin tavern-style, square-cut.",fits:"Reserved · loud family room energy"},
+{n:"Lincoln Park Zoo",must:"The Lionel train ride, the carousel, and the Children's Zoo",lat:41.9211,lng:-87.6437,cat:"stop",day:"thu",addr:"2001 N Clark St",note:"Thu 10am, free. Brown/Purple to Armitage + short bus/walk. Lionel train + carousel are toddler speed. Fall Fest runs Fri–Sun if you return.",fits:"Free · go at opening · stroller easy"},
+{n:"Peggy Notebaert Nature Museum",must:"The Butterfly Haven — 1,000+ free-flying butterflies in one room",lat:41.9265,lng:-87.6350,cat:"stop",day:"thu",addr:"2430 N Cannon Dr",note:"Thu bonus, 5 min from the zoo. Butterfly Haven: 1,000+ free-flying butterflies in one warm room. Open 10am–4pm.",fits:"One big wow, then done · warm indoor break"},
+{n:"The Wieners Circle — Lincoln Park",must:"Char dog with the works on a poppy seed bun",lat:41.9300,lng:-87.6445,cat:"dog",day:"thu",addr:"2622 N Clark St",note:"Chicago dog pick #3 (main pick) — Thu lunch after the zoo. Char dog with the works on a poppy seed bun, no ketchup. Go daytime, not late-night.",fits:"Fast counter · opens 11am Thu · short walk from zoo"},
+{n:"Lou Malnati's — River North",must:"Classic sausage deep dish (or 'The Lou') + the Malnati salad while you wait",lat:41.8900,lng:-87.6328,cat:"food",day:"thu",addr:"439 N Wells St",note:"Thu early dinner 5pm. Deep dish takes ~45 min — order a thin-crust appetizer or salad the moment you sit down.",fits:"Early seating · loud · short walk from hotel"},
+{n:"Rainbow Cone at Gino's East",must:"The Original Rainbow Cone — the 5-layer sliced stack",lat:41.8954,lng:-87.6238,cat:"snack",day:"thu",addr:"162 E Superior St",note:"Thu after dinner (also at Navy Pier Fri). Original Rainbow Cone counter inside Gino's East — skip the far-south original.",fits:"Counter service · on the walk back to the hotel"},
+{n:"Chicago Children's Museum — Navy Pier",must:"Pritzker Playspace (toddlers-only morning hours) + the Tinkering Lab",lat:41.8917,lng:-87.5996,cat:"stop",day:"fri",addr:"700 E Grand Ave",note:"Fri 10am–5pm (its long day). Aim for the 10am Pritzker Playspace, toddlers only in the morning.",fits:"Toddler-only playspace · indoor day"},
+{n:"Butterfly House — Navy Pier",must:"Walking through the free-flying butterflies — the one big room",lat:41.8913,lng:-87.6067,cat:"stop",day:"fri",addr:"600 E Grand Ave",note:"Fri, same pier, 10am–6pm. Free-flying butterflies + hands-on bugs. Pack listed ~$48.50 for 2 adults + 1 child.",fits:"Small and contained · toddler-paced"},
+{n:"Beatrix — River North",must:"Mini burgers / grilled cheese for him + something from the pastry case",lat:41.8916,lng:-87.6306,cat:"food",day:"fri",addr:"519 N Clark St",note:"Fri early-dinner option (or Eataly graze). Loud, fast, mini burgers and grilled cheese for him.",fits:"Walk-in · loud · fast · blocks from hotel"},
+{n:"Eataly Chicago",must:"Pistachio gelato + a fresh-pasta counter plate",lat:41.8926,lng:-87.6260,cat:"food",day:"fri",addr:"43 E Ohio St",note:"Fri early-dinner graze option + gelato snack stop any afternoon. Counters mean no waiting on one kitchen.",fits:"Graze format · stroller room · fast"},
+/* Coffee suggestions */
+{n:"Intelligentsia Coffee — Millennium Park",must:"The single-origin pour-over of the day",lat:41.8843,lng:-87.6258,cat:"coffee",day:"wed",addr:"53 E Randolph St",rate:"★4.6 (288 reviews)",note:"Specialty pour-over right at Millennium Park — the Wed-morning coffee. Opens 6:30am.",fits:"Pour-over · early open · on your Wed route"},
+{n:"Blue Bottle Coffee — Wolf Point",must:"New Orleans-style iced coffee",lat:41.8878,lng:-87.6364,cat:"coffee",day:"all",addr:"313 W Wolf Point Plaza",rate:"★4.3 (934 reviews)",note:"Pour-over with river views, ~10 min walk from the hotel. Good any-day morning coffee.",fits:"Pour-over · spacious · near hotel"},
+{n:"Sawada Coffee",must:"The Military Latte (matcha + espresso) — and the pour-over of the day",lat:41.8837,lng:-87.6487,cat:"coffee",day:"wed",addr:"112 N Green St",rate:"★4.9 (113 reviews)",note:"West Loop pour-over + famous Military Latte. 8am–4pm — go before the Pizz'Amici dinner, not after.",fits:"Pour-over · daytime hours · near birthday dinner"},
+{n:"Metric Coffee — roastery",must:"Single-origin pour-over — Ethiopia Worka Chelbessa when it's on",lat:41.8865,lng:-87.6784,cat:"coffee",day:"fri",addr:"2021 W Fulton St",rate:"★4.6 (506 reviews)",note:"Working roastery, single-origin pour-overs. A destination stop — fits a Fri afternoon detour west. 7am–4pm.",fits:"Single-origin pour-over · roastery experience"},
+{n:"Colectivo Coffee — Lincoln Park",must:"A patio seat + cold brew",lat:41.9287,lng:-87.6425,cat:"coffee",day:"thu",addr:"2530 N Clark St",rate:"★4.6 (1,200+ reviews)",note:"Thu zoo-day coffee. Big patio, same block as the Uni Uni boba pick.",fits:"Big patio · stroller room · on Clark by the zoo"},
+{n:"Stan's Donuts & Coffee — Rush St",must:"Old-fashioned donut + apple fritter; a plain glazed cut up for the toddler",lat:41.8964,lng:-87.6257,cat:"snack",day:"all",addr:"750 N Rush St",note:"Morning snack + coffee, 6am–8pm daily. Old-fashioneds for you, plain glazed cut up for him — works even on departure Sat.",fits:"Early open · fast counter · toddler-shareable donut"},
+{n:"Starbucks Reserve Roastery",must:"Barrel-aged cold brew + a Princi cornetto",lat:41.8940,lng:-87.6246,cat:"coffee",day:"fri",addr:"646 N Michigan Ave",rate:"★4.5 (thousands of reviews)",note:"5-story Mag Mile roastery — a sight as much as a coffee. ~10 min from Navy Pier. Expect lines, so not a nap-window stop.",fits:"Spectacle stop · go when you have slack"},
+/* Boba suggestions — adults only */
+{n:"Te'Amo Boba Bar — North Bridge",must:"Brown sugar milk tea + mochi donuts",lat:41.8916,lng:-87.6248,cat:"boba",day:"all",addr:"520 N Michigan Ave",rate:"★4.7 (DoorDash)",note:"Organic milk teas + mochi donuts in The Shops at North Bridge. The default boba near the hotel / Mag Mile.",fits:"Adults' treat · near hotel"},
+{n:"TE'AMO Boba & Desserts — Millennium Park",must:"Signature brown sugar boba milk",lat:41.8810,lng:-87.6247,cat:"boba",day:"wed",addr:"36 S Michigan Ave",note:"Across from Millennium Park — Wed boba, but it opens 11am, so it's a post-tour pick.",fits:"Adults' treat · on Wed route after 11am"},
+{n:"Te'Amo Boba Bar — Navy Pier",must:"Brown sugar milk tea without leaving the pier",lat:41.8913,lng:-87.6067,cat:"boba",day:"fri",addr:"600 E Grand Ave",note:"On Navy Pier itself — Fri boba without leaving the pier. Open Fri til 11pm.",fits:"Adults' treat · zero detour on Fri"},
+{n:"Uni Uni Bubble Tea — Lincoln Park",must:"Brown sugar milk tea (their signature)",lat:41.9285,lng:-87.6440,cat:"boba",day:"thu",addr:"2550 N Clark St",rate:"★4.8 (440+ ratings)",note:"Thu zoo-day boba — brown sugar milk tea + fruit teas, same block as Colectivo coffee. Opens 11am.",fits:"Adults' treat · highest-rated boba on the route"},
+{n:"Kung Fu Tea — Wicker Park",must:"Kung Fu milk tea with boba",lat:41.9035,lng:-87.6685,cat:"boba",day:"wed",addr:"1624 W Division St",rate:"★4.3 (74 reviews)",note:"Nearest boba to Pizz'Amici for the birthday evening — ~20 min walk / short ride west.",fits:"Adults' treat · near birthday dinner"},
+/* Snack suggestions */
+{n:"Xoco — churros & Mexican hot chocolate",must:"Hot churros + frothy Mexican hot chocolate",lat:41.8908,lng:-87.6306,cat:"snack",day:"all",addr:"67 W Illinois St",note:"Post-nap snack literally steps from the hotel. Hot-from-the-fryer churros + frothy Mexican hot chocolate. Tue–Fri 11am–9pm, Sat 10:30am–9pm.",fits:"Zero-effort distance · counter service"},
+{n:"Wow Bao — Water Tower Place",must:"BBQ pork bao + coconut custard bao",lat:41.8980,lng:-87.6237,cat:"snack",day:"all",addr:"835 N Michigan Ave",note:"Steamed bao — soft enough to tear up for a 2-year-old. BBQ pork / teriyaki for you, coconut custard bao for sweet. Wed/Thu 11am–7pm, Fri til 8pm.",fits:"Soft toddler snack · fast kiosk"},
+{n:"Floriole Cafe & Bakery",must:"Kouign amann + a croissant",lat:41.9218,lng:-87.6592,cat:"snack",day:"thu",addr:"1220 W Webster Ave",note:"Thu zoo-morning pastry stop — croissant / kouign amann on the way in. Closes 2pm, so morning only.",fits:"Bakery counter · grab-and-go"},
+{n:"Chicago's Dog House (backup dog)",must:"Chicago-style dog + one of the creative sausages",lat:41.9255,lng:-87.6496,cat:"dog",day:"thu",addr:"816 W Fullerton Ave",note:"Thu backup if Wieners Circle doesn't work — classic Chicago-style dog plus creative sausages. Thu 11am–9pm.",fits:"Fast counter · Lincoln Park"},
+/* Highly recommended eateries (ratings checked Oct 6, 2026) */
+{n:"Pequod's Pizza — Lincoln Park",must:"Pan pizza with the caramelized cheese crust — sausage",lat:41.9219,lng:-87.6643,cat:"food",day:"thu",addr:"2207 N Clybourn Ave",rate:"★4.6 (3,800+ reviews)",note:"Famous caramelized-cheese-crust pan pizza, often rated Chicago's #1 deep dish. Thu zoo-day lunch or early dinner — go off-peak or order ahead, peak waits are long and the pan pizza bakes 40–50 min.",fits:"Loud sports-bar buzz · worth it at lunch/early · west of the zoo"},
+{n:"Little Goat Diner — Southport",must:"Bull's Eye French toast with fried chicken + the Cheez-It sundae",lat:41.9423,lng:-87.6636,cat:"food",day:"all",addr:"3325 N Southport Ave",rate:"★4.5 (2,500+ reviews) · 4.7 OpenTable",note:"Stephanie Izard's diner — all-day breakfast, Bull's Eye French toast + fried chicken, listed good for kids with outdoor seating. Kids eat free Tuesdays 4–7pm (tight on arrival day, but noted). Brown Line to Southport — a planned detour, not a walk-by.",fits:"Built for kids · all-day menu 8am–9pm · CTA Brown Line"},
+{n:"Summer House Santa Monica — Lincoln Park",must:"Parmesan truffle fries + a giant cookie from the bakery counter",lat:41.9176,lng:-87.6486,cat:"food",day:"thu",addr:"1954 N Halsted St",rate:"★4.7 (7,800+ Google reviews)",note:"Bright, loud, crowded California spot minutes from the zoo — Thu lunch or early dinner. Truffle fries and the famous bakery cookies; has a children's menu.",fits:"Loud & spacious · kids' menu · near the zoo"},
+{n:"Ema — River North",must:"Lamb ragu hummus with warm bread + sticky date cake",lat:41.8909,lng:-87.6309,cat:"food",day:"all",addr:"74 W Illinois St",rate:"★4.6 (5,100+ OpenTable reviews)",note:"Mediterranean small plates practically next door to your hotel — same street. Hummus spreads and warm bread for sharing with the toddler; go lunch (11am–4pm) or early.",fits:"Steps from hotel · shareable plates · lively room"},
+{n:"The Purple Pig — Mag Mile",must:"Crispy pig's ears + milk-braised pork shoulder (bone marrow if you're sharing)",lat:41.8908,lng:-87.6247,cat:"food",day:"all",addr:"444 N Michigan Ave",rate:"★4.7 (11,500+ reviews)",note:"Bib Gourmand Mediterranean small plates on Michigan Ave — housemade charcuterie, cheeses, crispy pig's ears, bone marrow. Bustling and loud; lunch or early beats the dinner crowd.",fits:"Loud & lively · small plates to share · short walk from hotel"},
+{n:"J.P. Graziano — West Loop",must:"The Mr. G sub on ciabatta + a fresh-filled cannoli",lat:41.8842,lng:-87.6499,cat:"food",day:"wed",addr:"901 W Randolph St",rate:"★4.8 (highest-rated sandwich stop)",note:"Old-school Italian grocery since 1937 — the Mr. G sub is a Chicago icon. Lunch hours only most days (Tue/Wed 11am–4pm), so pair it with the Wed West Loop side of the trip near Sawada/Pizz'Amici.",fits:"Counter service · fast · lunch-only timing"},
+/* Chicago landmarks — pop up when nearby, all days */
+{n:"Willis Tower & Skydeck",must:"The Ledge — glass boxes jutting out 1,353 ft above Wacker Dr",lat:41.8789,lng:-87.6359,cat:"landmark",day:"all",addr:"233 S Wacker Dr",note:"Loop giant at Wacker & Jackson. The sidewalk view is free; the Skydeck and Ledge are ticketed and best booked ahead.",fits:"Free from the sidewalk · Skydeck ticketed · several CTA lines at Quincy/Wells",hist:"Completed in 1973 as the Sears Tower, it was the world's tallest building for about 25 years; renamed Willis Tower in 2009.",arch:"Skidmore, Owings & Merrill, engineer Fazlur Khan's bundled-tube frame — nine interlocking tubes in black aluminum and bronze glass, 1,451 ft to the roof."},
+{n:"360 CHICAGO — former John Hancock Center",must:"The lake-facing windows on the 94th floor — and TILT, which leans you out over Michigan Ave",lat:41.8988,lng:-87.6231,cat:"landmark",day:"all",addr:"875 N Michigan Ave",note:"Observation deck high above the Mag Mile at Michigan & Chestnut — the big north-side view.",fits:"Ticketed deck · free from the sidewalk · Mag Mile walk",hist:"Completed in 1969 as the John Hancock Center, a pioneering mixed-use supertall — offices, shops, parking, and homes in a single tower.",arch:"Also SOM and Fazlur Khan: a tapered, X-braced trussed tube — the giant dark X's up the facade are the building's structure, not decoration."},
+{n:"Tribune Tower",must:"The street-level fragments embedded in the walls by the doors — stones from the Taj Mahal, the Great Wall of China, and Westminster",lat:41.8904,lng:-87.6237,cat:"landmark",day:"all",addr:"435 N Michigan Ave",note:"Across Michigan Ave from the Wrigley Building — free to inspect from the sidewalk, steps from your hotel.",fits:"Free sidewalk stop · river / Mag Mile walk",hist:"Its design was chosen in a famous 1922 international competition; completed in 1925 as the Chicago Tribune's headquarters.",arch:"Neo-Gothic by Howells & Hood, in Indiana limestone, topped with flying buttresses modeled on Rouen Cathedral in France."},
+{n:"Wrigley Building",must:"The clock tower from the riverwalk — the white facade glows after dark",lat:41.8899,lng:-87.6247,cat:"landmark",day:"all",addr:"400 N Michigan Ave",note:"Just north of the river at Michigan Ave — you pass it on the way to the architecture boat dock.",fits:"Free sidewalk stop · Wed river-tour route",hist:"Built in two stages, 1921 and 1924, as headquarters of the Wrigley chewing-gum company — among the first major towers north of the river.",arch:"Spanish Renaissance Revival by Graham, Anderson, Probst & White, clad in glazed white terra-cotta in six shades that brighten toward the top."},
+{n:"Merchandise Mart",must:"The scale of it from the river — then the Art Deco lobby inside, and the riverwalk busts of famous merchants outside",lat:41.8885,lng:-87.6354,cat:"landmark",day:"all",addr:"222 W Merchandise Mart Plaza",note:"Spans two city blocks on the river's north bank, a few blocks west of your hotel; it has its own Brown/Purple Line station.",fits:"Free to view · public lobby · own CTA station",hist:"Opened in 1930 as Marshall Field & Co.'s wholesale hub — the largest building in the world by floor area at the time, and owned for decades by the Kennedy family.",arch:"Art Deco by Graham, Anderson, Probst & White: roughly 4 million sq ft, with stylized ornament and a central tower on the river. The Mart was assigned its own ZIP code in 1978; since 2008, 60654 has also covered the surrounding neighborhood."},
+{n:"Marina City",must:"The corncob photo from the State St bridge or the river tour — balconies ringing the towers like petals",lat:41.8879,lng:-87.6281,cat:"landmark",day:"all",addr:"300 N State St",note:"Twin residential towers right on the river at State St — a Wed boat-tour highlight, also an easy walk from the hotel.",fits:"Free sidewalk / river view · Wed route",hist:"Built in the 1960s by architect Bertrand Goldberg as a self-contained ‘city within a city’ meant to lure residents back downtown — homes, parking, shops, and a marina in one complex.",arch:"Poured-concrete corncobs: round towers ringed with semicircular balconies, apartments stacked above an open spiral parking ramp, boats docked below."},
+{n:"Art Institute of Chicago",must:"The two bronze lions out front, then American Gothic and the Impressionist galleries inside",lat:41.8796,lng:-87.6240,cat:"landmark",day:"all",addr:"111 S Michigan Ave",note:"Michigan Ave at Adams — a half-day museum, stroller-friendly, just south of Millennium Park.",fits:"Ticketed · stroller friendly · Red/Brown lines nearby",hist:"The museum was founded in 1879; this building opened in 1893 in connection with the World's Columbian Exposition and has been the museum's home since.",arch:"Beaux-Arts limestone by Shepley, Rutan and Coolidge along Michigan Ave — contrasted behind it by Renzo Piano's light steel-and-glass Modern Wing (2009)."},
+{n:"Field Museum",must:"Sue the T. rex in the main hall — among the largest and most complete T. rex skeletons ever found",lat:41.8662,lng:-87.6170,cat:"landmark",day:"all",addr:"1400 S DuSable Lake Shore Dr",note:"Museum Campus anchor, south of downtown — a planned outing from the hotel, not a walk-by.",fits:"Ticketed · big and stroller easy · Museum Campus buses",hist:"Founded in 1893 from the World's Columbian Exposition collections and named for its first major donor, department-store magnate Marshall Field; this building opened in 1921.",arch:"A neoclassical temple by Graham, Anderson, Probst & White — white marble outside, and the soaring, skylit Stanley Field Hall inside."},
+{n:"Shedd Aquarium",must:"The Caribbean Reef tank in the central rotunda — watch for the divers with the rays and the sea turtle",lat:41.8676,lng:-87.6140,cat:"landmark",day:"all",addr:"1200 S DuSable Lake Shore Dr",note:"On Museum Campus between the Field Museum and Adler — lake views from its terrace.",fits:"Ticketed (timed entry) · stroller friendly · lakefront",hist:"Opened in 1930, a gift from John G. Shedd, president of Marshall Field & Co. — for years the world's largest indoor aquarium.",arch:"Beaux-Arts/neoclassical by Graham, Anderson, Probst & White, octagonal at its center, with aquatic details — waves, shells, and sea creatures — worked into the building throughout."},
+{n:"Adler Planetarium",must:"The photo back to the skyline from Adler's front steps — the best skyline view in the city — plus a sky show inside",lat:41.8663,lng:-87.6065,cat:"landmark",day:"all",addr:"1300 S DuSable Lake Shore Dr",note:"At the tip of the Museum Campus peninsula — worth the walk out along the lake for the view alone.",fits:"Skyline view free · museum ticketed · lakefront walk",hist:"Opened in 1930 as the first planetarium in the United States, founded by Chicago businessman Max Adler.",arch:"Art Deco by Ernest A. Grunsfeld Jr. — a 12-sided granite building ringed with bronze reliefs of the zodiac, capped by a dome."},
+{n:"Buckingham Fountain",must:"The hourly water display — the center jet shoots roughly 150 ft up — framed against the skyline",lat:41.8758,lng:-87.6189,cat:"landmark",day:"all",addr:"Grant Park, 301 S Columbus Dr",note:"Grant Park's centerpiece, a short walk southeast of Millennium Park. Displays run seasonally (typically May to mid-October) — check on the day.",fits:"Free · open plaza · stroller easy",hist:"Dedicated in 1927, donated by Kate Buckingham in memory of her brother Clarence, and modeled on the Latona Fountain at Versailles at about three times its scale.",arch:"Rococo-style ‘wedding cake’ of pink Georgia marble by Bennett, Parsons & Frost, with sculptor Marcel Loyau's monumental sea horses — one of the largest fountains in the US."},
+{n:"Jay Pritzker Pavilion",must:"Standing on the Great Lawn under the steel trellis, with Gehry's ribbons curling over the stage",lat:41.8827,lng:-87.6219,cat:"landmark",day:"all",addr:"Millennium Park",note:"Millennium Park's bandshell, steps from the Bean — this will likely pop up the same Wed morning.",fits:"Free · lawn is stroller easy · Wed morning route",hist:"Opened with Millennium Park in 2004 and named for Jay Pritzker, co-founder of the Hyatt hotel group and founder of the Pritzker Architecture Prize.",arch:"A Frank Gehry design: billowing stainless-steel ribbons over the stage, and a web-like trellis over the lawn that carries concert sound evenly to the back."},
+{n:"Chicago Theatre",must:"A photo under the towering CHICAGO marquee on State St",lat:41.8854,lng:-87.6275,cat:"landmark",day:"all",addr:"175 N State St",note:"State St in the Loop theatre district — an easy Red Line / State St walk from the hotel.",fits:"Free sidewalk photo · shows ticketed · Red Line at Lake",hist:"Opened in 1921 as a Balaban & Katz movie palace, the first of the grand theatres by architects Rapp & Rapp; saved from demolition and restored in the 1980s.",arch:"French Baroque style by Rapp & Rapp in white terra-cotta, with a triumphal-arch window — its vertical CHICAGO sign is an official city landmark."},
+{n:"Chicago Cultural Center",must:"The Preston Bradley Hall dome — about 38 ft across, the world's largest Tiffany glass dome — and the free exhibits",lat:41.8839,lng:-87.6248,cat:"landmark",day:"all",addr:"78 E Washington St",note:"Across Michigan Ave from Millennium Park, free entry — an easy indoor stop near Wed's coffee.",fits:"Free · indoor · Wed route",hist:"Opened in 1897 as Chicago's first central public library; when the library moved out in 1991, it became the nation's first free municipal cultural center.",arch:"Beaux-Arts by Shepley, Rutan and Coolidge in limestone and marble, crowned by two glass domes — a Tiffany Favrile dome (1907) and a Healy & Millet stained-glass dome."},
+{n:"Historic Water Tower & Pumping Station",must:"The tower itself — then cross Michigan Ave to its matching twin, the Pumping Station, still working today",lat:41.8972,lng:-87.6244,cat:"landmark",day:"all",addr:"806 N Michigan Ave",note:"Mag Mile at Chicago Ave, steps from Stan's Donuts and the Hancock building.",fits:"Free sidewalk stop · Mag Mile walk",hist:"Built in 1869 to house the waterworks standpipe, it famously survived the Great Fire of 1871, when nearly everything around it burned — a lasting symbol of the city's rebirth.",arch:"Gothic Revival by William W. Boyington in yellow Joliet limestone — a castellated, almost fairy-tale tower about 182 ft tall, with the matching Pumping Station across Michigan Ave."},
+{n:"The Rookery",must:"The light-court lobby — Frank Lloyd Wright's 1905 remodel in white marble and gold detailing",lat:41.8792,lng:-87.6320,cat:"landmark",day:"all",addr:"209 S LaSalle St",note:"LaSalle St financial district — a Loop detour south of the river.",fits:"Lobby view free · Loop · busiest on weekdays",hist:"Completed in 1888 by Burnham & Root; the name nods to the ‘rookery’ of politicians and pigeons around the temporary City Hall that stood on this site after the Fire.",arch:"A transitional early skyscraper — load-bearing masonry outside with Romanesque, Moorish, and Venetian detail, steel framing emerging inside — wrapped around a glass-roofed light court Wright later remodeled."},
+{n:"Carbide & Carbon Building — St. Jane Hotel",must:"The gold top from Michigan Ave — legend says the tower was modeled on a champagne bottle, a wink at Prohibition",lat:41.8862,lng:-87.6250,cat:"landmark",day:"all",addr:"230 N Michigan Ave",note:"On Michigan Ave just south of the river — look up as you head toward the boat dock.",fits:"Free sidewalk view · near river tour dock",hist:"Built in 1929 for the Carbide and Carbon Chemicals Corporation; converted into the St. Jane Hotel in 2018.",arch:"Art Deco by the Burnham Brothers — black granite base, dark-green and gold terra-cotta shaft, and a cap finished in real gold leaf."},
+{n:"Union Station",must:"The Great Hall — marble columns, long benches, and the barrel-vaulted skylight overhead",lat:41.8786,lng:-87.6403,cat:"landmark",day:"all",addr:"225 S Canal St",note:"West of the river on Canal St — Chicago's Amtrak hub, a Loop detour west.",fits:"Great Hall free to enter · Amtrak / CTA nearby",hist:"Opened in 1925, replacing an earlier station; the project grew out of Daniel Burnham's 1909 Plan of Chicago and was completed by Graham, Anderson, Probst & White.",arch:"Beaux-Arts classicism — a vast marble Great Hall with a roughly 115-ft barrel-vaulted skylight and Corinthian columns, behind a low colonnaded exterior."},
+{n:"Holy Name Cathedral",must:"Looking up inside at the red cardinal hats (galeros) hanging above the sanctuary, and the carved wood ceiling",lat:41.8958,lng:-87.6278,cat:"landmark",day:"all",addr:"735 N State St",note:"State & Superior in River North, a few blocks from your hotel.",fits:"Free · quiet indoor stop · Red Line Chicago station steps away",hist:"The cathedral opened in 1875, built after the Great Fire destroyed the earlier cathedral on this site; it is the seat of the Archdiocese of Chicago.",arch:"Gothic Revival by Patrick Keely in limestone, with a spire of about 210 ft — extensively restored after a 2009 fire damaged its roof."},
+{n:"Lincoln Park Conservatory",must:"The Fern Room — a primeval garden under glass — and the Orchid Room; admission is free",lat:41.9242,lng:-87.6345,cat:"landmark",day:"all",addr:"2391 N Stockton Dr",note:"Just north of the zoo — pairs naturally with Thu's zoo morning, and it's warm inside if the day turns cold.",fits:"Free · Thu zoo route · warm indoor break",hist:"Built in stages in the 1890s for the Lincoln Park Commission, to grow and display exotic plants for the public.",arch:"Late-Victorian glasshouse design associated with architect Joseph L. Silsbee — four linked display houses (Palm, Fern, Orchid, and Show) under sweeping curved glass."},
+{n:"Alfred Caldwell Lily Pool",must:"The council ring and the limestone waterfall — a hidden, quiet garden most visitors walk right past",lat:41.9247,lng:-87.6338,cat:"landmark",day:"all",addr:"125 W Fullerton Pkwy",note:"At Fullerton, just north of the zoo and conservatory — a calm, toddler-paced wander.",fits:"Free · Thu zoo route · shaded and enclosed-feeling",hist:"Designed by landscape architect Alfred Caldwell in 1936–38 with WPA-era labor; restored in the early 2000s and designated a National Historic Landmark.",arch:"Pure Prairie School landscape: stratified limestone outcrops, a meandering lily pool, native plantings, and Caldwell's open pavilion and council ring."},
+{n:"Centennial Wheel — Navy Pier",must:"A gondola ride nearly 200 ft up — skyline on one side, open lake on the other",lat:41.8915,lng:-87.6050,cat:"landmark",day:"all",addr:"600 E Grand Ave",note:"Navy Pier's centerpiece, right in the middle of your Fri pier day.",fits:"Ticketed ride · Fri Navy Pier route · enclosed gondolas",hist:"Opened in 2016 for Navy Pier's 100th anniversary, replacing the 1995 wheel — a nod to the original Ferris wheel, built for Chicago's 1893 World's Fair.",arch:"A modern observation wheel about 196 ft tall with enclosed, climate-controlled gondolas — engineered to run through Chicago winters."},
+{n:"Wrigley Field",must:"The red marquee at Clark & Addison — and, if you tour, the ivy-covered outfield walls and hand-turned scoreboard",lat:41.9484,lng:-87.6553,cat:"landmark",day:"all",addr:"1060 W Addison St",note:"Lakeview, north of Lincoln Park — a Red/Brown Line detour; closest on Thu if you extend north after the zoo.",fits:"Marquee free · tours ticketed · Red Line at Addison",hist:"Opened in 1914 and home to the Cubs since 1916 — the second-oldest ballpark in the majors, after Boston's Fenway Park (1912).",arch:"Classic steel-and-concrete ballpark by Zachary Taylor Davis; the famous ivy was planted in 1937 under Bill Veeck, and neighbors still watch games from rooftops across Waveland and Sheffield."},
+{n:"DuSable Bridge — Michigan Ave",must:"The four limestone bridge houses and their relief sculptures — read the plaques while boats pass underneath",lat:41.8884,lng:-87.6242,cat:"landmark",day:"all",addr:"Michigan Ave & Wacker Dr",note:"The Michigan Ave crossing of the river — you walk over it around the Wed boat tour.",fits:"Free · on the river route · prime photo spot",hist:"Opened in 1920 as the Michigan Avenue Bridge — the link that let Michigan Ave and the future Mag Mile grow north of the river; later renamed for Jean Baptiste Point DuSable, Chicago's first permanent non-Native settler.",arch:"A double-leaf bascule bridge from Daniel Burnham's Plan of Chicago era, with Beaux-Arts bridge-tender houses by Edward H. Bennett carved with reliefs of explorers, settlers, defense, and the city's rebuilding."}
+];
+/* ---------- History & architecture notes, by pin name ---------- */
+var HIST={
+"Fairfield Inn — your hotel (base)":["River North rose from warehouses and factories rebuilt after the Great Chicago Fire of 1871, then became the city's gallery district in the 1970s–80s.","Low brick warehouse blocks sit beside newer glass hotel and condo towers — look for heavy brick and large industrial windows on the side streets around Illinois St."],
+"✈️ O'Hare (ORD)":["Built as a wartime airfield in the 1940s, it was renamed in 1949 for naval aviator Edward ‘Butch’ O'Hare, Chicago's first WWII Medal of Honor recipient.","Terminal 1 (1987, Helmut Jahn) is the landmark — a long, vaulted glass hall modeled on classic train sheds, linked to its concourse by the neon-lit underground tunnel."],
+"Al's #1 Italian Beef + Chicago Dog":["Al's traces to 1938 and Al Ferreri; the Italian beef sandwich grew out of Chicago's Italian immigrant community, where slow-roasted beef was stretched to feed big wedding crowds.","Classic Chicago storefront dining — a narrow counter shop set into River North's brick commercial blocks, built for ordering at the counter and eating fast."],
+"Millennium Park — The Bean":["Opened in 2004 over working rail yards and parking lots, Millennium Park turned an industrial corner of Grant Park into Chicago's front lawn for the new millennium.","Cloud Gate (Anish Kapoor, 2004–06) is 110 tons of highly polished stainless steel with no visible seams; nearby, Frank Gehry's Pritzker Pavilion wears curling stainless-steel ribbons."],
+"Maggie Daley Park — Play Garden":["Opened in 2014 and named for Maggie Daley, Chicago's former first lady and a longtime advocate for children and the arts.","Landscape architect Michael Van Valkenburg shaped rolling artificial hills and valleys over a parking garage — the Play Garden's towers, bridges, and slides echo a ship and an enchanted forest."],
+"Molly's Cupcakes — River East 🎂":["Molly's was founded in Chicago in 2007 by John Nicolaides and named for his third-grade teacher Molly, who baked cupcakes for her class.","Its River East shop sits in Streeterville, a district of former warehouses and newspaper-era buildings now wrapped in residential towers just east of Michigan Ave."],
+"Chicago River Architecture Tour":["The river itself is an engineering landmark: in 1900 Chicago reversed its flow away from Lake Michigan, a feat that reshaped the city's health, shipping, and growth.","From the boat you pass the full survey — early Chicago School steel frames, the Art Deco Merchandise Mart (1930), Marina City's corncob towers (1960s), and today's glass river towers."],
+"Devil Dawgs — Gold Coast":["The Chicago dog was perfected during the Great Depression — an inexpensive Vienna Beef frank ‘dragged through the garden’ with vegetable toppings so it ate like a full meal.","You are in the Gold Coast, Chicago's first mansion district after the Fire; Astor St, a few blocks west, preserves some of the city's finest 1880s–90s houses."],
+"Pizz'Amici — birthday dinner 🎂":["Tavern-style pizza — thin, crisp, and square-cut — began in 1940s South Side neighborhood taverns, where slices were served to patrons at the bar.","West Grand Ave runs through old industrial and Italian neighborhood blocks — low brick buildings rather than downtown towers, suiting the old-school tavern format."],
+"Lincoln Park Zoo":["Founded in 1868 with a pair of swans gifted from New York's Central Park, Lincoln Park Zoo is one of the oldest zoos in the United States — and still free.","Look for Café Brauer (1908), a Prairie School landmark by Dwight Perkins with a green tile roof and soaring Great Hall, at the south end of the zoo grounds."],
+"Peggy Notebaert Nature Museum":["Home of the Chicago Academy of Sciences, founded in 1857 as Chicago's first museum, and named for benefactor Peggy Notebaert; this building opened in 1999.","Perkins+Will designed it as a teaching landscape: glass walls opening onto the pond, with exhibits flowing into the surrounding restored prairie and wetland."],
+"The Wieners Circle — Lincoln Park":["A Lincoln Park fixture since 1983, famous citywide for char-grilled dogs — and, late at night, famously sassy counter banter. Daytime visits stay tame.","A classic Clark St hot-dog stand: small, low, and all counter — the opposite of the Victorian greystones and vintage courtyard apartments lining Lincoln Park's side streets."],
+"Lou Malnati's — River North":["Lou Malnati opened his first pizzeria in Lincolnwood in 1971; his father Rudy had helped create deep-dish pizza at Pizzeria Uno in the 1940s.","River North's converted brick warehouse blocks are the setting — heavy masonry, large windows, and former industrial entrances now serving as restaurant doors."],
+"Rainbow Cone at Gino's East":["The Original Rainbow Cone opened in 1926 in Beverly, on the Far South Side; its five sliced flavors stacked in order became a Chicago summer ritual.","This counter sits inside Gino's East on Superior St — Gino's, founded in 1966, is known for its graffiti-covered walls and deep-dish dining rooms."],
+"Chicago Children's Museum — Navy Pier":["The museum was founded in 1982 and moved to Navy Pier in 1995, when the Pier was reborn as a public attraction after decades as a shipping and campus site.","Navy Pier opened in 1916 under Daniel Burnham's lakefront vision and stretches about 3,300 ft into Lake Michigan, ending in the historic headhouse and its grand ballroom."],
+"Butterfly House — Navy Pier":["The Pier's first life was freight and passenger steamers from 1916; it later served as a naval training site in WWII before its 1990s revival as a public pier.","The Pier's long, low Festival Hall sheds contrast with the 196-ft Centennial Wheel (2016) — look back from the east end for the skyline view."],
+"Beatrix — River North":["Beatrix comes from Lettuce Entertain You, the Chicago restaurant group founded in 1971 with R.J. Grunts — often credited with popularizing the salad bar.","On Clark St you are at the edge where River North's 19th-century brick survivors meet the post-1990s hotel and condo towers."],
+"Eataly Chicago":["Eataly began in Turin, Italy in 2007, when Oscar Farinetti converted a former vermouth factory into a food marketplace; Chicago's branch, the second in the US, opened in 2013.","A two-level marketplace inserted into a River North retail building — open kitchens and counters follow the old European market-hall idea under one roof."],
+"Intelligentsia Coffee — Millennium Park":["Intelligentsia was founded in Chicago in 1995 by Doug Zell and Emily Mange, helping launch the city's third-wave, single-origin coffee scene.","Across Michigan Ave stands the Chicago Cultural Center (1897), a Beaux-Arts landmark with the world's largest Tiffany glass dome inside — free to enter and worth a look."],
+"Blue Bottle Coffee — Wolf Point":["Blue Bottle began in Oakland in 2002, named for Vienna's first coffee house. Wolf Point, where the river's three branches meet, was a fur-trade and tavern hub in the 1820s–30s.","Wolf Point's new glass towers rise over the confluence; from the riverwalk you can read Chicago's layers — 1920s bridges, postwar towers, and today's residential high-rises."],
+"Sawada Coffee":["Opened in 2015 by Japanese latte-art champion Hiroshi Sawada, in Fulton Market — the West Loop's former meatpacking district.","Industrial brick, big warehouse windows, and a skate-ramp-inspired interior inside a converted warehouse: classic Fulton Market adaptive reuse."],
+"Metric Coffee — roastery":["Metric sources and roasts in Fulton Market, part of a newer generation of Chicago roasters working out of the old industrial west side.","A working roastery in a low industrial building on Fulton St — brick and loading-dock architecture that predates the neighborhood's restaurant boom."],
+"Colectivo Coffee — Lincoln Park":["Colectivo was founded in Milwaukee in 1993 (as Alterra) and built its cafes as big, gathering-place rooms with patios.","Clark St in Lincoln Park is a vintage streetcar commercial strip — two- and three-story brick storefronts backed by 1880s–90s greystone homes."],
+"Stan's Donuts & Coffee — Rush St":["Stan's Donuts first opened in Los Angeles in 1963; Chicago restaurateur Rich Labriola brought it to Chicago in 2014, where it became a local morning staple.","Rush St here is the Gold Coast edge — hotels and towers over a street of small storefronts that once served the mansion blocks of Astor St."],
+"Starbucks Reserve Roastery":["Opened in 2019 in the former Crate & Barrel flagship, this was the largest Starbucks in the world at opening, with five floors of roasting, bars, and a bakery.","The building at Michigan & Erie keeps the retail-glass corner of its Crate & Barrel era; escalators curve through an atrium designed to show off each floor."],
+"Te'Amo Boba Bar — North Bridge":["Bubble tea was invented in Taiwan in the 1980s and spread across the US in the 2000s; Te'Amo is a Chicago-born chain built around organic teas.","The Shops at North Bridge fill a full Michigan Ave block — a modern mall tucked behind Mag Mile facades, near the 1929 InterContinental hotel tower (built as the Medinah Athletic Club)."],
+"TE'AMO Boba & Desserts — Millennium Park":["This Michigan Ave spot sits on the route generations of Chicagoans have walked between the Cultural Center, Millennium Park, and the Art Institute.","Look up: this stretch of Michigan Ave is the historic street wall facing Grant Park — early-1900s landmark facades protected to keep the park's edge intact."],
+"Te'Amo Boba Bar — Navy Pier":["Navy Pier's food tenants today occupy a pier first opened in 1916 for Great Lakes freighters and excursion boats.","Inside the Pier's long Festival Hall sheds — steel-truss, daylight-filled industrial halls re-clad in the Pier's 1995 and 2016 renovations."],
+"Uni Uni Bubble Tea — Lincoln Park":["Uni Uni is a Chicago-area bubble tea chain known for brown-sugar ‘tiger stripe’ milk tea, a style popularized from Taiwan in the late 2010s.","On Clark St's zoo blocks — a modern storefront in a vintage two-story brick retail building, typical of Lincoln Park's streetcar-era shopping strips."],
+"Kung Fu Tea — Wicker Park":["Kung Fu Tea was founded in Queens, New York in 2010 and became one of the largest US boba chains during bubble tea's second wave.","Division St in Wicker Park is a Polish-era commercial corridor turned nightlife strip — look for ornate 1890s brick storefronts near the Polish Triangle at Division, Ashland, and Milwaukee."],
+"Xoco — churros & Mexican hot chocolate":["Rick Bayless opened Xoco in 2009 beside Frontera Grill (1987); his restaurants put regional Mexican cooking at the center of River North dining.","Steps from your hotel on Illinois St, in a low brick River North block — Bayless's three restaurants in a row chart the district's dining transformation."],
+"Wow Bao — Water Tower Place":["Wow Bao, a Lettuce Entertain You concept launched in 2003, modernized the bao — a soft steamed bun with centuries of history in China — as Chicago fast food.","Water Tower Place (1975) is a vertical mall on Michigan Ave, directly across from the 1869 Chicago Water Tower — one of the few public buildings to survive the Great Fire of 1871."],
+"Floriole Cafe & Bakery":["Sandra Holl began selling pastries at Chicago farmers markets in the mid-2000s and opened this Lincoln Park cafe in 2010, inspired by Paris bakeries.","Webster Ave near the zoo is a leafy Lincoln Park street of vintage brick storefronts and greystone residences from the post-Fire rebuilding era."],
+"Chicago's Dog House (backup dog)":["A newer Lincoln Park sausage shop in an old tradition: Chicago hot-dog stands multiplied during the Depression, when an inexpensive dog with toppings was a working person's full lunch.","Fullerton Ave here mixes DePaul-era housing, vintage courtyard apartments, and low brick retail — the Lincoln Park of the 1900s–20s, before the towers."],
+"Pequod's Pizza — Lincoln Park":["Pequod's began in Morton Grove in 1970 and later brought its caramelized-crust pan pizza to Lincoln Park's Clybourn corridor; the crust — cheese baked against the pan until it crisps and darkens — is the signature.","Clybourn Ave was an industrial and rail diagonal of breweries, tanneries, and warehouses — now lofts and shops in heavy brick factory buildings."],
+"Little Goat Diner — Southport":["Stephanie Izard, Top Chef's first female winner, opened Little Goat as the casual sibling to Girl & the Goat (2010); this Southport diner is its newer Lakeview home.","Southport Ave is a classic neighborhood main street by the Brown Line — low brick storefronts, the 1929 Music Box Theatre a few blocks north, and vintage two-flats behind."],
+"Summer House Santa Monica — Lincoln Park":["Opened in 2013, this Lettuce Entertain You spot brought a bright, California-style dining room to a Halsted St block long known for neighborhood restaurants and zoo-day crowds.","Its glassy, plant-filled room contrasts with Halsted's older brick storefronts and the 19th-century rowhouses on Lincoln Park's side streets."],
+"Ema — River North":["Ema — the name means ‘mother’ in Hebrew — opened in 2016 from Lettuce Entertain You and chef C.J. Jacobson, focused on Mediterranean small plates.","A contemporary dining room on Illinois St, a few doors from your hotel, slotted into River North's mix of converted warehouses and newer hotel buildings."],
+"The Purple Pig — Mag Mile":["Opened in 2009 by chefs Jimmy Bannos Jr. and Sr., The Purple Pig earned a Michelin Bib Gourmand for Mediterranean small plates and house-cured meats.","At Michigan & Illinois, look up the avenue: the white terra-cotta Wrigley Building (1924) and the neo-Gothic Tribune Tower (1925) are two of the Mag Mile's defining landmarks."],
+"J.P. Graziano — West Loop":["Founded in 1937 by James P. Graziano as an Italian grocery wholesaler and still family-run generations later — the Mr. G is layered with imported Italian meats from that wholesale tradition.","Randolph St's Restaurant Row grew out of the West Loop's market and warehouse district; Graziano's brick storefront is a survivor of the era when this street supplied the city's restaurants."]
+};
+POIS.forEach(function(p){ var e=HIST[p.n]; if(e){ p.hist=e[0]; p.arch=e[1]; } });
+/* ---------- Live CTA times: official Train Tracker / Bus Tracker pages per pin ----------
+   CTA's APIs need a personal key this static page doesn't have, so pins link out to
+   CTA's own live pages for the nearest station/route instead of showing invented times. */
+var CTA_URL={
+ grandBlue:"https://www.transitchicago.com/station/grbl/",
+ ohare:"https://lapi.transitchicago.com/station/ord/",
+ grandRed:"https://lapi.transitchicago.com/station/grre/",
+ mart:"https://www.transitchicago.com/station/mart/",
+ armitage:"http://www.transitchicago.com/station/armi/",
+ clarkLake:"https://www.transitchicago.com/station/clkl/",
+ monroeBlue:"https://www.transitchicago.com/station/monb/",
+ monroeRed:"https://www.transitchicago.com/station/monr/",
+ chicagoBlue:"https://www.transitchicago.com/station/chib/",
+ busHome:"https://www.ctabustracker.com/bustime/wireless/html/home.jsp"
+};
+var TRANSIT={
+"Fairfield Inn — your hotel (base)":[["🔵 Grand (Blue) live trains","grandBlue"],["🔴 Grand (Red) live trains","grandRed"],["🟤 Merchandise Mart live trains","mart"],["🚌 Bus Tracker — #22 / #36","busHome"]],
+"✈️ O'Hare (ORD)":[["✈️ O'Hare (Blue) live trains","ohare"],["🔵 Grand (Blue) live trains","grandBlue"]],
+"Lincoln Park Zoo":[["🟤 Armitage live trains","armitage"],["🚌 Bus Tracker — #22 Clark / #151","busHome"]],
+"Peggy Notebaert Nature Museum":[["🟤 Armitage live trains","armitage"],["🚌 Bus Tracker — #151 Sheridan","busHome"]],
+"Chicago Children's Museum — Navy Pier":[["🔴 Grand (Red) live trains","grandRed"],["🚌 Bus Tracker — #124 Navy Pier","busHome"]],
+"Butterfly House — Navy Pier":[["🔴 Grand (Red) live trains","grandRed"],["🚌 Bus Tracker — #124 Navy Pier","busHome"]],
+"Centennial Wheel — Navy Pier":[["🔴 Grand (Red) live trains","grandRed"],["🚌 Bus Tracker — #124 Navy Pier","busHome"]],
+"Te'Amo Boba Bar — Navy Pier":[["🔴 Grand (Red) live trains","grandRed"],["🚌 Bus Tracker — #124 Navy Pier","busHome"]],
+"Millennium Park — The Bean":[["🔴 Monroe (Red) live trains","monroeRed"],["🔵 Clark/Lake live trains","clarkLake"],["🚌 Bus Tracker — #146 / #151","busHome"]],
+"Maggie Daley Park — Play Garden":[["🔴 Monroe (Red) live trains","monroeRed"],["🔵 Clark/Lake live trains","clarkLake"]],
+"Field Museum":[["🚌 Bus Tracker — #146 Museum Campus","busHome"],["🔴 Monroe (Red) live trains","monroeRed"]],
+"Shedd Aquarium":[["🚌 Bus Tracker — #146 Museum Campus","busHome"]],
+"Adler Planetarium":[["🚌 Bus Tracker — #146 Museum Campus","busHome"]],
+"Merchandise Mart":[["🟤 Merchandise Mart live trains","mart"]],
+"Pizz'Amici — birthday dinner 🎂":[["🔵 Grand (Blue) live trains","grandBlue"],["🔵 Chicago (Blue) live trains","chicagoBlue"],["🚌 Bus Tracker — #66 Chicago Ave","busHome"]],
+"Chicago River Architecture Tour":[["🔵 Clark/Lake live trains","clarkLake"],["🟤 Merchandise Mart live trains","mart"]]
+};
+function transitHTML(p){
+ var t=TRANSIT[p.n]; if(!t||!t.length) return "";
+ var links=t.map(function(x){ return "<a target='_blank' rel='noopener' href='"+CTA_URL[x[1]]+"'>"+x[0]+"</a>"; }).join(" · ");
+ return "<p class='ctaPin'>🚇 <strong>Live CTA times:</strong> "+links+"</p>";
+}
+var ROUTE=["Fairfield Inn — your hotel (base)","Al's #1 Italian Beef + Chicago Dog","Millennium Park — The Bean","Maggie Daley Park — Play Garden","Molly's Cupcakes — River East 🎂","Chicago River Architecture Tour","Devil Dawgs — Gold Coast","Pizz'Amici — birthday dinner 🎂","Lincoln Park Zoo","Peggy Notebaert Nature Museum","The Wieners Circle — Lincoln Park","Lou Malnati's — River North","Chicago Children's Museum — Navy Pier","Butterfly House — Navy Pier","Beatrix — River North"];
+
+/* ---------- Map + behaviour ---------- */
+var ICONS={stop:"📍",coffee:"☕",boba:"🧋",snack:"🍩",dog:"🌭",food:"🍽️",landmark:"🏛️"};
+var COLORS={stop:"#0b5cad",coffee:"#6f4e37",boba:"#e84393",snack:"#e67e22",dog:"#c0392b",food:"#2a9d8f",landmark:"#a67c00"};
+var statusEl=document.getElementById("status"), toast=document.getElementById("toast"), nearList=document.getElementById("nearList");
+var map=null, markers={}, walker=null, radius=+document.getElementById("radSel").value;
+var myPos=null, alerted={}, simTimer=null, simSeg=0, simT=0;
+var gpsWatchId=null, tapMode=false, gpsHasFix=false;
+
+function gmaps(p){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(p.n+" "+p.addr+" Chicago IL");}
+function gdir(p){return "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(p.n+" "+p.addr+" Chicago IL");}
+function distM(a,b){var R=6371000,dLa=(b.lat-a.lat)*Math.PI/180,dLo=(b.lng-a.lng)*Math.PI/180;var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.sqrt(h));}
+function fmtD(m){var ft=m*3.28084; if(ft<1000) return Math.max(10,Math.round(ft/10)*10)+" ft"; var mi=m/1609.344; return (mi<10?mi.toFixed(1):Math.round(mi))+" mi";}
+function fmtRad(m){return Math.round(m*3.28084/10)*10+" ft";}
+function popHTML(p){
+ return "<div class='pop'><h3>"+(ICONS[p.cat]||"📍")+" "+p.n+"</h3>"
+ +"<p>"+p.addr+(p.rate?" · "+p.rate:"")+"</p><p>"+p.note+"</p>"
+ +(p.must?"<p>⭐ <strong>"+(p.cat==="landmark"?"Must-see:":"Must-try:")+"</strong> "+p.must+"</p>":"")
+ +(p.hist?"<p>🏛️ <strong>History:</strong> "+p.hist+"</p>":"")
+ +(p.arch?"<p>🏗️ <strong>Architecture:</strong> "+p.arch+"</p>":"")
+ +"<p>✅ Fits your criteria: "+p.fits+"</p>"
+ +transitHTML(p)
+ +"<p><a target='_blank' rel='noopener' href='"+gmaps(p)+"'>Location</a> · <a target='_blank' rel='noopener' href='"+gdir(p)+"'>Directions</a></p></div>";
+}
+function showToast(p,d){
+ toast.style.display="block";
+ toast.innerHTML="<h3>📣 You're near: "+p.n+"</h3><p><strong>"+fmtD(d)+" away</strong> · "+p.addr+(p.rate?" · "+p.rate:"")+"</p><p>"+p.note+"</p>"+(p.must?"<p>⭐ <strong>"+(p.cat==="landmark"?"Must-see:":"Must-try:")+"</strong> "+p.must+"</p>":"")+(p.hist?"<p>🏛️ <strong>History:</strong> "+p.hist+"</p>":"")+(p.arch?"<p>🏗️ <strong>Architecture:</strong> "+p.arch+"</p>":"")+"<p>✅ Fits your criteria: "+p.fits+"</p>"+transitHTML(p)+"<p><a target='_blank' rel='noopener' href='"+gdir(p)+"'>🧭 Get directions</a></p>";
+ toast.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function visible(p){
+ var dv=document.getElementById("daySel").value, cv=document.getElementById("catSel").value;
+ return (dv==="all"||p.day===dv||p.day==="all") && (cv==="all"||p.cat===cv);
+}
+function refreshMarkers(){
+ if(!map)return;
+ POIS.forEach(function(p,i){
+   var show=visible(p);
+   if(show&&!markers[i]){
+     var ic=L.divIcon({className:"",html:"<div style='background:"+COLORS[p.cat]+";color:#fff;border-radius:50%;width:30px;height:30px;line-height:30px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)'>"+(ICONS[p.cat]||"📍")+"</div>",iconSize:[30,30],iconAnchor:[15,15]});
+     markers[i]=L.marker([p.lat,p.lng],{icon:ic}).addTo(map).bindPopup(popHTML(p));
+   } else if(!show&&markers[i]){ map.removeLayer(markers[i]); delete markers[i]; }
+ });
+}
+var userInteracted=false;
+document.addEventListener("pointerdown",function(){ userInteracted=true; },{once:false});
+function checkProximity(pos){
+ var rows=[];
+ POIS.forEach(function(p,i){
+   if(!visible(p))return;
+   var d=distM(pos,p);
+   rows.push({p:p,d:d});
+   if(d<=radius){
+     if(!alerted[i]){ alerted[i]=true; showToast(p,d); if(map&&markers[i])markers[i].openPopup(); if(userInteracted && navigator.vibrate){ try{navigator.vibrate(60);}catch(_){}} }
+   } else if(d>radius*1.6){ alerted[i]=false; }
+ });
+ rows.sort(function(a,b){return a.d-b.d;});
+ nearList.innerHTML=rows.slice(0,8).map(function(r){
+   return "<div class='poi'><div>"+(ICONS[r.p.cat]||"📍")+" <strong>"+r.p.n+"</strong> <span class='tag'>"+r.p.cat+"</span><br><span style='color:var(--muted);font-size:13px'>"+r.p.fits+"</span></div><div class='d'>"+fmtD(r.d)+"</div></div>";
+ }).join("");
+}
+function setWalker(lat,lng,label){
+ myPos={lat:lat,lng:lng};
+ if(map){
+   if(!walker){
+     walker=L.marker([lat,lng],{draggable:true,icon:L.divIcon({className:"",html:"<div style='background:#111;color:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)'>🚶</div>",iconSize:[28,28],iconAnchor:[14,14]})}).addTo(map);
+     walker.on("dragend",function(){
+       var ll=walker.getLatLng();
+       tapMode=false; var tb=document.getElementById("tapLocBtn"); if(tb){tb.classList.remove("active"); tb.textContent="👆 Tap map to set my location";}
+       setWalker(ll.lat,ll.lng,"You moved the walker — pop-ups check this spot. Drag it anytime, or tap Use my location for live GPS.");
+     });
+   }
+   else walker.setLatLng([lat,lng]);
+ }
+ if(label) statusEl.textContent=label;
+ checkProximity(myPos);
+}
+function showGpsHelp(){ var h=document.getElementById("gpsHelp"); if(h) h.style.display="block"; }
+function hideGpsHelp(){ var h=document.getElementById("gpsHelp"); if(h) h.style.display="none"; }
+function initMap(){
+ if(typeof L==="undefined"){ statusEl.textContent="Map library couldn't load (offline?). The nearest-list and pop-ups need the map library + internet."; return; }
+ map=L.map("map").setView([41.8945,-87.6280],13);
+ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"}).addTo(map);
+ var pts=ROUTE.map(function(name){var p=POIS.filter(function(x){return x.n===name;})[0]; return [p.lat,p.lng];});
+ L.polyline(pts,{color:"#0b5cad",weight:3,opacity:.55,dashArray:"6 6"}).addTo(map);
+ map.on("click",function(e){
+   if(!tapMode) return;
+   tapMode=false; var tb=document.getElementById("tapLocBtn"); if(tb){tb.classList.remove("active"); tb.textContent="👆 Tap map to set my location";}
+   setWalker(e.latlng.lat,e.latlng.lng,"Your location is set to where you tapped — pop-ups fired for pins nearby. Drag the 🚶 walker to move it, or tap the button again to re-place it.");
+ });
+ refreshMarkers();
+ var hotel=POIS[0]; setWalker(hotel.lat,hotel.lng,"Centered on your hotel. Start GPS or Simulate walk to trigger pop-ups.");
+}
+/* GPS — must be called from a user tap. In an in-app preview iframe the
+   origin is denied by Permissions-Policy ("Origin does not have permission
+   to use Geolocation service"); that only clears in Safari / Home Screen. */
+function handleGpsPos(g){
+ gpsHasFix=true; hideGpsHelp();
+ var btn=document.getElementById("gpsBtn"); if(btn) btn.textContent="📍 Live GPS on — tap to stop";
+ setWalker(g.coords.latitude,g.coords.longitude,"Live GPS on · accuracy ~"+Math.round(g.coords.accuracy*3.28084)+" ft. Walking… pop-ups fire within "+fmtRad(radius)+" of a pin.");
+ if(map) map.panTo([g.coords.latitude,g.coords.longitude]);
+}
+function handleGpsErr(e){
+ var inFrame=false; try{ inFrame=(window.self!==window.top); }catch(_){ inFrame=true; }
+ var blockedByOrigin = e && e.message && /permission|origin does not have/i.test(e.message);
+ var code = e ? e.code : 0;
+ if(code===1 || blockedByOrigin){
+   statusEl.textContent = inFrame
+     ? "GPS is blocked in this preview — the frame around the page doesn't have geolocation permission. Open from your Home Screen icon or directly in Safari for live GPS, or use “Tap map to set my location” below."
+     : "Location permission is off for this site. Allow it in Settings / Safari Website Settings (see help below), then try again — or use “Tap map to set my location”.";
+ } else if(code===3){
+   statusEl.textContent="GPS timed out — make sure Location Services is on and you're not in Airplane Mode, then try again. You can also tap the map to set your location manually.";
+ } else if(code===2){
+   statusEl.textContent="Your position isn't available right now (GPS signal unavailable). Try again outdoors, or tap the map to set your location manually.";
+ } else {
+   statusEl.textContent="GPS didn't come through ("+(e&&e.message?e.message:"unknown error")+"). See the help below, or tap the map to set your location manually.";
+ }
+ showGpsHelp();
+ var btn=document.getElementById("gpsBtn"); if(btn) btn.textContent="📍 Use my location (live GPS)";
+ if(gpsWatchId!==null && navigator.geolocation){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; }
+}
+function startGps(){
+ var btn=document.getElementById("gpsBtn");
+ if(gpsWatchId!==null){
+   try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){}
+   gpsWatchId=null; gpsHasFix=false; if(btn) btn.textContent="📍 Use my location (live GPS)";
+   statusEl.textContent="Live GPS stopped. Your last position stays on the map — drag the 🚶 walker or tap the map button to move it.";
+   return;
+ }
+ if(!navigator.geolocation){ statusEl.textContent="This browser doesn't expose GPS to the page. Use Tap map to set my location instead."; showGpsHelp(); return; }
+ if(window.isSecureContext===false){ statusEl.textContent="GPS needs a secure (https) page. Open the Home Screen / Safari version, or use Tap map to set my location."; showGpsHelp(); return; }
+ stopSim();
+ statusEl.textContent="Asking for location… if a prompt appears, choose Allow While Using App, then walk — pop-ups fire inside the radius.";
+ if(btn) btn.textContent="📍 Locating…";
+ /* Permissions API gives a clearer denied state on some browsers */
+ if(navigator.permissions && navigator.permissions.query){
+   navigator.permissions.query({name:"geolocation"}).then(function(st){
+     if(st.state==="denied"){ handleGpsErr({code:1,message:"User denied Geolocation"}); }
+   }).catch(function(){});
+ }
+ /* First a one-shot fix (best chance to surface the iOS prompt), then watch */
+ navigator.geolocation.getCurrentPosition(function(g){
+   handleGpsPos(g);
+   if(gpsWatchId===null){
+     gpsWatchId=navigator.geolocation.watchPosition(handleGpsPos,handleGpsErr,{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+   }
+ },function(e){
+   /* If the one-shot fails for a policy block, don't start a watch that will spam errors */
+   if(e && e.code===1){ handleGpsErr(e); return; }
+   handleGpsErr(e);
+ },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+document.getElementById("gpsBtn").addEventListener("click",startGps);
+var retryBtn=document.getElementById("gpsRetryBtn"); if(retryBtn) retryBtn.addEventListener("click",function(){ hideGpsHelp(); if(gpsWatchId!==null){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; } startGps(); });
+var helpClose=document.getElementById("gpsHelpClose"); if(helpClose) helpClose.addEventListener("click",hideGpsHelp);
+document.getElementById("tapLocBtn").addEventListener("click",function(){
+ stopSim();
+ if(gpsWatchId!==null){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; var gb=document.getElementById("gpsBtn"); if(gb) gb.textContent="📍 Use my location (live GPS)"; }
+ tapMode=!tapMode;
+ this.classList.toggle("active",tapMode);
+ this.textContent=tapMode?"👆 Now tap anywhere on the map…":"👆 Tap map to set my location";
+ statusEl.textContent=tapMode?"Tap anywhere on the map to drop yourself there — walk-near pop-ups will fire for pins within "+fmtRad(radius)+". You can also drag the 🚶 walker anytime.":"Manual location mode off. Drag the 🚶 walker anytime to move your position.";
+ if(tapMode && map) map.scrollWheelZoom.enable();
+});
+/* Simulation: walk the route stop by stop */
+var routePts=ROUTE.map(function(name){return POIS.filter(function(x){return x.n===name;})[0];});
+function simStepTo(idx){
+ var p=routePts[idx]; if(!p)return;
+ setWalker(p.lat,p.lng,"Simulating: you're at "+p.n+" ("+(idx+1)+" of "+routePts.length+"). Nearby suggestions within "+fmtRad(radius)+" popped up.");
+ if(map)map.setView([p.lat,p.lng],15);
+}
+document.getElementById("simNext").addEventListener("click",function(){
+ stopSim(); simSeg=(simSeg+1)%routePts.length; simStepTo(simSeg);
+});
+function stopSim(){ if(simTimer){clearInterval(simTimer); simTimer=null; document.getElementById("simBtn").textContent="▶️ Simulate walk";} }
+document.getElementById("simBtn").addEventListener("click",function(){
+ if(simTimer){ stopSim(); return; }
+ this.textContent="⏸ Pause walk";
+ var a=routePts[simSeg], b=routePts[(simSeg+1)%routePts.length]; simT=0;
+ simTimer=setInterval(function(){
+   simT+=0.02;
+   if(simT>=1){ simSeg=(simSeg+1)%routePts.length; a=routePts[simSeg]; b=routePts[(simSeg+1)%routePts.length]; simT=0; }
+   var lat=a.lat+(b.lat-a.lat)*simT, lng=a.lng+(b.lng-a.lng)*simT;
+   setWalker(lat,lng,"Simulating a walk along your route… ("+a.n+" → "+b.n+")");
+ },120);
+});
+document.getElementById("daySel").addEventListener("change",function(){ alerted={}; refreshMarkers(); if(myPos)checkProximity(myPos); });
+document.getElementById("catSel").addEventListener("change",function(){ alerted={}; refreshMarkers(); if(myPos)checkProximity(myPos); });
+document.getElementById("radSel").addEventListener("change",function(){ radius=+this.value; alerted={}; if(myPos)checkProximity(myPos); });
+initMap();
+if(/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone){
+  document.getElementById("installTip").style.display="block";
+}
+if(window.navigator.standalone){ statusEl.textContent="Running as your Home Screen app. Tap Use my location in Chicago — or Simulate walk to preview."; }
+</script></body></html>
