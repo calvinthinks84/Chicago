@@ -78,6 +78,11 @@ button,select{touch-action:manipulation}
 .planIn::placeholder{color:#68737d;-webkit-text-fill-color:#68737d;opacity:1}
 #planOut ol{margin:6px 0;padding-left:22px}
 #planOut li{margin:6px 0}
+.planPickWrap{position:relative}
+#planPick{display:none;position:absolute;left:0;right:0;top:calc(100% - 4px);z-index:2000;background:#fff;color:#1c2733;-webkit-text-fill-color:#1c2733;border:1.5px solid #b9c4cc;border-radius:10px;list-style:none;margin:0;padding:4px;max-height:264px;overflow:auto;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+#planPick li{padding:9px 10px;border-radius:7px;cursor:pointer;font-size:15px;margin:0}
+#planPick li:hover{background:#eef4fa}
+#planPick .pa-addr{color:#68737d;-webkit-text-fill-color:#68737d;font-size:12.5px}
 footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 @media print{#map,.bar{display:none}}
 </style></head><body>
@@ -108,9 +113,8 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 </div>
 <div class="panel" id="planPanel"><h2>🧭 Plan a ride — which bus or train?</h2>
 <label>Destination by day <select class="planIn" id="planDayPick"><option value="">📅 Pick from the itinerary…</option></select></label>
-<label>Or type a place <input class="planIn" id="planTo" list="pinNames" placeholder="Where to? Type a place…" autocomplete="off"></label>
-<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home</button> <button class="btn" id="planClear">🧹 Clear</button></p>
-<datalist id="pinNames"></datalist>
+<label>Or type a place</label><div class="planPickWrap"><input class="planIn" id="planTo" placeholder="Where to? Type a place…" autocomplete="off"><ul id="planPick"></ul></div>
+<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🍎 Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
 <div id="planOut"></div></div>
 <div id="map"></div>
 <div class="panel" id="pinInfo"><h2>📍 Pin details</h2><div id="pinInfoBody"><p class="legend">Tap any pin on the map — its ⭐ must-try, 🏛️ history, and 🧭 Getting there (bus/train board &amp; exit) show here, below the map.</p></div></div>
@@ -491,8 +495,6 @@ function planRoute(fromPin,toPin){
  return {steps:steps,totalMin:total};
 }
 if(typeof document!=="undefined"&&document.getElementById&&document.getElementById("planBtn")){
- var dl=document.getElementById("pinNames");
- POIS.forEach(function(p){ var o=document.createElement("option"); o.value=p.n; dl.appendChild(o); });
  var dayPick=document.getElementById("planDayPick");
  if(dayPick){
    var dayNames={tue:"Tue Oct 13",wed:"Wed Oct 14 \uD83C\uDF82",thu:"Thu Oct 15",fri:"Fri Oct 16",sat:"Sat Oct 17",all:"Any day — sights, food & more"};
@@ -542,6 +544,41 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  if(homeBtn) homeBtn.addEventListener("click",function(){ document.getElementById("planTo").value=POIS[0].n; plnGo(); });
  var clearBtn=document.getElementById("planClear");
  if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; document.getElementById("planOut").innerHTML=""; });
+ var toEl=document.getElementById("planTo"), pickEl=document.getElementById("planPick");
+ function hidePick(){ if(pickEl) pickEl.style.display="none"; }
+ function renderPick(){
+   if(!pickEl||!toEl) return;
+   var q=(toEl.value||"").trim().toLowerCase();
+   if(q.length<3){ hidePick(); return; }
+   var hits=[];
+   POIS.forEach(function(p,ix){ if(p.n.toLowerCase().indexOf(q)>=0||(p.addr&&p.addr.toLowerCase().indexOf(q)>=0)) hits.push(ix); });
+   hits=hits.slice(0,8);
+   var h="";
+   hits.forEach(function(ix){ var p=POIS[ix]; h+="<li data-i=\""+ix+"\">"+((typeof ICONS!=="undefined"&&ICONS[p.cat])||"\uD83D\uDCCD")+" "+p.n+" <span class='pa-addr'>"+(p.addr||"")+"</span></li>"; });
+   h+="<li data-search='1'>\uD83D\uDD0E Search Chicago for \u201C"+toEl.value.trim()+"\u201D\u2026</li>";
+   pickEl.innerHTML=h; pickEl.style.display="block";
+ }
+ if(toEl&&pickEl){
+   toEl.addEventListener("input",renderPick);
+   toEl.addEventListener("focus",renderPick);
+   pickEl.addEventListener("click",function(e){
+     var li=e.target; while(li&&li.tagName!=="LI") li=li.parentNode;
+     if(!li) return;
+     if(li.getAttribute("data-search")){ hidePick(); plnGo(); return; }
+     var ix=parseInt(li.getAttribute("data-i"),10);
+     if(!isNaN(ix)&&POIS[ix]){ toEl.value=POIS[ix].n; hidePick(); plnGo(); }
+   });
+   document.addEventListener("click",function(e){ if(e.target!==toEl&&pickEl.style.display!=="none"&&e.target!==pickEl) hidePick(); });
+ }
+ var apBtn=document.getElementById("planApple");
+ if(apBtn) apBtn.addEventListener("click",function(){
+   var txt=((document.getElementById("planTo").value)||"").trim();
+   var out=document.getElementById("planOut");
+   if(!txt){ out.innerHTML="<p>Pick or type a destination first \u2014 then tap \uD83C\uDF4E Directions.</p>"; return; }
+   var pin=plnMatchPin(txt);
+   var url=pin?gdir(pin):"https://maps.apple.com/?daddr="+encodeURIComponent(txt+" Chicago IL")+"&dirflg=t";
+   window.open(url,"_blank");
+ });
 }
 /*PLANNER-END*/
 </script>
