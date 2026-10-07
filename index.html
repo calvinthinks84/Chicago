@@ -424,6 +424,9 @@ document.getElementById("tapLocBtn").addEventListener("click",function(){
 });
 initMap();
 if(window.navigator.standalone){ statusEl.textContent="Running as your Home Screen app. Tap Current location in Chicago to start walk-near details."; }
+function hsRefresh(){ try{ var sa=(window.navigator.standalone===true)||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches); if(!sa) return; if(sessionStorage.getItem("__hsR")) return; sessionStorage.setItem("__hsR","1"); location.reload(); }catch(e){} }
+hsRefresh();
+window.addEventListener("pageshow",function(e){ if(e.persisted){ try{ sessionStorage.removeItem("__hsR"); }catch(_){} hsRefresh(); } });
 var _rszT=null;
 function _fitMap(){ if(map&&map.invalidateSize) map.invalidateSize(); }
 window.addEventListener("resize",function(){ clearTimeout(_rszT); _rszT=setTimeout(_fitMap,200); });
