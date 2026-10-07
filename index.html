@@ -92,33 +92,32 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 <div class="wrap">
 
 <div class="bar">
-<button class="btn go" id="gpsBtn">📍 Use my location (live GPS)</button>
+<button class="btn go" id="gpsBtn">📍 Current location (live GPS)</button>
 <button class="btn" id="tapLocBtn">👆 Tap map to set my location</button>
 <button class="btn" id="unselBtn" style="display:none">✕ Unselect — show all pins</button>
-<label>Day <select id="daySel"><option value="all">All days</option><option value="tue">Tue 13</option><option value="wed">Wed 14 🎂</option><option value="thu">Thu 15</option><option value="fri">Fri 16</option><option value="sat">Sat 17</option></select></label>
 <label>Show <select id="catSel"><option value="all">Everything</option><option value="stop">Itinerary stops</option><option value="coffee">☕ Coffee</option><option value="boba">🧋 Boba</option><option value="snack">🍩 Snacks</option><option value="dog">🌭 Chicago dogs</option><option value="food">🍽️ Food</option><option value="landmark">🏛️ Landmarks</option><option value="saved">⭐ Saved</option></select></label>
 <label>Pop-up radius <select id="radSel"><option value="200">660 ft</option><option value="350" selected>1,150 ft</option><option value="600">1,970 ft</option></select></label>
 </div>
-<p id="status">Map is centered on your hotel. Tap <strong>Use my location</strong> once you're in Chicago — details appear below the map as you get near each pin. At home, tap the map to drop the 🚶 walker and preview.</p>
+<p id="status">Map is centered on your hotel. Tap <strong>Current location</strong> once you're in Chicago — details appear below the map as you get near each pin. At home, tap the map to drop the 🚶 walker and preview.</p>
 <div id="gpsHelp">
 <h3>📍 GPS is blocked in this view — here's how to get live location working</h3>
 <p style="margin:4px 0">The message <em>“Origin does not have permission to use Geolocation service”</em> means the preview frame around this page is blocking GPS — it's not your phone's GPS failing. Live GPS works when the page is opened <strong>directly in Safari or from your Home Screen icon</strong>, not inside the in-app preview.</p>
 <ol>
-<li><strong>Best fix:</strong> Open this app from your <strong>Home Screen “Chicago Map” icon</strong> (or open its link directly in Safari). Tap <strong>Use my location</strong> there and choose <strong>Allow While Using App</strong>.</li>
+<li><strong>Best fix:</strong> Open this app from your <strong>Home Screen “Chicago Map” icon</strong> (or open its link directly in Safari). Tap <strong>Current location</strong> there and choose <strong>Allow While Using App</strong>.</li>
 <li><strong>Check iPhone settings:</strong> Settings → Privacy &amp; Security → Location Services → <strong>On</strong>, then Safari Websites → <strong>While Using the App</strong> and turn <strong>Precise Location</strong> on.</li>
-<li><strong>In Safari:</strong> tap <strong>aA</strong> in the address bar → Website Settings → Location → <strong>Allow</strong>, then reload and tap Use my location again.</li>
+<li><strong>In Safari:</strong> tap <strong>aA</strong> in the address bar → Website Settings → Location → <strong>Allow</strong>, then reload and tap Current location again.</li>
 <li><strong>Right now, without GPS:</strong> tap <strong>👆 Tap map to set my location</strong> above, then tap anywhere on the map — or drag the 🚶 walker — to trigger the same walk-near pop-ups.</li>
 </ol>
 <p style="margin:4px 0"><button class="btn" id="gpsRetryBtn" style="font-size:13px;padding:6px 11px">↻ Try GPS again</button> <button class="btn" id="gpsHelpClose" style="font-size:13px;padding:6px 11px">Dismiss</button></p>
 </div>
+<div id="map"></div>
+<div class="panel" id="pinInfo"><h2>📍 Pin details</h2><div id="pinInfoBody"><p class="legend">Tap any pin on the map — its ⭐ must-try, 🏛️ history, and 🧭 show here, below the map.</p></div></div>
 <div class="panel" id="planPanel"><h2>🧭 Plan a ride — which bus or train?</h2>
 <label>Day <select class="planIn" id="planDayPick"><option value="">📅 Pick a day…</option><option value="tue">Tue Oct 13</option><option value="wed">Wed Oct 14 🎂</option><option value="thu">Thu Oct 15</option><option value="fri">Fri Oct 16</option><option value="sat">Sat Oct 17</option><option value="all">Any day</option></select></label>
 <label>Activity <select class="planIn" id="planActPick"><option value="">Pick a day first…</option></select></label>
 <label>Or type a place</label><div class="planPickWrap"><input class="planIn" id="planTo" placeholder="Where to? Type a place…" autocomplete="off"><ul id="planPick"></ul></div>
 <p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🍎 Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
 <div id="planOut"></div></div>
-<div id="map"></div>
-<div class="panel" id="pinInfo"><h2>📍 Pin details</h2><div id="pinInfoBody"><p class="legend">Tap any pin on the map — its ⭐ must-try, 🏛️ history, and 🧭 show here, below the map.</p></div></div>
 <div class="panel"><h2>🗓️ Itinerary — day by day</h2><p class="legend">Tap any underlined stop to jump to it on the map — its card has the ⭐ must-try, 🏛️ history, and 🧭 bus/train board &amp; exit.</p><details class="itday" open><summary>Tue Oct 13 — Arrival</summary><p class="itrow"><span class="itt">11:45am PT</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Fly Delta LAX → O'Hare</button></p><p class="itrow"><span class="itt">~5:45pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Land at ORD</button></p><p class="itrow"><span class="itt">~5:50pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Blue Line to Grand station, check in at the Fairfield Inn (~7pm)</button></p><p class="itrow"><span class="itt">~7:15pm</span> <button type="button" class="itgo" data-pin="Al's #1 Italian Beef + Chicago Dog">Dinner — Al's #1 Italian Beef + a Chicago dog</button></p></details><details class="itday"><summary>Wed Oct 14 — 🎂 Birthday day</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Millennium Park — The Bean">Millennium Park & The Bean first (fewest crowds)</button></p><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Maggie Daley Park — Play Garden">Maggie Daley Park Play Garden</button></p><p class="itrow"><span class="itt">~10:00am</span> <button type="button" class="itgo" data-pin="Molly's Cupcakes — River East 🎂">Birthday cupcakes — Molly's Cupcakes, River East</button></p><p class="itrow"><span class="itt">11:45am</span> <button type="button" class="itgo" data-pin="Chicago River Architecture Tour">Chicago River architecture tour (your booking)</button></p><p class="itrow"><span class="itt">After tour</span> <button type="button" class="itgo" data-pin="Devil Dawgs — Gold Coast">Chicago dog snack — Devil Dawgs, Gold Coast</button></p><p class="itrow"><span class="itt">1:30–3:30pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">Afternoon</span> <button type="button" class="itgo" data-pin="DuSable Bridge — Michigan Ave">Riverwalk stroll</button></p><p class="itrow"><span class="itt">Evening</span> <button type="button" class="itgo" data-pin="Pizz'Amici — birthday dinner 🎂">Birthday dinner — Pizz'Amici (reserved)</button></p></details><details class="itday"><summary>Thu Oct 15 — Zoo day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Lincoln Park Zoo (free, opens 10)</button></p><p class="itrow"><span class="itt">Bonus</span> <button type="button" class="itgo" data-pin="Peggy Notebaert Nature Museum">Peggy Notebaert Nature Museum — Butterfly Haven, 5 min away</button></p><p class="itrow"><span class="itt">Lunch</span> <button type="button" class="itgo" data-pin="The Wieners Circle — Lincoln Park">Chicago dogs — The Wieners Circle (main pick)</button></p><p class="itrow"><span class="itt">1:00–3:00pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">5:00pm</span> <button type="button" class="itgo" data-pin="Lou Malnati's — River North">Early dinner — Lou Malnati's deep dish (order a salad/apps right away, pies take ~45 min)</button></p><p class="itrow"><span class="itt">After</span> <button type="button" class="itgo" data-pin="Rainbow Cone at Gino's East">Rainbow Cone at Gino's East</button></p></details><details class="itday"><summary>Fri Oct 16 — Navy Pier day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Chicago Children's Museum — Navy Pier">Chicago Children's Museum — Pritzker Playspace first (toddlers-only, morning)</button></p><p class="itrow"><span class="itt">Also today</span> <button type="button" class="itgo" data-pin="Butterfly House — Navy Pier">Butterfly House — Incredible Insects, same pier</button></p><p class="itrow"><span class="itt">Midday</span> <span>Nap: stroller on the pier or a hotel reset (~15 min)</span></p><p class="itrow"><span class="itt">Early dinner</span> <button type="button" class="itgo" data-pin="Beatrix — River North">Beatrix or Eataly — walk-in, your call</button></p><p class="itrow"><span class="itt">Flex</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Fall Fest at Lincoln Park Zoo (Fri–Sun), if energy allows</button></p></details><details class="itday"><summary>Sat Oct 17 — Departure</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Eataly Chicago">Pack up, easy breakfast (Beatrix / Eataly)</button></p><p class="itrow"><span class="itt">11:45am–12pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Leave the hotel — Blue Line Grand → O'Hare (~45 min), arrive ~1:00pm</button></p><p class="itrow"><span class="itt">2:30pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Flight home from ORD</button></p></details></div>
 <div class="panel"><h2>📍 Nearest to you / the walker</h2><div id="nearList"><p class="legend">Start GPS (or drop the walker on the map) and this list sorts itself by distance.</p></div></div>
 </div>
@@ -219,8 +218,8 @@ function showToast(p,d){
  pinInfo.innerHTML="<p style='margin:2px 0'><strong>\uD83D\uDCE3 You're near — "+fmtD(d)+" away:</strong></p>"+popHTML(p);
 }
 function visible(p){
- var dv=document.getElementById("daySel").value, cv=document.getElementById("catSel").value;
- return (dv==="all"||p.day===dv||p.day==="all") && (cv==="all"||p.cat===cv);
+ var cv=document.getElementById("catSel").value;
+ return (cv==="all"||p.cat===cv);
 }
 function refreshMarkers(){
  if(!map)return;
@@ -260,7 +259,7 @@ function setWalker(lat,lng,label){
      walker.on("dragend",function(){
        var ll=walker.getLatLng();
        tapMode=false; var tb=document.getElementById("tapLocBtn"); if(tb){tb.classList.remove("active"); tb.textContent="👆 Tap map to set my location";}
-       setWalker(ll.lat,ll.lng,"You moved the walker — pop-ups check this spot. Drag it anytime, or tap Use my location for live GPS.");
+       setWalker(ll.lat,ll.lng,"You moved the walker — pop-ups check this spot. Drag it anytime, or tap Current location for live GPS.");
      });
    }
    else walker.setLatLng([lat,lng]);
@@ -309,14 +308,14 @@ function handleGpsErr(e){
    statusEl.textContent="GPS didn't come through ("+(e&&e.message?e.message:"unknown error")+"). See the help below, or tap the map to set your location manually.";
  }
  showGpsHelp();
- var btn=document.getElementById("gpsBtn"); if(btn) btn.textContent="📍 Use my location (live GPS)";
+ var btn=document.getElementById("gpsBtn"); if(btn) btn.textContent="📍 Current location (live GPS)";
  if(gpsWatchId!==null && navigator.geolocation){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; }
 }
 function startGps(){
  var btn=document.getElementById("gpsBtn");
  if(gpsWatchId!==null){
    try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){}
-   gpsWatchId=null; gpsHasFix=false; if(btn) btn.textContent="📍 Use my location (live GPS)";
+   gpsWatchId=null; gpsHasFix=false; if(btn) btn.textContent="📍 Current location (live GPS)";
    statusEl.textContent="Live GPS stopped. Your last position stays on the map — drag the 🚶 walker or tap the map button to move it.";
    return;
  }
@@ -348,18 +347,17 @@ var retryBtn=document.getElementById("gpsRetryBtn"); if(retryBtn) retryBtn.addEv
 var helpClose=document.getElementById("gpsHelpClose"); if(helpClose) helpClose.addEventListener("click",hideGpsHelp);
 document.getElementById("tapLocBtn").addEventListener("click",function(){
  
- if(gpsWatchId!==null){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; var gb=document.getElementById("gpsBtn"); if(gb) gb.textContent="📍 Use my location (live GPS)"; }
+ if(gpsWatchId!==null){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; var gb=document.getElementById("gpsBtn"); if(gb) gb.textContent="📍 Current location (live GPS)"; }
  tapMode=!tapMode;
  this.classList.toggle("active",tapMode);
  this.textContent=tapMode?"👆 Now tap anywhere on the map…":"👆 Tap map to set my location";
  statusEl.textContent=tapMode?"Tap anywhere on the map to drop yourself there — walk-near pop-ups will fire for pins within "+fmtRad(radius)+". You can also drag the 🚶 walker anytime.":"Manual location mode off. Drag the 🚶 walker anytime to move your position.";
  if(tapMode && map) map.scrollWheelZoom.enable();
 });
-document.getElementById("daySel").addEventListener("change",function(){ alerted={}; refreshMarkers(); if(myPos)checkProximity(myPos); });
 document.getElementById("catSel").addEventListener("change",function(){ alerted={}; refreshMarkers(); if(myPos)checkProximity(myPos); });
 document.getElementById("radSel").addEventListener("change",function(){ radius=+this.value; alerted={}; if(myPos)checkProximity(myPos); });
 initMap();
-if(window.navigator.standalone){ statusEl.textContent="Running as your Home Screen app. Tap Use my location in Chicago to start walk-near details."; }
+if(window.navigator.standalone){ statusEl.textContent="Running as your Home Screen app. Tap Current location in Chicago to start walk-near details."; }
 </script><script>
 document.querySelectorAll(".itgo").forEach(function(b){ b.addEventListener("click",function(){
  var nm=b.getAttribute("data-pin"); var idx=-1;
@@ -533,7 +531,7 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  }
  function plnGo(){
    var out=document.getElementById("planOut");
-   if(!(typeof myPos!=="undefined"&&myPos)){ out.innerHTML="<p>No live location yet — tap \u201CUse my location\u201D, or tap the map / drag the \uD83D\uDEB6 walker to set where you are, then try again.</p>"; return; }
+   if(!(typeof myPos!=="undefined"&&myPos)){ out.innerHTML="<p>No live location yet — tap \u201CCurrent location\u201D, or tap the map / drag the \uD83D\uDEB6 walker to set where you are, then try again.</p>"; return; }
    var f={n:"\uD83D\uDCCD Your current location",lat:myPos.lat,lng:myPos.lng};
    var txt=document.getElementById("planTo").value||"";
    var t=plnMatchPin(txt);
