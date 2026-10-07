@@ -142,7 +142,6 @@ html,body{overflow-x:clip}
 <div class="locRow"><button class="btn go" id="gpsBtn">📍 Current location</button><button class="btn" id="tapLocBtn">👆 Tap map to set my location</button></div>
 <button class="btn" id="unselBtn" style="display:none">✕ Unselect — show all pins</button>
 </div>
-<p id="status">Map is centered on your hotel. Tap <strong>Current location</strong> once you're in Chicago — details appear below the map as you get near each pin. At home, tap the map to drop the 🚶 walker and preview.</p>
 <div id="gpsHelp">
 <h3>📍 GPS is blocked in this view — here's how to get live location working</h3>
 <p style="margin:4px 0">The message <em>“Origin does not have permission to use Geolocation service”</em> means the preview frame around this page is blocking GPS — it's not your phone's GPS failing. Live GPS works when the page is opened <strong>directly in Safari or from your Home Screen icon</strong>, not inside the in-app preview.</p>
@@ -224,7 +223,7 @@ var ICONS={stop:"📍",coffee:"☕",boba:"🧋",snack:"🍩",dog:"🌭",food:"�
 var COLORS={stop:"#0b5cad",coffee:"#6f4e37",boba:"#e84393",snack:"#e67e22",dog:"#c0392b",food:"#2a9d8f",landmark:"#a67c00",saved:"#7c3aed"};
 var FILTER_CATS={food:["food","dog","snack"],drinks:["coffee","boba"],landmark:["landmark"],saved:["saved"],stop:["stop"]};
 var catFilter="all";
-var statusEl=document.getElementById("status"), pinInfo=document.getElementById("pinInfoBody"), nearList=document.getElementById("nearList");
+var statusEl=document.createElement("span"), pinInfo=document.getElementById("pinInfoBody"), nearList=document.getElementById("nearList");
 var map=null, markers={}, walker=null, radius=350;
 var myPos=null, alerted={}, simTimer=null, simSeg=0, simT=0;
 var selectedIdx=-1;
