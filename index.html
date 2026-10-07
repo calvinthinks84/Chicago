@@ -112,7 +112,8 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 <p style="margin:4px 0"><button class="btn" id="gpsRetryBtn" style="font-size:13px;padding:6px 11px">↻ Try GPS again</button> <button class="btn" id="gpsHelpClose" style="font-size:13px;padding:6px 11px">Dismiss</button></p>
 </div>
 <div class="panel" id="planPanel"><h2>🧭 Plan a ride — which bus or train?</h2>
-<label>Destination by day <select class="planIn" id="planDayPick"><option value="">📅 Pick from the itinerary…</option></select></label>
+<label>Day <select class="planIn" id="planDayPick"><option value="">📅 Pick a day…</option><option value="tue">Tue Oct 13</option><option value="wed">Wed Oct 14 🎂</option><option value="thu">Thu Oct 15</option><option value="fri">Fri Oct 16</option><option value="sat">Sat Oct 17</option><option value="all">Any day</option></select></label>
+<label>Activity <select class="planIn" id="planActPick"><option value="">Pick a day first…</option></select></label>
 <label>Or type a place</label><div class="planPickWrap"><input class="planIn" id="planTo" placeholder="Where to? Type a place…" autocomplete="off"><ul id="planPick"></ul></div>
 <p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🍎 Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
 <div id="planOut"></div></div>
@@ -495,16 +496,23 @@ function planRoute(fromPin,toPin){
  return {steps:steps,totalMin:total};
 }
 if(typeof document!=="undefined"&&document.getElementById&&document.getElementById("planBtn")){
- var dayPick=document.getElementById("planDayPick");
- if(dayPick){
-   var dayNames={tue:"Tue Oct 13",wed:"Wed Oct 14 \uD83C\uDF82",thu:"Thu Oct 15",fri:"Fri Oct 16",sat:"Sat Oct 17",all:"Any day — sights, food & more"};
-   ["tue","wed","thu","fri","sat","all"].forEach(function(d){
-     var grp=document.createElement("optgroup"); grp.label=dayNames[d]; var cnt=0;
-     POIS.forEach(function(p){ if(p.day===d){ var o=document.createElement("option"); o.value=p.n; o.textContent=p.n; grp.appendChild(o); cnt++; } });
-     if(cnt>0) dayPick.appendChild(grp);
-   });
-   dayPick.addEventListener("change",function(){ if(dayPick.value){ document.getElementById("planTo").value=dayPick.value; plnGo(); } });
+ var dayPick=document.getElementById("planDayPick"), actPick=document.getElementById("planActPick");
+ function plnFillActs(){
+   if(!actPick) return;
+   var d=dayPick?dayPick.value:"";
+   actPick.innerHTML="";
+   var ph=document.createElement("option"); ph.value="";
+   if(!d){ ph.textContent="Pick a day first\u2026"; actPick.appendChild(ph); actPick.disabled=true; return; }
+   ph.textContent="\uD83C\uDFAF Pick an activity\u2026"; actPick.appendChild(ph);
+   var list=[];
+   if(d==="sat"){ ["Fairfield Inn \u2014 your hotel (base)","\u2708\uFE0F O'Hare (ORD)","Beatrix \u2014 River North","Eataly Chicago"].forEach(function(nm){ var f=POIS.filter(function(x){return x.n===nm;})[0]; if(f) list.push(f); }); }
+   else POIS.forEach(function(p){ if(p.day===d) list.push(p); });
+   list.forEach(function(p){ var o=document.createElement("option"); o.value=p.n; o.textContent=p.n; actPick.appendChild(o); });
+   if(!list.length){ var o2=document.createElement("option"); o2.value=""; o2.textContent="Nothing pinned this day"; actPick.appendChild(o2); }
+   actPick.disabled=false;
  }
+ if(dayPick){ dayPick.addEventListener("change",plnFillActs); plnFillActs(); }
+ if(actPick) actPick.addEventListener("change",function(){ if(actPick.value){ document.getElementById("planTo").value=actPick.value; plnGo(); } });
  function plnMatchPin(txt){
    txt=(txt||"").trim(); if(!txt) return null;
    var low=txt.toLowerCase(),i;
@@ -514,6 +522,7 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  }
  function plnRender(f,t){
    var out=document.getElementById("planOut");
+   if(!t.cat&&typeof map!=="undefined"&&map) map.setView([t.lat,t.lng],15);
    var appleAddr=encodeURIComponent(t.n+(t.addr?" "+t.addr:"")+" Chicago IL");
    var r=planRoute(f,t);
    if(!r){ out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps \uD83C\uDF4E</a></p>"; out.scrollIntoView({behavior:"smooth",block:"nearest"}); return; }
@@ -527,7 +536,7 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
    var f={n:"\uD83D\uDCCD Your current location",lat:myPos.lat,lng:myPos.lng};
    var txt=document.getElementById("planTo").value||"";
    var t=plnMatchPin(txt);
-   if(t){ plnRender(f,t); return; }
+   if(t){ var six=POIS.indexOf(t); if(six>=0&&typeof showPin==="function") showPin(six,false); plnRender(f,t); return; }
    if(!txt.trim()){ out.innerHTML="<p>Pick a destination from the day dropdown, or type any business or place name.</p>"; return; }
    out.innerHTML="<p>\uD83D\uDD0E Searching for \u201C"+txt.trim()+"\u201D\u2026</p>";
    fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&viewbox=-87.95,42.05,-87.50,41.60&q="+encodeURIComponent(txt.trim()+", Chicago, IL"))
@@ -543,7 +552,7 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  var homeBtn=document.getElementById("planHome");
  if(homeBtn) homeBtn.addEventListener("click",function(){ document.getElementById("planTo").value=POIS[0].n; plnGo(); });
  var clearBtn=document.getElementById("planClear");
- if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; document.getElementById("planOut").innerHTML=""; });
+ if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; if(typeof plnFillActs==="function") plnFillActs(); document.getElementById("planOut").innerHTML=""; });
  var toEl=document.getElementById("planTo"), pickEl=document.getElementById("planPick");
  function hidePick(){ if(pickEl) pickEl.style.display="none"; }
  function renderPick(){
