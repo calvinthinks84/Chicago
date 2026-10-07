@@ -169,7 +169,7 @@ html,body{overflow-x:clip}
 </div>
 <footer>Built from your Chicago Toddler Trip Pack — Oct 13–17, 2026. Nothing here was booked by Forky.</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="pins.js?v=web1"></script>
+<script src="pins.js?v=hrs1"></script>
 <script>
 "use strict";
 /* ---------- Data: itinerary stops + suggestions. fits = why it matches the trip criteria ---------- */
@@ -238,7 +238,7 @@ function fmtD(m){var ft=m*3.28084; if(ft<1000) return Math.max(10,Math.round(ft/
 function fmtRad(m){return Math.round(m*3.28084/10)*10+" ft";}
 function popHTML(p){
  return "<div class='pop'><h3>"+(ICONS[p.cat]||"📍")+" "+p.n+"</h3>"
- +"<p>"+p.addr+(p.rate?" · "+p.rate:"")+(p.tel?"<br>📞 <a href='tel:+1"+p.tel.replace(/[^0-9]/g,"")+"'>"+p.tel+"</a>":"")+"</p><p>"+p.note+"</p>"
+ +"<p>"+p.addr+(p.rate?" · "+p.rate:"")+(p.tel?"<br>📞 <a href='tel:+1"+p.tel.replace(/[^0-9]/g,"")+"'>"+p.tel+"</a>":"")+(p.hours?"<br>🕐 "+p.hours:"")+"</p><p>"+p.note+"</p>"
  +(p.must?"<p>⭐ <strong>"+(p.cat==="landmark"?"Must-see:":"Must-try:")+"</strong> "+p.must+"</p>":"")
  +(p.hist?"<p>🏛️ <strong>History:</strong> "+p.hist+"</p>":"")
  +(p.arch?"<p>🏗️ <strong>Architecture:</strong> "+p.arch+"</p>":"")
