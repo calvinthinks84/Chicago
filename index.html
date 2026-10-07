@@ -329,11 +329,12 @@ function initMap(){
  if(typeof L==="undefined"){ statusEl.textContent="Map library couldn't load (offline?). The nearest-list and pop-ups need the map library + internet."; return; }
  map=L.map("map").setView([41.8945,-87.6280],13);
  var darkMq=window.matchMedia("(prefers-color-scheme: dark)");
- var baseOpts={maxZoom:20,subdomains:"abcd",attribution:"© OpenStreetMap contributors © CARTO"};
- var baseLight=L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",baseOpts);
- var baseDark=L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",baseOpts);
+ var baseOpts={maxZoom:16,attribution:"Esri, HERE, Garmin, © OpenStreetMap contributors"};
+ var esri="https://server.arcgisonline.com/ArcGIS/rest/services/";
+ var baseLight=L.layerGroup([L.tileLayer(esri+"Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",baseOpts),L.tileLayer(esri+"Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",baseOpts)]);
+ var baseDark=L.layerGroup([L.tileLayer(esri+"Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",baseOpts),L.tileLayer(esri+"Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",baseOpts)]);
  var baseCur=null;
- function applyBase(){ var want=darkMq.matches?baseDark:baseLight; if(baseCur===want) return; if(baseCur) map.removeLayer(baseCur); want.addTo(map); if(want.bringToBack) want.bringToBack(); baseCur=want; }
+ function applyBase(){ var want=darkMq.matches?baseDark:baseLight; if(baseCur===want) return; if(baseCur) map.removeLayer(baseCur); want.addTo(map); if(want.eachLayer) want.eachLayer(function(l){ if(l.bringToBack) l.bringToBack(); }); else if(want.bringToBack) want.bringToBack(); baseCur=want; }
  applyBase();
  if(darkMq.addEventListener) darkMq.addEventListener("change",applyBase);
  var pts=ROUTE.map(function(name){var p=POIS.filter(function(x){return x.n===name;})[0]; return [p.lat,p.lng];});
