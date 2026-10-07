@@ -681,18 +681,38 @@ function plnShowLive(ft){
  out.innerHTML+=plnCardHTML(g);
  plnEnrich(g,out);
 }
-function plnPhoton(f,txt,out){
- fetch("https://photon.komoot.io/api/?limit=1&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(txt.trim()+" Chicago"))
+function plnPhotonMulti(f,txt,out){
+ fetch("https://photon.komoot.io/api/?limit=5&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(txt.trim()+" Chicago"))
   .then(function(r){ return r.json(); })
   .then(function(pj){
-    var ft=pj&&pj.features&&pj.features[0];
-    if(!ft){ out.innerHTML="<p>Couldn\u2019t find \u201C"+plnEsc(txt.trim())+"\u201D in Chicago \u2014 check the spelling, or pick from the day dropdown.</p>"; return; }
-    var g=plnFeatureToPlace(ft,txt.trim());
-    plnRender(f,g);
-    out.innerHTML+=plnCardHTML(g);
-    plnEnrich(g,out);
+    var cands=[];
+    if(pj&&pj.features) pj.features.forEach(function(ft){ if(ft&&ft.properties&&ft.properties.name) cands.push(plnFeatureToPlace(ft,txt.trim())); });
+    plnShowCands(f,txt,cands,out);
   })
   .catch(function(){ out.innerHTML="<p>Place search needs an internet connection \u2014 try again in a moment, or pick from the day dropdown (works offline).</p>"; });
+}
+function plnMi(a,b){ var R=3958.8, dLa=(b.lat-a.lat)*Math.PI/180, dLo=(b.lng-a.lng)*Math.PI/180; var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(h)); }
+function plnGoPlace(f,g,out){
+ plnRender(f,g);
+ out.innerHTML+=plnCardHTML(g);
+ plnEnrich(g,out);
+}
+function plnShowCands(f,txt,cands,out){
+ var ded=[];
+ cands.forEach(function(c){ var dup=false; for(var i=0;i<ded.length;i++){ if(ded[i].n.toLowerCase()===c.n.toLowerCase()&&plnMi(ded[i],c)<0.1){ dup=true; break; } } if(!dup) ded.push(c); });
+ ded.sort(function(a,b){ return plnMi(f,a)-plnMi(f,b); });
+ ded=ded.slice(0,5);
+ if(!ded.length){ out.innerHTML="<p>Couldn\u2019t find \u201C"+plnEsc(txt.trim())+"\u201D in Chicago \u2014 check the spelling, or pick from the day dropdown.</p>"; return; }
+ if(ded.length===1){ plnGoPlace(f,ded[0],out); return; }
+ window.__cands=ded; window.__candFrom=f;
+ var h="<p style='margin:6px 0'><strong>"+ded.length+" places match \u201C"+plnEsc(txt.trim())+"\u201D \u2014 nearest first. Tap one:</strong></p>";
+ ded.forEach(function(c,i){
+   var d=plnMi(f,c);
+   var dtxt=d<0.1?Math.round(d*5280)+" ft":d.toFixed(1)+" mi";
+   h+="<div data-cand='"+i+"' style='border:1px solid var(--line);border-radius:10px;padding:9px 10px;margin:5px 0;cursor:pointer;background:var(--panel)'><strong>\uD83D\uDCCD "+plnEsc(c.n)+"</strong> \u00B7 "+dtxt+"<br><span style='color:var(--mut);font-size:13px'>"+plnEsc(c.full||"")+"</span></div>";
+ });
+ out.innerHTML=h;
+ out.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 function plnGo(){
    var out=document.getElementById("planOut");
@@ -703,20 +723,21 @@ function plnGo(){
    if(t){ var six=POIS.indexOf(t); if(six>=0&&typeof showPin==="function") showPin(six,false); plnRender(f,t); return; }
    if(!txt.trim()){ out.innerHTML="<p>Pick a destination from the day dropdown, or type any business or place name.</p>"; return; }
    out.innerHTML="<p>\uD83D\uDD0E Searching for \u201C"+txt.trim()+"\u201D\u2026</p>";
-   fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&extratags=1&namedetails=1&countrycodes=us&viewbox=-87.95,42.05,-87.50,41.60&q="+encodeURIComponent(txt.trim()+", Chicago, IL"))
+   fetch("https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&extratags=1&namedetails=1&countrycodes=us&viewbox=-87.95,42.05,-87.50,41.60&q="+encodeURIComponent(txt.trim()+", Chicago, IL"))
      .then(function(r){ return r.json(); })
      .then(function(j){
-       if(!j||!j.length){ plnPhoton(f,txt,out); return; }
-       var r0=j[0], xt=r0.extratags||{};
-       var g={n:(r0.namedetails&&r0.namedetails.name)||r0.display_name.split(",").slice(0,2).join(","),lat:parseFloat(r0.lat),lng:parseFloat(r0.lon)};
-       g.full=r0.display_name;
-       g.tel=xt["contact:phone"]||xt.phone||"";
-       g.web=plnWeb(xt["contact:website"]||xt.website||"");
-       g.hours=xt.opening_hours||"";
-       g.kind=(r0.type||"").replace(/_/g," ");
-       plnRender(f,g);
-       out.innerHTML+=plnCardHTML(g);
-       plnEnrich(g,out);
+       if(!j||!j.length){ plnPhotonMulti(f,txt,out); return; }
+       var cands=j.map(function(r0){
+         var xt=r0.extratags||{};
+         var g={n:(r0.namedetails&&r0.namedetails.name)||r0.display_name.split(",").slice(0,2).join(","),lat:parseFloat(r0.lat),lng:parseFloat(r0.lon)};
+         g.full=r0.display_name;
+         g.tel=xt["contact:phone"]||xt.phone||"";
+         g.web=plnWeb(xt["contact:website"]||xt.website||"");
+         g.hours=xt.opening_hours||"";
+         g.kind=(r0.type||"").replace(/_/g," ");
+         return g;
+       });
+       plnShowCands(f,txt,cands,out);
      })
      .catch(function(){ out.innerHTML="<p>Place search needs an internet connection — try again in a moment, or pick from the day dropdown (works offline).</p>"; });
  }
@@ -792,6 +813,17 @@ function plnGo(){
  });
 }
 /*PLANNER-END*/
+(function(){
+ var outEl=document.getElementById("planOut");
+ if(outEl) outEl.addEventListener("click",function(e){
+   var t=e.target;
+   while(t&&t!==outEl&&!(t.getAttribute&&t.getAttribute("data-cand"))) t=t.parentNode;
+   if(!t||t===outEl) return;
+   var ci=parseInt(t.getAttribute("data-cand"),10);
+   var c=(window.__cands||[])[ci];
+   if(c&&window.__candFrom) plnGoPlace(window.__candFrom,c,outEl);
+ });
+})();
 /*PLANNER-END*/
 </script>
 <script>
