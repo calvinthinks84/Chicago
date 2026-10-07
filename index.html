@@ -203,6 +203,7 @@ function popHTML(p){
 }
 function showPin(i,scroll){
  var p=POIS[i]; if(!p||!pinInfo) return;
+ if(typeof plnClearRoute==="function") plnClearRoute();
  selectedIdx=i; refreshMarkers();
  var ub=document.getElementById("unselBtn"); if(ub) ub.style.display="";
  if(map) map.panTo([p.lat,p.lng]);
@@ -214,6 +215,7 @@ function unselectPin(){
  selectedIdx=-1;
  if(catFilter!=="all"){ catFilter="all"; document.querySelectorAll(".fchip").forEach(function(b){ b.classList.toggle("on",b.getAttribute("data-f")==="all"); }); }
  refreshMarkers();
+ if(typeof plnClearRoute==="function") plnClearRoute();
  var ub=document.getElementById("unselBtn"); if(ub) ub.style.display="none";
  if(pinInfo) pinInfo.innerHTML="<p class='legend'>All pins are back on the map. Tap any pin — its ⭐ must-try and notes show here.</p>";
  if(statusEl) statusEl.textContent="Selection cleared — showing all pins.";
@@ -503,7 +505,8 @@ function planRoute(fromPin,toPin){
      i++;
    }
  }
- return {steps:steps,totalMin:total};
+ var coords=path.map(function(sg){ return N[sg.from].c; }); coords.push(N["@to"].c);
+ return {steps:steps,totalMin:total,coords:coords};
 }
 if(typeof document!=="undefined"&&document.getElementById&&document.getElementById("planBtn")){
  var dayPick=document.getElementById("planDayPick"), actPick=document.getElementById("planActPick");
@@ -530,14 +533,24 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
    for(i=0;i<POIS.length;i++) if(POIS[i].n.toLowerCase().indexOf(low)>=0) return POIS[i];
    return null;
  }
+ function plnClearRoute(){
+   if(window.__routeLine&&typeof map!=="undefined"&&map){ try{ map.removeLayer(window.__routeLine); }catch(_){ } window.__routeLine=null; }
+ }
+ function plnDrawRoute(coords){
+   if(typeof L==="undefined"||typeof map==="undefined"||!map||!coords||coords.length<2) return;
+   plnClearRoute();
+   window.__routeLine=L.polyline(coords.map(function(c){ return [c[0],c[1]]; }),{color:"#0b5cad",weight:5,opacity:0.85}).addTo(map);
+   try{ map.fitBounds(window.__routeLine.getBounds().pad(0.18)); }catch(_){ }
+ }
  function plnRender(f,t){
    var out=document.getElementById("planOut");
    if(!t.cat&&typeof map!=="undefined"&&map) map.setView([t.lat,t.lng],15);
    var appleAddr=encodeURIComponent(t.n+(t.addr?" "+t.addr:"")+" Chicago IL");
    var r=planRoute(f,t);
-   if(!r){ out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; out.scrollIntoView({behavior:"smooth",block:"nearest"}); return; }
+   if(!r){ plnClearRoute(); out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; out.scrollIntoView({behavior:"smooth",block:"nearest"}); return; }
    var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps 🗺️</a>";
    out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(x){return "<li>"+x+"</li>";}).join("")+"</ol>"+extra;
+   plnDrawRoute(r.coords);
    out.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
  function plnGo(){
