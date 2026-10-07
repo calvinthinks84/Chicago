@@ -18,7 +18,7 @@
   --bg:#f3f5f7; --ink:#182430; --muted:#66727e; --panel:#ffffff; --line:#e3e8ed;
   --btn-bg:#ffffff; --btn-line:#ccd4dc; --chip-bg:#edf3fa; --chip-line:#cfdff2;
   --tag-bg:#eff2f5; --tag-ink:#5d6b77; --toast-bg:#fff8e1; --warn-bg:#fff6e8;
-  --link:#0b5cad; --accent:#0b5cad; --hover:#eef4fa;
+  --link:#0b5cad; --accent:#0b5cad; --sel:#3f4750; --hover:#eef4fa;
   --shadow:0 1px 2px rgba(16,27,38,.05),0 6px 18px rgba(16,27,38,.06);
 }
 @media (prefers-color-scheme: dark){
@@ -26,7 +26,7 @@
     --bg:#11151a; --ink:#e9eef3; --muted:#9aa7b3; --panel:#1a2029; --line:#2b333f;
     --btn-bg:#222a35; --btn-line:#3b4655; --chip-bg:#1d2a44; --chip-line:#33466b;
     --tag-bg:#262f3c; --tag-ink:#c3cdd8; --toast-bg:#3a3319; --warn-bg:#3a2e18;
-    --link:#8fc3f5; --accent:#5aa5e8; --hover:#232c39;
+    --link:#8fc3f5; --accent:#5aa5e8; --sel:#5a6572; --hover:#232c39;
     --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3);
   }
   .leaflet-popup-content-wrapper{background:#1a2029;color:#e9eef3}
@@ -49,12 +49,12 @@ header p{margin:3px 0;font-size:13.5px;line-height:1.45;color:var(--mut)}
 .locRow .btn{flex:1 1 0;min-width:0}
 .btn{border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer;font-size:14px;font-weight:600;box-shadow:0 1px 2px rgba(16,27,38,.06);transition:background .15s,border-color .15s,transform .05s}
 .btn:active{transform:scale(.98)}
-.btn.go{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.go{background:var(--sel);color:#fff;border-color:var(--sel)}
 .btn.warn{background:var(--warn-bg)}
 .btn.active{background:#111827;color:#fff;border-color:#111827}
 .fchip{border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
-.fchip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-#planHome.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 1px 2px rgba(16,27,38,.06)}
+.fchip.on{background:var(--sel);color:#fff;border-color:var(--sel)}
+#planHome.on{background:var(--sel);color:#fff;border-color:var(--sel);box-shadow:0 1px 2px rgba(16,27,38,.06)}
 button,select{touch-action:manipulation}
 .btn:focus-visible,.itgo:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 select,.rad{font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink)}
