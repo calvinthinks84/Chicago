@@ -14,76 +14,77 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{
-  --bg:#fff8f0; --ink:#222; --muted:#666; --panel:#fff; --line:#f0e6da;
-  --btn-bg:#fff; --btn-line:#bbb; --chip-bg:#eef4ff; --chip-line:#cfe0f7;
-  --tag-bg:#f3f3f3; --tag-ink:#555; --toast-bg:#fff8e1; --warn-bg:#fff3e0;
-  --link:#0b5cad; --accent:#0b5cad;
+  --bg:#f3f5f7; --ink:#182430; --muted:#66727e; --panel:#ffffff; --line:#e3e8ed;
+  --btn-bg:#ffffff; --btn-line:#ccd4dc; --chip-bg:#edf3fa; --chip-line:#cfdff2;
+  --tag-bg:#eff2f5; --tag-ink:#5d6b77; --toast-bg:#fff8e1; --warn-bg:#fff6e8;
+  --link:#0b5cad; --accent:#0b5cad; --hover:#eef4fa;
+  --shadow:0 1px 2px rgba(16,27,38,.05),0 6px 18px rgba(16,27,38,.06);
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#16181d; --ink:#ece9e2; --muted:#a9a49a; --panel:#22252c; --line:#33363f;
-    --btn-bg:#262a33; --btn-line:#484e5c; --chip-bg:#1d2a44; --chip-line:#33466b;
-    --tag-bg:#2e333e; --tag-ink:#c9c4b8; --toast-bg:#3a3319; --warn-bg:#3d2f1a;
-    --link:#7db8f0; --accent:#4a9be0;
+    --bg:#11151a; --ink:#e9eef3; --muted:#9aa7b3; --panel:#1a2029; --line:#2b333f;
+    --btn-bg:#222a35; --btn-line:#3b4655; --chip-bg:#1d2a44; --chip-line:#33466b;
+    --tag-bg:#262f3c; --tag-ink:#c3cdd8; --toast-bg:#3a3319; --warn-bg:#3a2e18;
+    --link:#8fc3f5; --accent:#5aa5e8; --hover:#232c39;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3);
   }
-  .leaflet-popup-content-wrapper{background:#22252c;color:#ece9e2}
-  .leaflet-popup-tip{background:#22252c}
-  .leaflet-bar a{background:#262a33;color:#ece9e2;border-color:#484e5c}
+  .leaflet-popup-content-wrapper{background:#1a2029;color:#e9eef3}
+  .leaflet-popup-tip{background:#1a2029}
+  .leaflet-bar a{background:#222a35;color:#e9eef3;border-color:#3b4655}
 }
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-header{background:linear-gradient(135deg,#0b5cad,#2a9d8f);color:#fff;padding:14px 16px}
-header h1{margin:0 0 4px;font-size:21px}header p{margin:3px 0;font-size:13.5px;opacity:.96}
-.wrap{max-width:1000px;margin:0 auto;padding:10px}
-#map{height:62dvh;min-height:340px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.15);z-index:1}
-.bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
-.btn{border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);border-radius:999px;padding:8px 13px;cursor:pointer;font-size:14px;font-weight:600}
-.btn.go{background:#0b5cad;color:#fff;border-color:#0b5cad}
-.btn.warn{background:var(--warn-bg)}
-select,.rad{font-size:14px;padding:7px;border-radius:8px;border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink)}
-.chip{display:inline-block;background:var(--chip-bg);border:1px solid var(--chip-line);border-radius:999px;padding:3px 9px;font-size:12.5px;margin:2px 2px 2px 0}
-header .chip{background:rgba(255,255,255,.92);border-color:rgba(255,255,255,.6);color:#14406b;font-weight:600}
-.panel{background:var(--panel);border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:12px 14px;margin:10px 0}
-.panel h2{margin:0 0 8px;font-size:16px}
-.nearRow{cursor:pointer}.nearRow:active{background:#e8f1fa}.poi{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
-.poi:last-child{border-bottom:0}.poi .d{color:var(--muted);white-space:nowrap}
-.tag{font-size:11.5px;background:var(--tag-bg);border-radius:6px;padding:1px 6px;color:var(--tag-ink)}
-
-
-.pop h3{margin:0 0 3px;font-size:15px}.pop p{margin:3px 0;font-size:13px}
-.pop a{font-weight:700;color:var(--link)}
-
-#status{font-size:13px;color:var(--muted)}
-.legend{font-size:13px;color:var(--ink)}
+*{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{padding-bottom:env(safe-area-inset-bottom);overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent}
-header{padding-top:calc(14px + env(safe-area-inset-top))}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;padding-bottom:env(safe-area-inset-bottom);overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent}
+header{background:linear-gradient(135deg,#0a4a85,#0b5cad 55%,#0e6db8);color:#fff;padding:calc(16px + env(safe-area-inset-top)) 16px 16px}
+header h1{margin:0 0 4px;font-size:20px;font-weight:700;letter-spacing:-.01em}
+header p{margin:3px 0;font-size:13.5px;line-height:1.45;opacity:.94}
+.wrap{max-width:1000px;margin:0 auto;padding:12px}
+#map{height:62dvh;min-height:340px;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:1}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;align-items:center}
+.btn{border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);border-radius:999px;padding:9px 15px;cursor:pointer;font-size:14px;font-weight:600;box-shadow:0 1px 2px rgba(16,27,38,.06);transition:background .15s,border-color .15s,transform .05s}
+.btn:active{transform:scale(.98)}
+.btn.go{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.warn{background:var(--warn-bg)}
+.btn.active{background:#111827;color:#fff;border-color:#111827}
 button,select{touch-action:manipulation}
-#gpsHelp{display:none;background:var(--warn-bg);border:1.5px solid #e6a817;border-radius:12px;padding:12px 14px;margin:10px 0;font-size:14px;line-height:1.5}
+.btn:focus-visible,.itgo:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+select,.rad{font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink)}
+.chip{display:inline-block;background:var(--chip-bg);border:1px solid var(--chip-line);border-radius:999px;padding:3px 9px;font-size:12.5px;margin:2px 2px 2px 0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:14px 16px;margin:12px 0}
+.panel h2{margin:0 0 8px;font-size:15.5px;font-weight:700;letter-spacing:-.01em}
+.nearRow{cursor:pointer;border-radius:10px}
+.nearRow:hover{background:var(--hover)}
+.nearRow:active{background:var(--hover)}
+.poi{display:flex;justify-content:space-between;gap:10px;padding:9px 6px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.4}
+.poi:last-child{border-bottom:0}
+.poi .d{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.tag{font-size:11.5px;background:var(--tag-bg);border-radius:999px;padding:2px 8px;color:var(--tag-ink);white-space:nowrap}
+.pop h3{margin:0 0 3px;font-size:15.5px;letter-spacing:-.01em}
+.pop p{margin:3px 0;font-size:13.5px;line-height:1.45}
+.pop a{font-weight:700;color:var(--link);text-decoration:none}
+#status{font-size:13px;line-height:1.5;color:var(--muted);margin:2px 2px 0}
+.legend{font-size:13px;line-height:1.5;color:var(--ink)}
+#gpsHelp{display:none;background:var(--warn-bg);border:1px solid #e6a817;border-radius:16px;padding:14px 16px;margin:12px 0;font-size:14px;line-height:1.55;box-shadow:var(--shadow)}
 #gpsHelp h3{margin:0 0 6px;font-size:15px}
 #gpsHelp ol{margin:6px 0 6px 18px;padding:0}
 #gpsHelp li{margin:4px 0}
-.btn.active{background:#111;color:#fff;border-color:#111}
-.ctaGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
-@media(max-width:560px){.ctaGrid{grid-template-columns:1fr}}
-.ctaLink{display:flex;align-items:center;gap:8px;min-height:48px;padding:10px 12px;border:1.5px solid var(--chip-line);background:var(--chip-bg);border-radius:10px;color:var(--ink);text-decoration:none;font-size:14px;font-weight:600;line-height:1.3}
-.ctaLink small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
-.ctaLink:active{opacity:.75}
-.pop .ride{border-left:3px solid #2a9d8f;padding:2px 0 2px 8px}
-.itday{margin:6px 0}
-.itday summary{font-weight:700;cursor:pointer;padding:6px 0}
-.itrow{margin:4px 0 4px 6px}
-.itt{display:inline-block;min-width:104px;font-weight:700;color:var(--muted)}
-.itgo{background:none;border:none;padding:0;font:inherit;color:var(--link,#0b5cad);text-decoration:underline;text-align:left;cursor:pointer}
-.planIn{width:100%;box-sizing:border-box;padding:9px 10px;border:1.5px solid #b9c4cc;border-radius:9px;font:inherit;margin:3px 0 8px;background:#fff;color:#1c2733;-webkit-text-fill-color:#1c2733;color-scheme:light}
+.itday{margin:2px 0;border-bottom:1px solid var(--line)}
+.itday:last-child{border-bottom:0}
+.itday summary{font-weight:700;cursor:pointer;padding:9px 0;font-size:14.5px}
+.itrow{margin:4px 0 6px 6px;font-size:14px;line-height:1.45}
+.itt{display:inline-block;min-width:104px;font-weight:700;color:var(--muted);font-size:13px}
+.itgo{background:none;border:none;padding:0;font:inherit;color:var(--link);text-decoration:underline;text-underline-offset:2px;text-align:left;cursor:pointer}
+.planIn{width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid #b9c4cc;border-radius:11px;font:inherit;margin:3px 0 8px;background:#fff;color:#1c2733;-webkit-text-fill-color:#1c2733;color-scheme:light}
 .planIn::placeholder{color:#68737d;-webkit-text-fill-color:#68737d;opacity:1}
+#planOut{font-size:14.5px;line-height:1.5}
 #planOut ol{margin:6px 0;padding-left:22px}
-#planOut li{margin:6px 0}
+#planOut li{margin:7px 0}
 .planPickWrap{position:relative}
-#planPick{display:none;position:absolute;left:0;right:0;top:calc(100% - 4px);z-index:2000;background:#fff;color:#1c2733;-webkit-text-fill-color:#1c2733;border:1.5px solid #b9c4cc;border-radius:10px;list-style:none;margin:0;padding:4px;max-height:264px;overflow:auto;box-shadow:0 8px 24px rgba(0,0,0,.28)}
-#planPick li{padding:9px 10px;border-radius:7px;cursor:pointer;font-size:15px;margin:0}
+#planPick{display:none;position:absolute;left:0;right:0;top:calc(100% - 4px);z-index:2000;background:#fff;color:#1c2733;-webkit-text-fill-color:#1c2733;border:1px solid #ccd4dc;border-radius:12px;list-style:none;margin:0;padding:4px;max-height:264px;overflow:auto;box-shadow:0 12px 32px rgba(16,27,38,.22)}
+#planPick li{padding:9px 10px;border-radius:8px;cursor:pointer;font-size:15px;margin:0}
 #planPick li:hover{background:#eef4fa}
 #planPick .pa-addr{color:#68737d;-webkit-text-fill-color:#68737d;font-size:12.5px}
-footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
+footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px}
 @media print{#map,.bar{display:none}}
 </style></head><body>
 <header><div class="wrap"><h1>🗺️ Chicago Trip Map — Walk-Near Pop-ups</h1>
@@ -92,7 +93,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 <div class="wrap">
 
 <div class="bar">
-<button class="btn go" id="gpsBtn">📍 Current location (live GPS)</button>
+<button class="btn go" id="gpsBtn">📍 Current location</button>
 <button class="btn" id="tapLocBtn">👆 Tap map to set my location</button>
 <button class="btn" id="unselBtn" style="display:none">✕ Unselect — show all pins</button>
 </div>
@@ -305,14 +306,14 @@ function handleGpsErr(e){
    statusEl.textContent="GPS didn't come through ("+(e&&e.message?e.message:"unknown error")+"). See the help below, or tap the map to set your location manually.";
  }
  showGpsHelp();
- var btn=document.getElementById("gpsBtn"); if(btn) btn.textContent="📍 Current location (live GPS)";
+ var btn=document.getElementById("gpsBtn"); if(btn) btn.textContent="📍 Current location";
  if(gpsWatchId!==null && navigator.geolocation){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; }
 }
 function startGps(){
  var btn=document.getElementById("gpsBtn");
  if(gpsWatchId!==null){
    try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){}
-   gpsWatchId=null; gpsHasFix=false; if(btn) btn.textContent="📍 Current location (live GPS)";
+   gpsWatchId=null; gpsHasFix=false; if(btn) btn.textContent="📍 Current location";
    statusEl.textContent="Live GPS stopped. Your last position stays on the map — drag the 🚶 walker or tap the map button to move it.";
    return;
  }
@@ -344,7 +345,7 @@ var retryBtn=document.getElementById("gpsRetryBtn"); if(retryBtn) retryBtn.addEv
 var helpClose=document.getElementById("gpsHelpClose"); if(helpClose) helpClose.addEventListener("click",hideGpsHelp);
 document.getElementById("tapLocBtn").addEventListener("click",function(){
  
- if(gpsWatchId!==null){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; var gb=document.getElementById("gpsBtn"); if(gb) gb.textContent="📍 Current location (live GPS)"; }
+ if(gpsWatchId!==null){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; var gb=document.getElementById("gpsBtn"); if(gb) gb.textContent="📍 Current location"; }
  tapMode=!tapMode;
  this.classList.toggle("active",tapMode);
  this.textContent=tapMode?"👆 Now tap anywhere on the map…":"👆 Tap map to set my location";
