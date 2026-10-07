@@ -46,6 +46,8 @@ header p{margin:3px 0;font-size:13.5px;line-height:1.45;opacity:.94}
 .btn.go{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn.warn{background:var(--warn-bg)}
 .btn.active{background:#111827;color:#fff;border-color:#111827}
+.fchip{border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
+.fchip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 button,select{touch-action:manipulation}
 .btn:focus-visible,.itgo:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 select,.rad{font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink)}
@@ -113,8 +115,9 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px}
 <label>Day <select class="planIn" id="planDayPick"><option value="">📅 Pick a day…</option><option value="tue">Tue Oct 13</option><option value="wed">Wed Oct 14 🎂</option><option value="thu">Thu Oct 15</option><option value="fri">Fri Oct 16</option><option value="sat">Sat Oct 17</option><option value="all">Any day</option></select></label>
 <label>Activity <select class="planIn" id="planActPick"><option value="">Pick a day first…</option></select></label>
 <label>Or type a place</label><div class="planPickWrap"><input class="planIn" id="planTo" placeholder="Where to? Type a place…" autocomplete="off"><ul id="planPick"></ul></div>
-<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🍎 Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
+<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🗺️ Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
 <div id="planOut"></div></div>
+<div class="bar" id="filterBar" style="margin:10px 0 8px"><button class="fchip on" data-f="all">All locations</button><button class="fchip" data-f="food">🍽️ Food</button><button class="fchip" data-f="drinks">🥤 Drinks</button><button class="fchip" data-f="landmark">🏛️ Landmarks</button><button class="fchip" data-f="saved">⭐ Saved</button><button class="fchip" data-f="stop">📍 Stops</button></div>
 <div id="map"></div>
 <div class="panel" id="pinInfo"><h2>📍 Pin details</h2><div id="pinInfoBody"><p class="legend">Tap any pin on the map — its ⭐ must-try, 🏛️ history, and 🧭 show here, below the map.</p></div></div>
 <div class="panel"><h2>🗓️ Itinerary — day by day</h2><p class="legend">Tap any underlined stop to jump to it on the map — its card has the ⭐ must-try, 🏛️ history, and 🧭 bus/train board &amp; exit.</p><details class="itday" open><summary>Tue Oct 13 — Arrival</summary><p class="itrow"><span class="itt">11:45am PT</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Fly Delta LAX → O'Hare</button></p><p class="itrow"><span class="itt">~5:45pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Land at ORD</button></p><p class="itrow"><span class="itt">~5:50pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Blue Line to Grand station, check in at the Fairfield Inn (~7pm)</button></p><p class="itrow"><span class="itt">~7:15pm</span> <button type="button" class="itgo" data-pin="Al's #1 Italian Beef + Chicago Dog">Dinner — Al's #1 Italian Beef + a Chicago dog</button></p></details><details class="itday"><summary>Wed Oct 14 — 🎂 Birthday day</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Millennium Park — The Bean">Millennium Park & The Bean first (fewest crowds)</button></p><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Maggie Daley Park — Play Garden">Maggie Daley Park Play Garden</button></p><p class="itrow"><span class="itt">~10:00am</span> <button type="button" class="itgo" data-pin="Molly's Cupcakes — River East 🎂">Birthday cupcakes — Molly's Cupcakes, River East</button></p><p class="itrow"><span class="itt">11:45am</span> <button type="button" class="itgo" data-pin="Chicago River Architecture Tour">Chicago River architecture tour (your booking)</button></p><p class="itrow"><span class="itt">After tour</span> <button type="button" class="itgo" data-pin="Devil Dawgs — Gold Coast">Chicago dog snack — Devil Dawgs, Gold Coast</button></p><p class="itrow"><span class="itt">1:30–3:30pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">Afternoon</span> <button type="button" class="itgo" data-pin="DuSable Bridge — Michigan Ave">Riverwalk stroll</button></p><p class="itrow"><span class="itt">Evening</span> <button type="button" class="itgo" data-pin="Pizz'Amici — birthday dinner 🎂">Birthday dinner — Pizz'Amici (reserved)</button></p></details><details class="itday"><summary>Thu Oct 15 — Zoo day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Lincoln Park Zoo (free, opens 10)</button></p><p class="itrow"><span class="itt">Bonus</span> <button type="button" class="itgo" data-pin="Peggy Notebaert Nature Museum">Peggy Notebaert Nature Museum — Butterfly Haven, 5 min away</button></p><p class="itrow"><span class="itt">Lunch</span> <button type="button" class="itgo" data-pin="The Wieners Circle — Lincoln Park">Chicago dogs — The Wieners Circle (main pick)</button></p><p class="itrow"><span class="itt">1:00–3:00pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">5:00pm</span> <button type="button" class="itgo" data-pin="Lou Malnati's — River North">Early dinner — Lou Malnati's deep dish (order a salad/apps right away, pies take ~45 min)</button></p><p class="itrow"><span class="itt">After</span> <button type="button" class="itgo" data-pin="Rainbow Cone at Gino's East">Rainbow Cone at Gino's East</button></p></details><details class="itday"><summary>Fri Oct 16 — Navy Pier day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Chicago Children's Museum — Navy Pier">Chicago Children's Museum — Pritzker Playspace first (toddlers-only, morning)</button></p><p class="itrow"><span class="itt">Also today</span> <button type="button" class="itgo" data-pin="Butterfly House — Navy Pier">Butterfly House — Incredible Insects, same pier</button></p><p class="itrow"><span class="itt">Midday</span> <span>Nap: stroller on the pier or a hotel reset (~15 min)</span></p><p class="itrow"><span class="itt">Early dinner</span> <button type="button" class="itgo" data-pin="Beatrix — River North">Beatrix or Eataly — walk-in, your call</button></p><p class="itrow"><span class="itt">Flex</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Fall Fest at Lincoln Park Zoo (Fri–Sun), if energy allows</button></p></details><details class="itday"><summary>Sat Oct 17 — Departure</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Eataly Chicago">Pack up, easy breakfast (Beatrix / Eataly)</button></p><p class="itrow"><span class="itt">11:45am–12pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Leave the hotel — Blue Line Grand → O'Hare (~45 min), arrive ~1:00pm</button></p><p class="itrow"><span class="itt">2:30pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Flight home from ORD</button></p></details></div>
@@ -176,6 +179,8 @@ var ROUTE=["Fairfield Inn — your hotel (base)","Al's #1 Italian Beef + Chicago
 /* ---------- Map + behaviour ---------- */
 var ICONS={stop:"📍",coffee:"☕",boba:"🧋",snack:"🍩",dog:"🌭",food:"🍽️",landmark:"🏛️",saved:"⭐"};
 var COLORS={stop:"#0b5cad",coffee:"#6f4e37",boba:"#e84393",snack:"#e67e22",dog:"#c0392b",food:"#2a9d8f",landmark:"#a67c00",saved:"#7c3aed"};
+var FILTER_CATS={food:["food","dog","snack"],drinks:["coffee","boba"],landmark:["landmark"],saved:["saved"],stop:["stop"]};
+var catFilter="all";
 var statusEl=document.getElementById("status"), pinInfo=document.getElementById("pinInfoBody"), nearList=document.getElementById("nearList");
 var map=null, markers={}, walker=null, radius=350;
 var myPos=null, alerted={}, simTimer=null, simSeg=0, simT=0;
@@ -206,25 +211,35 @@ function showPin(i,scroll){
  if(scroll) document.getElementById("pinInfo").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 function unselectPin(){
- selectedIdx=-1; refreshMarkers();
+ selectedIdx=-1;
+ if(catFilter!=="all"){ catFilter="all"; document.querySelectorAll(".fchip").forEach(function(b){ b.classList.toggle("on",b.getAttribute("data-f")==="all"); }); }
+ refreshMarkers();
  var ub=document.getElementById("unselBtn"); if(ub) ub.style.display="none";
  if(pinInfo) pinInfo.innerHTML="<p class='legend'>All pins are back on the map. Tap any pin — its ⭐ must-try and notes show here.</p>";
  if(statusEl) statusEl.textContent="Selection cleared — showing all pins.";
 }
 var _ub=document.getElementById("unselBtn"); if(_ub) _ub.addEventListener("click",unselectPin);
+document.querySelectorAll(".fchip").forEach(function(b){ b.addEventListener("click",function(){ setFilter(b.getAttribute("data-f")); }); });
 function showToast(p,d){
  if(!pinInfo) return;
  pinInfo.innerHTML="<p style='margin:2px 0'><strong>\uD83D\uDCE3 You're near — "+fmtD(d)+" away:</strong></p>"+popHTML(p);
 }
 function visible(p){
- return true;
+ if(catFilter==="all") return true;
+ var cats=FILTER_CATS[catFilter]||[];
+ return cats.indexOf(p.cat)>=0;
+}
+function setFilter(f){
+ catFilter=f;
+ document.querySelectorAll(".fchip").forEach(function(b){ b.classList.toggle("on",b.getAttribute("data-f")===f); });
+ refreshMarkers(); if(typeof myPos!=="undefined"&&myPos) checkProximity(myPos);
 }
 function refreshMarkers(){
  if(!map)return;
  POIS.forEach(function(p,i){
    var show=(selectedIdx>=0)?(i===selectedIdx):visible(p);
    if(show&&!markers[i]){
-     var ic=L.divIcon({className:"",html:"<div style='background:"+COLORS[p.cat]+";color:#fff;border-radius:50%;width:30px;height:30px;line-height:30px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)'>"+(ICONS[p.cat]||"📍")+"</div>",iconSize:[30,30],iconAnchor:[15,15]});
+     var ic=L.divIcon({className:"",html:"<div style='background:#0b5cad;color:#fff;border-radius:50%;width:30px;height:30px;line-height:30px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)'>"+(ICONS[p.cat]||"📍")+"</div>",iconSize:[30,30],iconAnchor:[15,15]});
      markers[i]=L.marker([p.lat,p.lng],{icon:ic}).addTo(map).on("click",function(){ showPin(i,true); });
    } else if(!show&&markers[i]){ map.removeLayer(markers[i]); delete markers[i]; }
  });
@@ -520,8 +535,8 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
    if(!t.cat&&typeof map!=="undefined"&&map) map.setView([t.lat,t.lng],15);
    var appleAddr=encodeURIComponent(t.n+(t.addr?" "+t.addr:"")+" Chicago IL");
    var r=planRoute(f,t);
-   if(!r){ out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps \uD83C\uDF4E</a></p>"; out.scrollIntoView({behavior:"smooth",block:"nearest"}); return; }
-   var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps \uD83C\uDF4E</a>";
+   if(!r){ out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; out.scrollIntoView({behavior:"smooth",block:"nearest"}); return; }
+   var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps 🗺️</a>";
    out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(x){return "<li>"+x+"</li>";}).join("")+"</ol>"+extra;
    out.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
@@ -547,7 +562,7 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  var homeBtn=document.getElementById("planHome");
  if(homeBtn) homeBtn.addEventListener("click",function(){ document.getElementById("planTo").value=POIS[0].n; plnGo(); });
  var clearBtn=document.getElementById("planClear");
- if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; if(typeof plnFillActs==="function") plnFillActs(); document.getElementById("planOut").innerHTML=""; });
+ if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; if(typeof plnFillActs==="function") plnFillActs(); document.getElementById("planOut").innerHTML=""; if(typeof unselectPin==="function") unselectPin(); });
  var toEl=document.getElementById("planTo"), pickEl=document.getElementById("planPick");
  function hidePick(){ if(pickEl) pickEl.style.display="none"; }
  function renderPick(){
@@ -581,7 +596,7 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
  if(apBtn) apBtn.addEventListener("click",function(){
    var txt=((document.getElementById("planTo").value)||"").trim();
    var out=document.getElementById("planOut");
-   if(!txt){ out.innerHTML="<p>Pick or type a destination first \u2014 then tap \uD83C\uDF4E Directions.</p>"; return; }
+   if(!txt){ out.innerHTML="<p>Pick or type a destination first \u2014 then tap 🗺️ Directions.</p>"; return; }
    var pin=plnMatchPin(txt);
    var url=pin?gdir(pin):"https://maps.apple.com/?daddr="+encodeURIComponent(txt+" Chicago IL")+"&dirflg=t";
    window.open(url,"_blank");
