@@ -74,7 +74,8 @@ button,select{touch-action:manipulation}
 .itrow{margin:4px 0 4px 6px}
 .itt{display:inline-block;min-width:104px;font-weight:700;color:var(--muted)}
 .itgo{background:none;border:none;padding:0;font:inherit;color:var(--link,#0b5cad);text-decoration:underline;text-align:left;cursor:pointer}
-.planIn{width:100%;box-sizing:border-box;padding:9px 10px;border:1.5px solid #b9c4cc;border-radius:9px;font:inherit;margin:3px 0 8px;background:var(--surface,#fff);color:inherit}
+.planIn{width:100%;box-sizing:border-box;padding:9px 10px;border:1.5px solid #b9c4cc;border-radius:9px;font:inherit;margin:3px 0 8px;background:#fff;color:#1c2733;-webkit-text-fill-color:#1c2733;color-scheme:light}
+.planIn::placeholder{color:#68737d;-webkit-text-fill-color:#68737d;opacity:1}
 #planOut ol{margin:6px 0;padding-left:22px}
 #planOut li{margin:6px 0}
 footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
@@ -106,10 +107,9 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:14px}
 <p style="margin:4px 0"><button class="btn" id="gpsRetryBtn" style="font-size:13px;padding:6px 11px">↻ Try GPS again</button> <button class="btn" id="gpsHelpClose" style="font-size:13px;padding:6px 11px">Dismiss</button></p>
 </div>
 <div class="panel" id="planPanel"><h2>🧭 Plan a ride — which bus or train?</h2>
-<p class="legend">Always starts from <strong>your current location</strong> (GPS, or wherever the 🚶 walker is). Pick a destination by day, or type a place — and get the exact bus or train to board, and where to get off.</p>
 <label>Destination by day <select class="planIn" id="planDayPick"><option value="">📅 Pick from the itinerary…</option></select></label>
 <label>Or type a place <input class="planIn" id="planTo" list="pinNames" placeholder="Where to? Type a place…" autocomplete="off"></label>
-<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home — route to the hotel</button></p>
+<p style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn go" id="planHome">🏠 Home</button></p>
 <datalist id="pinNames"></datalist>
 <div id="planOut"></div></div>
 <div id="map"></div>
@@ -573,24 +573,39 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
    });
    dayPick.addEventListener("change",function(){ if(dayPick.value){ document.getElementById("planTo").value=dayPick.value; plnGo(); } });
  }
- function plnResolveDest(txt){
-   txt=(txt||"").trim();
-   if(!txt) return {err:"Pick a destination from the day dropdown, or type a place name."};
+ function plnMatchPin(txt){
+   txt=(txt||"").trim(); if(!txt) return null;
    var low=txt.toLowerCase(),i;
    for(i=0;i<POIS.length;i++) if(POIS[i].n.toLowerCase()===low) return POIS[i];
    for(i=0;i<POIS.length;i++) if(POIS[i].n.toLowerCase().indexOf(low)>=0) return POIS[i];
-   return {err:"Couldn't find \u201C"+txt+"\u201D — pick a name from the dropdown or the list that pops up as you type."};
+   return null;
+ }
+ function plnRender(f,t){
+   var out=document.getElementById("planOut");
+   var appleAddr=encodeURIComponent(t.n+(t.addr?" "+t.addr:"")+" Chicago IL");
+   var r=planRoute(f,t);
+   if(!r){ out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps \uD83C\uDF4E</a></p>"; out.scrollIntoView({behavior:"smooth",block:"nearest"}); return; }
+   var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps \uD83C\uDF4E</a>";
+   out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(x){return "<li>"+x+"</li>";}).join("")+"</ol>"+extra;
+   out.scrollIntoView({behavior:"smooth",block:"nearest"});
  }
  function plnGo(){
    var out=document.getElementById("planOut");
    if(!(typeof myPos!=="undefined"&&myPos)){ out.innerHTML="<p>No live location yet — tap \u201CUse my location\u201D, or tap the map / drag the \uD83D\uDEB6 walker to set where you are, then try again.</p>"; return; }
    var f={n:"\uD83D\uDCCD Your current location",lat:myPos.lat,lng:myPos.lng};
-   var t=plnResolveDest(document.getElementById("planTo").value);
-   if(t.err){ out.innerHTML="<p>"+t.err+"</p>"; return; }
-   var r=planRoute(f,t);
-   if(!r){ out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+" — check its \uD83E\uDDED Getting there card, or a rideshare may be easier for that pair.</p>"; return; }
-   out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(x){return "<li>"+x+"</li>";}).join("")+"</ol>";
-   out.scrollIntoView({behavior:"smooth",block:"nearest"});
+   var txt=document.getElementById("planTo").value||"";
+   var t=plnMatchPin(txt);
+   if(t){ plnRender(f,t); return; }
+   if(!txt.trim()){ out.innerHTML="<p>Pick a destination from the day dropdown, or type any business or place name.</p>"; return; }
+   out.innerHTML="<p>\uD83D\uDD0E Searching for \u201C"+txt.trim()+"\u201D\u2026</p>";
+   fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&viewbox=-87.95,42.05,-87.50,41.60&q="+encodeURIComponent(txt.trim()+", Chicago, IL"))
+     .then(function(r){ return r.json(); })
+     .then(function(j){
+       if(!j||!j.length){ out.innerHTML="<p>Couldn\u2019t find \u201C"+txt.trim()+"\u201D in Chicago — check the spelling, or pick from the day dropdown.</p>"; return; }
+       var g={n:j[0].display_name.split(",").slice(0,2).join(","),lat:parseFloat(j[0].lat),lng:parseFloat(j[0].lon)};
+       plnRender(f,g);
+     })
+     .catch(function(){ out.innerHTML="<p>Place search needs an internet connection — try again in a moment, or pick from the day dropdown (works offline).</p>"; });
  }
  document.getElementById("planBtn").addEventListener("click",plnGo);
  var homeBtn=document.getElementById("planHome");
