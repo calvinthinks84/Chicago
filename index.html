@@ -40,7 +40,7 @@ header{background:linear-gradient(135deg,#0a4a85,#0b5cad 55%,#0e6db8);color:#fff
 header h1{margin:0 0 4px;font-size:20px;font-weight:700;letter-spacing:-.01em}
 header p{margin:3px 0;font-size:13.5px;line-height:1.45;opacity:.94}
 #wxStrip{display:flex;gap:6px;flex-wrap:nowrap;margin-top:9px}
-.wxd{flex:1 1 0;min-width:0}
+.wxd{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden}
 .wxd{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:5px 9px;font-size:12.5px;line-height:1.4;color:#fff}
 .wrap{max-width:1000px;margin:0 auto;padding:12px}
 #map{height:clamp(320px,58dvh,560px);border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:1}
@@ -694,7 +694,7 @@ if(typeof document!=="undefined"&&document.getElementById&&document.getElementBy
      var i=d.time.indexOf(w[1]); if(i<0) return;
      var parts=d.time[i].split("-"); var dt=new Date(+parts[0],+parts[1]-1,+parts[2]);
      var bday=(d.time[i]==="2026-10-14")?" \uD83C\uDF82":"";
-     h+="<span class='wxd'><b>"+w[0]+" · "+DN[dt.getDay()]+" "+(+parts[2])+"</b>"+bday+" "+(EM[d.weathercode[i]]||"\uD83C\uDF21\uFE0F")+" "+Math.round(d.temperature_2m_max[i])+"\u00B0/"+Math.round(d.temperature_2m_min[i])+"\u00B0"+((d.precipitation_probability_max&&d.precipitation_probability_max[i]!=null)?"<br>\uD83D\uDCA7 "+d.precipitation_probability_max[i]+"%":"")+"</span>";
+     h+="<span class='wxd'><b>"+w[0]+" \u00B7 "+DN[dt.getDay()]+" "+(+parts[2])+"</b>"+bday+"<br>"+(EM[d.weathercode[i]]||"\uD83C\uDF21\uFE0F")+" "+Math.round(d.temperature_2m_max[i])+"\u00B0/"+Math.round(d.temperature_2m_min[i])+"\u00B0"+((d.precipitation_probability_max&&d.precipitation_probability_max[i]!=null)?" \u00B7 \uD83D\uDCA7 "+d.precipitation_probability_max[i]+"%":"")+"</span>";
    });
    el.innerHTML=h||"<span class='wxd'>\uD83C\uDF26\uFE0F Chicago weather unavailable right now.</span>";
  })
