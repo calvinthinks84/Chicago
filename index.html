@@ -140,7 +140,7 @@ html,body{overflow-x:clip}
 <div class="wrap">
 
 <div class="bar">
-<div class="locRow"><button class="btn go" id="gpsBtn">📍 Current location</button><button class="btn" id="tapLocBtn">👆 Tap map to set my location</button></div>
+<div class="locRow"><button class="btn go" id="gpsBtn">📍 Current location</button><button class="btn" id="tapLocBtn">👆 Pin drop</button></div>
 <button class="btn" id="unselBtn" style="display:none">✕ Unselect — show all pins</button>
 </div>
 <div id="gpsHelp">
@@ -150,7 +150,7 @@ html,body{overflow-x:clip}
 <li><strong>Best fix:</strong> Open this app from your <strong>Home Screen “Chicago Map” icon</strong> (or open its link directly in Safari). Tap <strong>Current location</strong> there and choose <strong>Allow While Using App</strong>.</li>
 <li><strong>Check iPhone settings:</strong> Settings → Privacy &amp; Security → Location Services → <strong>On</strong>, then Safari Websites → <strong>While Using the App</strong> and turn <strong>Precise Location</strong> on.</li>
 <li><strong>In Safari:</strong> tap <strong>aA</strong> in the address bar → Website Settings → Location → <strong>Allow</strong>, then reload and tap Current location again.</li>
-<li><strong>Right now, without GPS:</strong> tap <strong>👆 Tap map to set my location</strong> above, then tap anywhere on the map — or drag the 🚶 walker — to trigger the same walk-near pop-ups.</li>
+<li><strong>Right now, without GPS:</strong> tap <strong>👆 Pin drop</strong> above, then tap anywhere on the map — or drag the 🚶 walker — to trigger the same walk-near pop-ups.</li>
 </ol>
 <p style="margin:4px 0"><button class="btn" id="gpsRetryBtn" style="font-size:13px;padding:6px 11px">↻ Try GPS again</button> <button class="btn" id="gpsHelpClose" style="font-size:13px;padding:6px 11px">Dismiss</button></p>
 </div>
@@ -318,7 +318,7 @@ function setWalker(lat,lng,label){
      walker=L.marker([lat,lng],{draggable:true,icon:L.divIcon({className:"",html:"<div style='background:#111;color:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)'>🚶</div>",iconSize:[28,28],iconAnchor:[14,14]})}).addTo(map);
      walker.on("dragend",function(){
        var ll=walker.getLatLng();
-       tapMode=false; var tb=document.getElementById("tapLocBtn"); if(tb){tb.classList.remove("active"); tb.textContent="👆 Tap map to set my location";}
+       tapMode=false; var tb=document.getElementById("tapLocBtn"); if(tb){tb.classList.remove("active"); tb.textContent="👆 Pin drop";}
        setWalker(ll.lat,ll.lng,"You moved the walker — pop-ups check this spot. Drag it anytime, or tap Current location for live GPS.");
      });
    }
@@ -337,7 +337,7 @@ function initMap(){
  L.polyline(pts,{color:"#0b5cad",weight:3,opacity:.55,dashArray:"6 6"}).addTo(map);
  map.on("click",function(e){
    if(!tapMode) return;
-   tapMode=false; var tb=document.getElementById("tapLocBtn"); if(tb){tb.classList.remove("active"); tb.textContent="👆 Tap map to set my location";}
+   tapMode=false; var tb=document.getElementById("tapLocBtn"); if(tb){tb.classList.remove("active"); tb.textContent="👆 Pin drop";}
    setWalker(e.latlng.lat,e.latlng.lng,"Your location is set to where you tapped — pop-ups fired for pins nearby. Drag the 🚶 walker to move it, or tap the button again to re-place it.");
  });
  refreshMarkers();
@@ -358,8 +358,8 @@ function handleGpsErr(e){
  var code = e ? e.code : 0;
  if(code===1 || blockedByOrigin){
    statusEl.textContent = inFrame
-     ? "GPS is blocked in this preview — the frame around the page doesn't have geolocation permission. Open from your Home Screen icon or directly in Safari for live GPS, or use “Tap map to set my location” below."
-     : "Location permission is off for this site. Allow it in Settings / Safari Website Settings (see help below), then try again — or use “Tap map to set my location”.";
+     ? "GPS is blocked in this preview — the frame around the page doesn't have geolocation permission. Open from your Home Screen icon or directly in Safari for live GPS, or use “Pin drop” below."
+     : "Location permission is off for this site. Allow it in Settings / Safari Website Settings (see help below), then try again — or use “Pin drop”.";
  } else if(code===3){
    statusEl.textContent="GPS timed out — make sure Location Services is on and you're not in Airplane Mode, then try again. You can also tap the map to set your location manually.";
  } else if(code===2){
@@ -379,8 +379,8 @@ function startGps(){
    statusEl.textContent="Live GPS stopped. Your last position stays on the map — drag the 🚶 walker or tap the map button to move it.";
    return;
  }
- if(!navigator.geolocation){ statusEl.textContent="This browser doesn't expose GPS to the page. Use Tap map to set my location instead."; showGpsHelp(); return; }
- if(window.isSecureContext===false){ statusEl.textContent="GPS needs a secure (https) page. Open the Home Screen / Safari version, or use Tap map to set my location."; showGpsHelp(); return; }
+ if(!navigator.geolocation){ statusEl.textContent="This browser doesn't expose GPS to the page. Use Pin drop instead."; showGpsHelp(); return; }
+ if(window.isSecureContext===false){ statusEl.textContent="GPS needs a secure (https) page. Open the Home Screen / Safari version, or use Pin drop."; showGpsHelp(); return; }
  
  statusEl.textContent="Asking for location… if a prompt appears, choose Allow While Using App, then walk — pop-ups fire inside the radius.";
  if(btn) btn.textContent="📍 Locating…";
@@ -410,7 +410,7 @@ document.getElementById("tapLocBtn").addEventListener("click",function(){
  if(gpsWatchId!==null){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; var gb=document.getElementById("gpsBtn"); if(gb) gb.textContent="📍 Current location"; }
  tapMode=!tapMode;
  this.classList.toggle("active",tapMode);
- this.textContent=tapMode?"👆 Now tap anywhere on the map…":"👆 Tap map to set my location";
+ this.textContent=tapMode?"👆 Now tap anywhere on the map…":"👆 Pin drop";
  statusEl.textContent=tapMode?"Tap anywhere on the map to drop yourself there — walk-near pop-ups will fire for pins within "+fmtRad(radius)+". You can also drag the 🚶 walker anytime.":"Manual location mode off. Drag the 🚶 walker anytime to move your position.";
  if(tapMode && map) map.scrollWheelZoom.enable();
 });
