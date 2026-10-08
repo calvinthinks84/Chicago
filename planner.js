@@ -389,14 +389,20 @@ function plnFetchJSON(url,want){
   if(cfg.relay) tries.push(cfg.relay+"?u="+encodeURIComponent(url));
   tries.push("https://api.codetabs.com/v1/proxy?quest="+encodeURIComponent(url));
   tries.push("https://api.allorigins.win/raw?url="+encodeURIComponent(url));
-  tries.push("https://corsproxy.io/?url="+encodeURIComponent(url));
-  function attempt(i){
-    if(i>=tries.length) return Promise.reject(new Error("all transports failed"));
-    var ctl=("AbortController" in window)?new AbortController():null;
-    var to=ctl?setTimeout(function(){ ctl.abort(); },9000):null;
-    return fetch(tries[i],ctl?{signal:ctl.signal}:undefined).then(function(r){ if(to) clearTimeout(to); if(!r.ok) throw new Error("http "+r.status); return r.text(); }).then(function(tx){ var j=JSON.parse(tx); if(want&&!(want in j)) throw new Error("wrong shape"); return j; }).catch(function(e){ if(to) clearTimeout(to); return attempt(i+1); });
-  }
-  return attempt(0);
+  return new Promise(function(resolve,reject){
+    var left=tries.length, done=false, ctls=[];
+    function fail(){ left--; if(left<=0&&!done){ done=true; reject(new Error("all transports failed")); } }
+    tries.forEach(function(tu){
+      var settled=false;
+      var ctl=("AbortController" in window)?new AbortController():null; ctls.push(ctl);
+      var to=ctl?setTimeout(function(){ if(!settled){ settled=true; try{ ctl.abort(); }catch(e){} fail(); } },9000):null;
+      fetch(tu,ctl?{signal:ctl.signal}:undefined).then(function(r){ if(!r.ok) throw new Error("http "+r.status); return r.text(); }).then(function(tx){
+        var j=JSON.parse(tx); if(want&&!(want in j)) throw new Error("wrong shape");
+        if(settled) return; settled=true; if(to) clearTimeout(to);
+        if(!done){ done=true; ctls.forEach(function(c){ if(c&&c!==ctl){ try{ c.abort(); }catch(e){} } }); resolve(j); }
+      }).catch(function(){ if(settled) return; settled=true; if(to) clearTimeout(to); fail(); });
+    });
+  });
 }
 function plnChiMs(str){
   var m=String(str||"").match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/);
@@ -418,12 +424,13 @@ function plnDirTokens(dir){
 }
 function plnLiveFill(rides,quiet){
   var cfg=plnLiveCfg(); if(!cfg.relay&&!cfg.train&&!cfg.bus) return;
+  window.__liveRides=rides; if(!window.__liveCache) window.__liveCache={};
   rides.forEach(function(rd,j){
     var span=document.getElementById("liveT"+j); if(!span) return;
     if(rd.mode==="train"){
       if(!cfg.relay&&!cfg.train) return;
       var mid=(typeof PLN_TRAIN_ID!=="undefined")?PLN_TRAIN_ID[rd.node]:null; if(!mid) return;
-      if(!quiet) span.textContent="⏱ Fetching live trains…";
+      var ckeyT="T|"+mid+"|"+rd.dir; if(window.__liveCache[ckeyT]) span.textContent=window.__liveCache[ckeyT]; else if(!quiet) span.textContent="⏱ Fetching live trains…";
       var url="https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx?mapid="+mid+"&max=6&outputType=JSON"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.train));
       plnFetchJSON(url,"ctatt").then(function(j2){
         if(j2.ctatt.errCd&&j2.ctatt.errCd!=="0"){ span.textContent="⏱ CTA rejected the train key — check it under Live times → Edit"; return; }
@@ -440,13 +447,13 @@ function plnLiveFill(rides,quiet){
           var m=Math.round((plnChiMs(e.arrT)-now)/60000);
           parts.push(m<=0?"due":m+" min");
         });
-        span.textContent="🔴 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains "+parts.join(", ")+(dly?" · delays reported":"");
+        span.textContent="🔴 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains "+parts.join(", ")+(dly?" · delays reported":""); window.__liveCache[ckeyT]=span.textContent;
       }).catch(function(){ span.textContent="⏱ Live times unavailable right now"; });
     } else {
       if(!cfg.relay&&!cfg.bus) return;
       var byDir=(typeof PLN_BUS_ID!=="undefined")?PLN_BUS_ID[rd.node+"|"+rd.route]:null;
       var stpid=byDir?byDir[rd.dir]:null; if(!stpid) return;
-      if(!quiet) span.textContent="⏱ Fetching live buses…";
+      var ckeyB="B|"+stpid+"|"+rd.route; if(window.__liveCache[ckeyB]) span.textContent=window.__liveCache[ckeyB]; else if(!quiet) span.textContent="⏱ Fetching live buses…";
       var url2="https://www.ctabustracker.com/bustime/api/v2/getpredictions?stpid="+stpid+"&format=json"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.bus));
       plnFetchJSON(url2,"bustime-response").then(function(j2){
         var berr=j2["bustime-response"].error; if(berr&&berr.length){ span.textContent="⏱ CTA rejected the bus key — check it under Live times → Edit"; return; }
@@ -455,12 +462,12 @@ function plnLiveFill(rides,quiet){
         if(!mine.length){ span.textContent="⏱ No live buses reported right now"; return; }
         var parts=[], dly=false;
         mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; parts.push(p.prdctdn==="DUE"?"due":p.prdctdn+" min"); });
-        span.textContent="🔴 Live: next #"+rd.route+" buses "+parts.join(", ")+(dly?" · delayed":"");
+        span.textContent="🔴 Live: next #"+rd.route+" buses "+parts.join(", ")+(dly?" · delayed":""); window.__liveCache[ckeyB]=span.textContent;
       }).catch(function(){ span.textContent="⏱ Live times unavailable right now"; });
     }
   });
   if(window.__liveTimer) clearInterval(window.__liveTimer);
-  window.__liveTimer=setInterval(function(){ if(document.getElementById("liveT0")) plnLiveFill(rides,true); else { clearInterval(window.__liveTimer); window.__liveTimer=null; } },45000);
+  window.__liveTimer=setInterval(function(){ if(document.getElementById("liveT0")) plnLiveFill(rides,true); else { clearInterval(window.__liveTimer); window.__liveTimer=null; } },20000);
 }
 /* Live-times setup row (keys live only on this device) */
 function plnLiveSetupRender(){
@@ -487,4 +494,5 @@ function plnLiveForm(){
   });
   document.getElementById("liveCancel").addEventListener("click",plnLiveSetupRender);
 }
+if(typeof document!=="undefined"&&document.addEventListener&&!window.__liveVisHook){ window.__liveVisHook=1; document.addEventListener("visibilitychange",function(){ if(!document.hidden&&window.__liveRides&&document.getElementById("liveT0")) plnLiveFill(window.__liveRides,true); }); }
 if(typeof document!=="undefined"&&document.getElementById&&document.getElementById("liveSetup")) plnLiveSetupRender();
