@@ -177,6 +177,7 @@ if(typeof document!=="undefined"&&document.getElementById){
    if(!r){ plnClearRoute(); out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; return; }
    var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps 🗺️</a>";
    out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'></span>":"")+"</li>"; }).join("")+"</ol>"+extra;
+   window.__lastRoute={res:r,from:f,to:t}; var nb=document.getElementById("navBtn"); if(nb) nb.style.display="block"; if(window.__nav&&window.__nav.on&&!window.__navRerender) plnNavEnd();
    plnDrawRoute(r.coords);
    if(r.rides&&r.rides.length&&typeof plnLiveFill==="function") plnLiveFill(r.rides,false);
    if(r.walkLegs&&r.walkLegs.length&&typeof plnOsrmEnrich==="function") plnOsrmEnrich(r);
@@ -688,12 +689,158 @@ function plnOsrmEnrich(res){
       if(subs.length>9) subs=subs.slice(0,9);
       li.innerHTML=plnEsc(head)+(subs.length?("<ul class='walkSub'>"+subs.map(function(x){ return "<li>"+plnEsc(x)+"</li>"; }).join("")+"</ul>"):"");
       var geo=(rt.geometry&&rt.geometry.coordinates)?rt.geometry.coordinates.map(function(p){ return [p[1],p[0]]; }):[];
+      leg.maneuvers=raw.map(function(st){ var ins=osrmInstr(st); var mv=(st.maneuver||{}).location; return (ins&&mv)?{lat:mv[1],lng:mv[0],text:ins}:null; }).filter(Boolean);
       if(geo.length>1){
         var idx=leg.ci;
         base.splice.apply(base,[idx,2].concat(geo));
+        leg.geoN=geo.length;
         res.walkLegs.forEach(function(o){ if(o!==leg&&o.ci>idx) o.ci+=geo.length-2; });
+        res.coords=base;
         plnDrawRoute(base);
       }
     }).catch(function(){ if(timer) clearTimeout(timer); });
   });
+}
+
+/* ---- Navigation mode: live GPS follow, advancing steps, voice, reroute ---- */
+var PLN_NAV={on:false,watch:null,seq:[],idx:0,res:null,dest:null,lastPos:null,offTicks:0,lastReroute:0,lastPan:0,dot:null,voice:(function(){ try{ return localStorage.getItem("chiNavVoice")!=="0"; }catch(e){ return true; } })()};
+window.__nav=PLN_NAV;
+function plnNavEl(id){ return document.getElementById(id); }
+function plnNavSpeak(txt){ if(!PLN_NAV.voice||typeof speechSynthesis==="undefined") return; try{ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(String(txt).replace(/[\uD83D\uDEB6\uD83D\uDE8C\uD83D\uDE87\uD83E\uDD6C\u23F1\uD83D\uDFE2\uD83D\uDD34]/g,"")); u.rate=1.05; speechSynthesis.speak(u); }catch(e){} }
+function plnNavBuildSeq(res){
+  var seq=[];
+  var legs=(res.walkLegs||[]).slice().sort(function(a,b){ return a.step-b.step; });
+  var rides=(res.rides||[]).slice().sort(function(a,b){ return a.step-b.step; });
+  var items=[];
+  legs.forEach(function(l){ items.push({type:"walk",step:l.step,leg:l}); });
+  rides.forEach(function(r){ items.push({type:"ride",step:r.step,ride:r}); });
+  items.sort(function(a,b){ return a.step-b.step; });
+  var coords=res.coords||[];
+  var prevIdx=0;
+  items.forEach(function(it){
+    if(it.type==="walk"){
+      var leg=it.leg, geoN=leg.geoN||2;
+      if(leg.maneuvers&&leg.maneuvers.length){
+        leg.maneuvers.forEach(function(mv){ seq.push({lat:mv.lat,lng:mv.lng,text:mv.text,kind:"walk",thr:0.016}); });
+      } else {
+        seq.push({lat:leg.to[0],lng:leg.to[1],text:(res.steps[leg.step]||"Walk"),kind:"walk",thr:0.016});
+      }
+      prevIdx=leg.ci+geoN-1;
+    } else {
+      var rd=it.ride;
+      var nextLeg=null; legs.forEach(function(l){ if(l.step>rd.step&&!nextLeg) nextLeg=l; });
+      var endIdx=nextLeg?nextLeg.ci:(coords.length-1);
+      var stations=coords.slice(prevIdx,endIdx+1);
+      if(stations.length){
+        var b=stations[0], x=stations[stations.length-1];
+        seq.push({lat:b[0],lng:b[1],text:"Board the "+rd.line+" at "+rd.boardName+" ("+rd.dir+")",kind:"board",thr:0.02});
+        seq.push({lat:x[0],lng:x[1],text:"🚇 Ride the "+rd.line+" — get off at "+rd.exitName,kind:"ride",thr:0.045,stations:stations,line:rd.line,exitName:rd.exitName});
+      }
+      prevIdx=endIdx;
+    }
+  });
+  var last=coords[coords.length-1];
+  if(last) seq.push({lat:last[0],lng:last[1],text:"🎉 You've arrived",kind:"arrive",thr:0.03});
+  return seq;
+}
+function plnNavSetCard(){
+  var big=plnNavEl("navBig"), sub=plnNavEl("navSub"); if(!big) return;
+  var wp=PLN_NAV.seq[PLN_NAV.idx];
+  if(!wp){ big.textContent="🎉 You've arrived"; if(sub) sub.textContent=""; return; }
+  big.textContent=wp.text;
+  if(!sub) return;
+  var pos=PLN_NAV.lastPos;
+  if(!pos){ sub.textContent="Waiting for GPS…"; return; }
+  if(wp.kind==="ride"&&wp.stations){
+    var ni=0, nd=1e9;
+    wp.stations.forEach(function(st,i){ var dd=plnDist([pos.lat,pos.lng],st); if(dd<nd){ nd=dd; ni=i; } });
+    var left=wp.stations.length-1-ni;
+    sub.textContent=left>0?((left===1?"1 stop":left+" stops")+" to go · exit at "+wp.exitName):("Arriving at "+wp.exitName+" — get ready to exit");
+  } else {
+    sub.textContent="In "+plnFmtD(plnDist([pos.lat,pos.lng],[wp.lat,wp.lng]));
+  }
+}
+function plnNavAdvance(){
+  PLN_NAV.idx++; PLN_NAV.offTicks=0;
+  if(PLN_NAV.idx>=PLN_NAV.seq.length){ plnNavArrive(); return; }
+  plnNavSetCard();
+  plnNavSpeak(PLN_NAV.seq[PLN_NAV.idx].text);
+}
+function plnNavArrive(){
+  var big=plnNavEl("navBig"), sub=plnNavEl("navSub");
+  if(big) big.textContent="🎉 You've arrived";
+  if(sub) sub.textContent=PLN_NAV.dest?("Welcome to "+PLN_NAV.dest.n):"";
+  plnNavSpeak("You have arrived");
+  setTimeout(function(){ if(PLN_NAV.on) plnNavEnd(); }, 6000);
+}
+function plnNavOffDist(pos, coords){
+  var la=69, lo=69*Math.cos(pos.lat*Math.PI/180);
+  var px=pos.lng*lo, py=pos.lat*la, best=1e9;
+  for(var i=0;i<coords.length-1;i++){
+    var ax=coords[i][1]*lo, ay=coords[i][0]*la, bx=coords[i+1][1]*lo, by=coords[i+1][0]*la;
+    var dx=bx-ax, dy=by-ay, L2=dx*dx+dy*dy;
+    var t=L2?((px-ax)*dx+(py-ay)*dy)/L2:0; t=Math.max(0,Math.min(1,t));
+    var ex=ax+t*dx-px, ey=ay+t*dy-py, dd=ex*ex+ey*ey;
+    if(dd<best) best=dd;
+  }
+  return Math.sqrt(best);
+}
+function plnNavTick(pos){
+  var lat=pos.coords.latitude, lng=pos.coords.longitude, acc=pos.coords.accuracy||999;
+  PLN_NAV.lastPos={lat:lat,lng:lng,acc:acc};
+  if(typeof myPos!=="undefined") myPos={lat:lat,lng:lng};
+  if(typeof L!=="undefined"&&typeof map!=="undefined"&&map){
+    try{
+      if(!PLN_NAV.dot){ PLN_NAV.dot=L.circleMarker([lat,lng],{radius:8,color:"#ffffff",weight:3,fillColor:"#1e9e50",fillOpacity:1}).addTo(map); }
+      else PLN_NAV.dot.setLatLng([lat,lng]);
+      var now=Date.now();
+      if(now-PLN_NAV.lastPan>1500){ var c=map.getCenter(); if(plnDist([c.lat,c.lng],[lat,lng])>0.01) map.panTo([lat,lng]); PLN_NAV.lastPan=now; }
+    }catch(e){}
+  }
+  var wp=PLN_NAV.seq[PLN_NAV.idx]; if(!wp) return;
+  if(acc>160){ var s0=plnNavEl("navSub"); if(s0) s0.textContent="GPS signal weak (±"+Math.round(acc*3.28)+" ft) — hold on"; return; }
+  var d=plnDist([lat,lng],[wp.lat,wp.lng]);
+  if(d<wp.thr){ plnNavAdvance(); return; }
+  if((wp.kind==="walk"||wp.kind==="board")&&PLN_NAV.res){
+    var off=plnNavOffDist(PLN_NAV.lastPos, PLN_NAV.res.coords||[]);
+    PLN_NAV.offTicks=(off>0.075)?PLN_NAV.offTicks+1:0;
+    if(PLN_NAV.offTicks>=3&&Date.now()-PLN_NAV.lastReroute>45000){
+      PLN_NAV.lastReroute=Date.now(); PLN_NAV.offTicks=0;
+      plnNavSpeak("Rerouting");
+      window.__navRerender=1;
+      plnRender({n:"📍 Your current location",lat:lat,lng:lng}, PLN_NAV.dest);
+      window.__navRerender=0;
+      if(window.__lastRoute){ PLN_NAV.res=window.__lastRoute.res; PLN_NAV.seq=plnNavBuildSeq(PLN_NAV.res); PLN_NAV.idx=0; }
+    }
+  }
+  plnNavSetCard();
+}
+function plnNavStart(){
+  var lr=window.__lastRoute; if(!lr||!lr.res) return;
+  if(typeof navigator==="undefined"||!navigator.geolocation){ var s1=plnNavEl("navSub"); if(s1) s1.textContent="Geolocation isn't available in this browser."; return; }
+  PLN_NAV.res=lr.res; PLN_NAV.dest=lr.to;
+  PLN_NAV.seq=plnNavBuildSeq(lr.res); PLN_NAV.idx=0; PLN_NAV.offTicks=0; PLN_NAV.lastReroute=0;
+  if(!PLN_NAV.seq.length) return;
+  PLN_NAV.on=true;
+  var card=plnNavEl("navCard"), btn=plnNavEl("navBtn");
+  if(card) card.style.display="block"; if(btn) btn.style.display="none";
+  var vb=plnNavEl("navVoice"); if(vb) vb.textContent=PLN_NAV.voice?"🔊 Voice: on":"🔇 Voice: off";
+  plnNavSetCard();
+  plnNavSpeak(PLN_NAV.seq[0].text);
+  PLN_NAV.watch=navigator.geolocation.watchPosition(plnNavTick, function(){ var s=plnNavEl("navSub"); if(s) s.textContent="GPS unavailable — check location permission"; }, {enableHighAccuracy:true, maximumAge:3000, timeout:20000});
+}
+function plnNavEnd(){
+  PLN_NAV.on=false;
+  if(PLN_NAV.watch!=null&&typeof navigator!=="undefined"&&navigator.geolocation) navigator.geolocation.clearWatch(PLN_NAV.watch);
+  PLN_NAV.watch=null;
+  if(typeof speechSynthesis!=="undefined"){ try{ speechSynthesis.cancel(); }catch(e){} }
+  if(PLN_NAV.dot&&typeof map!=="undefined"&&map){ try{ map.removeLayer(PLN_NAV.dot); }catch(e){} PLN_NAV.dot=null; }
+  var card=plnNavEl("navCard"), btn=plnNavEl("navBtn");
+  if(card) card.style.display="none"; if(btn&&window.__lastRoute) btn.style.display="block";
+}
+if(typeof document!=="undefined"&&document.getElementById){
+  var __nb=document.getElementById("navBtn"); if(__nb) __nb.addEventListener("click",plnNavStart);
+  var __ne=document.getElementById("navEnd"); if(__ne) __ne.addEventListener("click",plnNavEnd);
+  var __nn=document.getElementById("navNext"); if(__nn) __nn.addEventListener("click",function(){ plnNavAdvance(); });
+  var __nv=document.getElementById("navVoice"); if(__nv) __nv.addEventListener("click",function(){ PLN_NAV.voice=!PLN_NAV.voice; try{ localStorage.setItem("chiNavVoice",PLN_NAV.voice?"1":"0"); }catch(e){} __nv.textContent=PLN_NAV.voice?"🔊 Voice: on":"🔇 Voice: off"; if(PLN_NAV.voice) plnNavSpeak("Voice on"); });
 }
