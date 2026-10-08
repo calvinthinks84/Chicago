@@ -112,7 +112,7 @@ function planRoute(fromPin,toPin){
      while(i<path.length&&path[i].e.kind==="ride"&&path[i].e.line===line){ mins+=path[i].e.min; exitN=path[i].to; i++; }
      total+=mins;
      steps.push((line[1]==="bus"?"🚌":"🚇")+" Board the "+line[0]+" at "+N[board].name+" ("+dir+") → ride ~"+mins+" min → exit at "+N[exitN].name);
-     rides.push({step:steps.length-1,mode:(line[1]==="bus"?"bus":"train"),line:line[0],route:(line[1]==="bus"?line[0].replace(/^#/,"").split(" ")[0]:null),node:board,dir:dir});
+     rides.push({step:steps.length-1,mode:(line[1]==="bus"?"bus":"train"),line:line[0],route:(line[1]==="bus"?line[0].replace(/^#/,"").split(" ")[0]:null),node:board,dir:dir,boardName:N[board].name,exitName:N[exitN].name});
    } else if(s.e.kind==="xfer"){
      total+=s.e.min; steps.push("🚶 Transfer: walk ~"+s.e.min+" min to "+N[s.to].name); i++;
    } else if(s.e.kind==="walkall"){
@@ -431,7 +431,7 @@ function plnClock(ms){ if(!ms) return ""; try{ return new Date(ms).toLocaleTimeS
 function plnBusMs(v){ return plnChiMs(String(v||"").replace(/^(\d{4})(\d{2})(\d{2}) (\d{2}):(\d{2})/,"$1-$2-$3T$4:$5:00")); }
 function plnVeh(rt){ var nm=PLN_RT_NAME[rt], k=PLN_RT_COLOR[rt]; if(!nm) return "Train"; return '<span class="lc'+(k?" lc-"+k:"")+'">'+nm+"</span> train"; }
 function liveMinSpan(x){ return '<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.m+'</span>'; }
-function liveTable(rows){ if(!rows.length) return ""; var body=rows.map(function(x){ return "<tr><td>"+(x.veh||"")+(x.dir?("<br><span class=\"liveDir\">"+plnEsc(x.dir)+"</span>"):"")+"</td><td>"+liveMinSpan(x)+"</td><td>"+(x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):"")+"</td><td>"+(x.late?'<span class="lc lc-Red">Late</span>':'<span class="lc lc-Green">On time</span>')+"</td></tr>"; }).join(""); return '<table class="liveTbl"><tr><th>Bus or Train</th><th>Arrival</th><th>Time</th><th>Status</th></tr>'+body+"</table>"; }
+function liveTable(rows,rd){ if(!rows.length) return ""; var bn=plnEsc((rd&&rd.boardName)||""), xn=plnEsc((rd&&rd.exitName)||""); var body=rows.map(function(x){ return "<tr><td>"+(x.veh||"")+(x.dir?("<br><span class=\"liveDir\">"+plnEsc(x.dir)+"</span>"):"")+"</td><td>"+bn+"</td><td>"+xn+"</td><td>"+liveMinSpan(x)+"</td><td>"+(x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):"")+"</td><td>"+(x.late?'<span class="lc lc-Red">Late</span>':'<span class="lc lc-Green">On time</span>')+"</td></tr>"; }).join(""); return '<table class="liveTbl"><tr><th>Bus or Train</th><th>Board</th><th>Exit</th><th>Arrival</th><th>Time</th><th>Status</th></tr>'+body+"</table>"; }
 function plnLiveMark(span,ok){ if(span) span.className="liveT "+(ok?"ok":"bad"); }
 function plnLiveFill(rides,quiet){
   var cfg=plnLiveCfg(); if(!cfg.relay&&!cfg.train&&!cfg.bus) return;
@@ -459,7 +459,7 @@ function plnLiveFill(rides,quiet){
           var m=Math.round((plnChiMs(e.arrT)-now)/60000);
           ent.push({late:(e.isDly==="1"), veh:plnVeh(e.rt), dir:(e.destNm?("toward "+e.destNm):rd.dir), m:(m<=0?"due":m+" min"), c:plnClock(plnChiMs(e.arrT)), k:k});
         });
-        plnLiveMark(span,true); span.innerHTML="🟢 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains"+liveTable(ent); window.__liveCache[ckeyT]=span.innerHTML;
+        plnLiveMark(span,true); span.innerHTML="🟢 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains"+liveTable(ent, rd); window.__liveCache[ckeyT]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
     } else {
       if(!cfg.relay&&!cfg.bus) return;
@@ -474,7 +474,7 @@ function plnLiveFill(rides,quiet){
         if(!mine.length){ plnLiveMark(span,false); span.textContent="⏱ No live buses reported right now"; return; }
         var ent=[], dly=false;
         mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; ent.push({late:!!p.dly, veh:"Bus #"+rd.route, dir:((p.rtdir||"")+(p.des?(" to "+p.des):""))||rd.dir, m:((p.prdctdn==="DUE"||parseInt(p.prdctdn,10)<=0)?"due":p.prdctdn+" min"), c:plnClock(plnBusMs(p.prdtm)), k:""}); });
-        plnLiveMark(span,true); span.innerHTML="🟢 Live: next #"+rd.route+" buses"+liveTable(ent); window.__liveCache[ckeyB]=span.innerHTML;
+        plnLiveMark(span,true); span.innerHTML="🟢 Live: next #"+rd.route+" buses"+liveTable(ent, rd); window.__liveCache[ckeyB]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
     }
   });
