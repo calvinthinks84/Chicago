@@ -385,20 +385,22 @@ function plnLsGet(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return
 function plnLsSet(k,v){ try{ if(v) localStorage.setItem(k,v); else localStorage.removeItem(k); }catch(e){} }
 var PLN_RELAY_DEFAULT="https://cta-relay.yd9zy8w2j6.workers.dev";
 function plnLiveCfg(){ return {train:plnLsGet("chiTrainKey"),bus:plnLsGet("chiBusKey"),relay:(plnLsGet("chiRelay")||PLN_RELAY_DEFAULT).replace(/\/+$/,"")}; }
-function plnFetchJSON(url,want){
+function plnFetchJSON(url,want,opts){
+  opts=opts||{}; var isErr=opts.isErr||null, keyed=!!opts.keyed;
   var cfg=plnLiveCfg(), tries=[];
   if(cfg.relay) tries.push(cfg.relay+"?u="+encodeURIComponent(url));
   tries.push("https://api.codetabs.com/v1/proxy?quest="+encodeURIComponent(url));
   tries.push("https://api.allorigins.win/raw?url="+encodeURIComponent(url));
   return new Promise(function(resolve,reject){
-    var left=tries.length, done=false, ctls=[];
-    function fail(){ left--; if(left<=0&&!done){ done=true; reject(new Error("all transports failed")); } }
+    var left=tries.length, done=false, ctls=[], errPayload=null;
+    function fail(){ left--; if(left<=0&&!done){ done=true; if(errPayload) resolve(errPayload); else reject(new Error("all transports failed")); } }
     tries.forEach(function(tu){
       var settled=false;
       var ctl=("AbortController" in window)?new AbortController():null; ctls.push(ctl);
       var to=ctl?setTimeout(function(){ if(!settled){ settled=true; try{ ctl.abort(); }catch(e){} fail(); } },9000):null;
       fetch(tu,ctl?{signal:ctl.signal}:undefined).then(function(r){ if(!r.ok) throw new Error("http "+r.status); return r.text(); }).then(function(tx){
         var j=JSON.parse(tx); if(want&&!(want in j)) throw new Error("wrong shape");
+        if(isErr&&isErr(j)){ if(keyed) errPayload=j; throw new Error("cta rejected"); }
         if(settled) return; settled=true; if(to) clearTimeout(to);
         if(!done){ done=true; ctls.forEach(function(c){ if(c&&c!==ctl){ try{ c.abort(); }catch(e){} } }); resolve(j); }
       }).catch(function(){ if(settled) return; settled=true; if(to) clearTimeout(to); fail(); });
@@ -433,7 +435,7 @@ function plnLiveFill(rides,quiet){
       var mid=(typeof PLN_TRAIN_ID!=="undefined")?PLN_TRAIN_ID[rd.node]:null; if(!mid) return;
       var ckeyT="T|"+mid+"|"+rd.dir; if(window.__liveCache[ckeyT]) span.textContent=window.__liveCache[ckeyT]; else if(!quiet) span.textContent="⏱ Fetching live trains…";
       var url="https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx?mapid="+mid+"&max=6&outputType=JSON"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.train));
-      plnFetchJSON(url,"ctatt").then(function(j2){
+      plnFetchJSON(url,"ctatt",{keyed:!!(cfg.relay||cfg.train),isErr:function(j){ return !!(j.ctatt&&j.ctatt.errCd&&j.ctatt.errCd!=="0"); }}).then(function(j2){
         if(j2.ctatt.errCd&&j2.ctatt.errCd!=="0"){ span.textContent="⏱ CTA rejected the train key — check it under Live times → Edit"; return; }
         var etas=(j2&&j2.ctatt&&j2.ctatt.eta)||[];
         var codes=PLN_RT_CODES[rd.line]||[];
@@ -456,7 +458,7 @@ function plnLiveFill(rides,quiet){
       var stpid=byDir?byDir[rd.dir]:null; if(!stpid) return;
       var ckeyB="B|"+stpid+"|"+rd.route; if(window.__liveCache[ckeyB]) span.textContent=window.__liveCache[ckeyB]; else if(!quiet) span.textContent="⏱ Fetching live buses…";
       var url2="https://www.ctabustracker.com/bustime/api/v2/getpredictions?stpid="+stpid+"&format=json"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.bus));
-      plnFetchJSON(url2,"bustime-response").then(function(j2){
+      plnFetchJSON(url2,"bustime-response",{keyed:!!(cfg.relay||cfg.bus),isErr:function(j){ var e=j["bustime-response"]&&j["bustime-response"].error; return !!(e&&e.length); }}).then(function(j2){
         var berr=j2["bustime-response"].error; if(berr&&berr.length){ span.textContent="⏱ CTA rejected the bus key — check it under Live times → Edit"; return; }
         var prds=(j2&&j2["bustime-response"]&&j2["bustime-response"].prd)||[];
         var mine=prds.filter(function(p){ return String(p.rt)===String(rd.route); });
