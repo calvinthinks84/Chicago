@@ -174,12 +174,12 @@ if(typeof document!=="undefined"&&document.getElementById){
    if(!t.cat&&typeof map!=="undefined"&&map) map.setView([t.lat,t.lng],15);
    var appleAddr=encodeURIComponent(t.n+(t.addr?" "+t.addr:"")+" Chicago IL");
    var r=planRoute(f,t);
-   if(!r){ plnClearRoute(); out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; out.scrollIntoView({behavior:"smooth",block:"nearest"}); return; }
+   if(!r){ plnClearRoute(); out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; return; }
    var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps 🗺️</a>";
    out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'></span>":"")+"</li>"; }).join("")+"</ol>"+extra;
    plnDrawRoute(r.coords);
    if(r.rides&&r.rides.length&&typeof plnLiveFill==="function") plnLiveFill(r.rides,false);
-   out.scrollIntoView({behavior:"smooth",block:"nearest"});
+  
  }
  function plnEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function plnWeb(u){ u=String(u||"").split(";")[0].trim(); if(!u) return ""; if(!/^https?:\/\//i.test(u)) u="https://"+u; return u; }
@@ -265,7 +265,7 @@ function plnShowCands(f,txt,cands,out){
    h+="<div data-cand='"+i+"' style='border:1px solid var(--line);border-radius:10px;padding:9px 10px;margin:5px 0;cursor:pointer;background:var(--panel)'><strong>\uD83D\uDCCD "+plnEsc(c.n)+"</strong> \u00B7 "+dtxt+"<br><span style='color:var(--mut);font-size:13px'>"+plnEsc(c.full||"")+"</span></div>";
  });
  out.innerHTML=h;
- out.scrollIntoView({behavior:"smooth",block:"nearest"});
+
 }
 function plnGo(){
    var out=document.getElementById("planOut");
@@ -426,10 +426,12 @@ function plnDirTokens(dir){
   return String(dir||"").replace(/^toward\s+/i,"").split("/").map(function(x){ return x.replace(/\(.*?\)/g,"").replace(/^the\s+/i,"").trim().toLowerCase(); }).filter(Boolean);
 }
 var PLN_RT_COLOR={"Blue":"Blue","Red":"Red","Brn":"Brown","P":"Purple","G":"Green","Pink":"Pink","Org":"Orange","Y":"Yellow"};
+var PLN_RT_NAME={"Blue":"Blue Line","Red":"Red Line","Brn":"Brown Line","P":"Purple Line","G":"Green Line","Pink":"Pink Line","Org":"Orange Line","Y":"Yellow Line"};
 function plnClock(ms){ if(!ms) return ""; try{ return new Date(ms).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZone:"America/Chicago"}); }catch(e){ return ""; } }
 function plnBusMs(v){ return plnChiMs(String(v||"").replace(/^(\d{4})(\d{2})(\d{2}) (\d{2}):(\d{2})/,"$1-$2-$3T$4:$5:00")); }
+function plnVeh(rt){ var nm=PLN_RT_NAME[rt], k=PLN_RT_COLOR[rt]; if(!nm) return "Train"; return '<span class="lc'+(k?" lc-"+k:"")+'">'+nm+"</span> train"; }
 function liveMinSpan(x){ return '<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.m+'</span>'; }
-function liveTable(rows){ if(!rows.length) return ""; var body=rows.map(function(x){ return "<tr><td>"+plnEsc(x.dir||"")+"</td><td>"+liveMinSpan(x)+"</td><td>"+(x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):"")+"</td></tr>"; }).join(""); return '<table class="liveTbl"><tr><th>Direction</th><th>Time count down</th><th>Time</th></tr>'+body+"</table>"; }
+function liveTable(rows){ if(!rows.length) return ""; var body=rows.map(function(x){ return "<tr><td>"+(x.veh||"")+(x.dir?(" · "+plnEsc(x.dir)):"")+"</td><td>"+liveMinSpan(x)+"</td><td>"+(x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):"")+"</td></tr>"; }).join(""); return '<table class="liveTbl"><tr><th>Bus or Train</th><th>Arrival</th><th>Time</th></tr>'+body+"</table>"; }
 function plnLiveMark(span,ok){ if(span) span.className="liveT "+(ok?"ok":"bad"); }
 function plnLiveFill(rides,quiet){
   var cfg=plnLiveCfg(); if(!cfg.relay&&!cfg.train&&!cfg.bus) return;
@@ -453,9 +455,9 @@ function plnLiveFill(rides,quiet){
         mine.slice(0,3).forEach(function(e){
           if(e.isDly==="1") dly=true;
           var k=PLN_RT_COLOR[e.rt]||"";
-          if(e.isApp==="1"){ ent.push({dir:(e.destNm?("toward "+e.destNm):rd.dir), m:"due", c:plnClock(plnChiMs(e.arrT)), k:k}); return; }
+          if(e.isApp==="1"){ ent.push({veh:plnVeh(e.rt), dir:(e.destNm?("toward "+e.destNm):rd.dir), m:"due", c:plnClock(plnChiMs(e.arrT)), k:k}); return; }
           var m=Math.round((plnChiMs(e.arrT)-now)/60000);
-          ent.push({dir:(e.destNm?("toward "+e.destNm):rd.dir), m:(m<=0?"due":m+" min"), c:plnClock(plnChiMs(e.arrT)), k:k});
+          ent.push({veh:plnVeh(e.rt), dir:(e.destNm?("toward "+e.destNm):rd.dir), m:(m<=0?"due":m+" min"), c:plnClock(plnChiMs(e.arrT)), k:k});
         });
         plnLiveMark(span,true); span.innerHTML="🟢 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains"+(dly?" · delays reported":"")+liveTable(ent); window.__liveCache[ckeyT]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
@@ -471,7 +473,7 @@ function plnLiveFill(rides,quiet){
         var mine=prds.filter(function(p){ return String(p.rt)===String(rd.route); });
         if(!mine.length){ plnLiveMark(span,false); span.textContent="⏱ No live buses reported right now"; return; }
         var ent=[], dly=false;
-        mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; ent.push({dir:((p.rtdir||"")+(p.des?(" to "+p.des):""))||rd.dir, m:((p.prdctdn==="DUE"||parseInt(p.prdctdn,10)<=0)?"due":p.prdctdn+" min"), c:plnClock(plnBusMs(p.prdtm)), k:""}); });
+        mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; ent.push({veh:"Bus #"+rd.route, dir:((p.rtdir||"")+(p.des?(" to "+p.des):""))||rd.dir, m:((p.prdctdn==="DUE"||parseInt(p.prdctdn,10)<=0)?"due":p.prdctdn+" min"), c:plnClock(plnBusMs(p.prdtm)), k:""}); });
         plnLiveMark(span,true); span.innerHTML="🟢 Live: next #"+rd.route+" buses"+(dly?" · delayed":"")+liveTable(ent); window.__liveCache[ckeyB]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
     }
