@@ -429,7 +429,7 @@ var PLN_RT_COLOR={"Blue":"Blue","Red":"Red","Brn":"Brown","P":"Purple","G":"Gree
 function plnClock(ms){ if(!ms) return ""; try{ return new Date(ms).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZone:"America/Chicago"}); }catch(e){ return ""; } }
 function plnBusMs(v){ return plnChiMs(String(v||"").replace(/^(\d{4})(\d{2})(\d{2}) (\d{2}):(\d{2})/,"$1-$2-$3T$4:$5:00")); }
 function liveMinSpan(x){ return '<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.m+'</span>'; }
-function liveTable(ent){ if(!ent.length) return ""; var r1=ent.map(function(x){ return "<td>"+liveMinSpan(x)+"</td>"; }).join(""); var r2=ent.map(function(x){ return "<td>"+(x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):"")+"</td>"; }).join(""); return '<table class="liveTbl"><tr>'+r1+"</tr><tr>"+r2+"</tr></table>"; }
+function liveTable(rows){ if(!rows.length) return ""; var body=rows.map(function(x){ return "<tr><td>"+plnEsc(x.dir||"")+"</td><td>"+liveMinSpan(x)+"</td><td>"+(x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):"")+"</td></tr>"; }).join(""); return '<table class="liveTbl"><tr><th>Direction</th><th>Time count down</th><th>Time</th></tr>'+body+"</table>"; }
 function plnLiveMark(span,ok){ if(span) span.className="liveT "+(ok?"ok":"bad"); }
 function plnLiveFill(rides,quiet){
   var cfg=plnLiveCfg(); if(!cfg.relay&&!cfg.train&&!cfg.bus) return;
@@ -453,9 +453,9 @@ function plnLiveFill(rides,quiet){
         mine.slice(0,3).forEach(function(e){
           if(e.isDly==="1") dly=true;
           var k=PLN_RT_COLOR[e.rt]||"";
-          if(e.isApp==="1"){ ent.push({m:"due", c:plnClock(plnChiMs(e.arrT)), k:k}); return; }
+          if(e.isApp==="1"){ ent.push({dir:(e.destNm?("toward "+e.destNm):rd.dir), m:"due", c:plnClock(plnChiMs(e.arrT)), k:k}); return; }
           var m=Math.round((plnChiMs(e.arrT)-now)/60000);
-          ent.push({m:(m<=0?"due":m+" min"), c:plnClock(plnChiMs(e.arrT)), k:k});
+          ent.push({dir:(e.destNm?("toward "+e.destNm):rd.dir), m:(m<=0?"due":m+" min"), c:plnClock(plnChiMs(e.arrT)), k:k});
         });
         plnLiveMark(span,true); span.innerHTML="🟢 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains"+(dly?" · delays reported":"")+liveTable(ent); window.__liveCache[ckeyT]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
@@ -471,7 +471,7 @@ function plnLiveFill(rides,quiet){
         var mine=prds.filter(function(p){ return String(p.rt)===String(rd.route); });
         if(!mine.length){ plnLiveMark(span,false); span.textContent="⏱ No live buses reported right now"; return; }
         var ent=[], dly=false;
-        mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; ent.push({m:((p.prdctdn==="DUE"||parseInt(p.prdctdn,10)<=0)?"due":p.prdctdn+" min"), c:plnClock(plnBusMs(p.prdtm)), k:""}); });
+        mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; ent.push({dir:((p.rtdir||"")+(p.des?(" to "+p.des):""))||rd.dir, m:((p.prdctdn==="DUE"||parseInt(p.prdctdn,10)<=0)?"due":p.prdctdn+" min"), c:plnClock(plnBusMs(p.prdtm)), k:""}); });
         plnLiveMark(span,true); span.innerHTML="🟢 Live: next #"+rd.route+" buses"+(dly?" · delayed":"")+liveTable(ent); window.__liveCache[ckeyB]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
     }
