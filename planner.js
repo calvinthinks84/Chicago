@@ -431,7 +431,7 @@ function plnClock(ms){ if(!ms) return ""; try{ return new Date(ms).toLocaleTimeS
 function plnBusMs(v){ return plnChiMs(String(v||"").replace(/^(\d{4})(\d{2})(\d{2}) (\d{2}):(\d{2})/,"$1-$2-$3T$4:$5:00")); }
 function plnVeh(rt){ var nm=PLN_RT_NAME[rt], k=PLN_RT_COLOR[rt]; if(!nm) return "Train"; return '<span class="lc'+(k?" lc-"+k:"")+'">'+nm+"</span> train"; }
 function liveMinSpan(x){ return '<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.m+'</span>'; }
-function liveTable(rows){ if(!rows.length) return ""; var body=rows.map(function(x){ return "<tr><td>"+(x.veh||"")+(x.dir?(" · "+plnEsc(x.dir)):"")+"</td><td>"+liveMinSpan(x)+"</td><td>"+(x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):"")+"</td><td>"+(x.late?'<span class="lc lc-Red">Late</span>':'<span class="lc lc-Green">On time</span>')+"</td></tr>"; }).join(""); return '<table class="liveTbl"><tr><th>Bus or Train</th><th>Arrival</th><th>Time</th><th>Status</th></tr>'+body+"</table>"; }
+function liveTable(rows){ if(!rows.length) return ""; var body=rows.map(function(x){ return "<tr><td>"+(x.veh||"")+(x.dir?("<br><span class=\"liveDir\">"+plnEsc(x.dir)+"</span>"):"")+"</td><td>"+liveMinSpan(x)+"</td><td>"+(x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):"")+"</td><td>"+(x.late?'<span class="lc lc-Red">Late</span>':'<span class="lc lc-Green">On time</span>')+"</td></tr>"; }).join(""); return '<table class="liveTbl"><tr><th>Bus or Train</th><th>Arrival</th><th>Time</th><th>Status</th></tr>'+body+"</table>"; }
 function plnLiveMark(span,ok){ if(span) span.className="liveT "+(ok?"ok":"bad"); }
 function plnLiveFill(rides,quiet){
   var cfg=plnLiveCfg(); if(!cfg.relay&&!cfg.train&&!cfg.bus) return;
