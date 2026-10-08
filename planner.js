@@ -70,7 +70,7 @@ var PLN_LINES=[
 var PLN_XFER=[["clark-lake","washington-wabash"],["washington-blue","washington-wabash"],["monroe-blue","monroe-red"],["lake-red","clark-lake"],["chicago-red","chicago-brown"],["michigan-hubbard","grand-red"],["clark-armitage","armitage"],["grand-halsted","grand-blue"],["clark-washington","clark-lake"],["washington-state","washington-blue"],["washington-state","washington-wabash"],["grand-red","washington-state"]];
 function plnDist(a,b){var R=3958.8,dLa=(b[0]-a[0])*Math.PI/180,dLo=(b[1]-a[1])*Math.PI/180;var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.sqrt(h));}
 function plnFmtD(mi){var ft=mi*5280; if(ft<1000) return Math.max(10,Math.round(ft/10)*10)+" ft"; return (mi<10?mi.toFixed(1):Math.round(mi))+" mi";}
-function planRoute(fromPin,toPin){
+function planRouteV1(fromPin,toPin){
  /* fromPin/toPin: {n,lat,lng}. Returns {steps:[strings], totalMin} or null */
  var N={}; Object.keys(PLN_NODES).forEach(function(k){ N[k]={name:PLN_NODES[k][0],c:[PLN_NODES[k][1],PLN_NODES[k][2]]}; });
  N["@from"]={name:fromPin.n,c:[fromPin.lat,fromPin.lng]};
@@ -179,6 +179,7 @@ if(typeof document!=="undefined"&&document.getElementById){
    out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'></span>":"")+"</li>"; }).join("")+"</ol>"+extra;
    plnDrawRoute(r.coords);
    if(r.rides&&r.rides.length&&typeof plnLiveFill==="function") plnLiveFill(r.rides,false);
+   if(r.walkLegs&&r.walkLegs.length&&typeof plnOsrmEnrich==="function") plnOsrmEnrich(r);
   
  }
  function plnEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
@@ -380,7 +381,7 @@ function plnGo(){
 /* Live CTA stop IDs — from CTA GTFS (Sep 2026 feed); trains: Train Tracker mapid by planner node; buses: Bus Tracker stpid by node|route|direction */
 var PLN_TRAIN_ID={"adams-wabash":"40680","addison-red":"41420","armitage":"40660","ashland-green":"40170","belmont":"41320","chicago-blue":"41410","chicago-brown":"40710","chicago-red":"41450","clark-division":"40630","clark-lake":"40380","clinton-blue":"40430","clinton-green":"41160","diversey":"40530","division-blue":"40320","fullerton":"41220","grand-blue":"40490","grand-red":"40330","jackson-blue":"40070","jackson-red":"40560","jeffpark":"41280","lake-red":"41660","logan":"41020","mart":"40460","monroe-blue":"40790","monroe-red":"41090","morgan":"41510","north-clybourn":"40650","ohare":"40890","roosevelt":"41400","sedgwick":"40800","southport":"40360","washington-blue":"40370","washington-wabash":"41700"};
 var PLN_BUS_ID={"adler-stop|146":{"toward Museum Campus":"4877","toward downtown / Berwyn":"4877"},"ashland-cortland|9":{"toward 95th (south)":"6016","toward Irving Park (north)":"6259"},"chicago-blue|9":{"toward 95th (south)":"15842","toward Irving Park (north)":"15843"},"clark-armitage|22":{"toward Howard":"1907","toward downtown":"14788"},"clark-deming|22":{"toward Howard":"1913","toward downtown":"1836"},"clark-division|22":{"toward Howard":"1899","toward downtown":"1850"},"clark-fullerton|22":{"toward Howard":"1909","toward downtown":"1840"},"clark-washington|22":{"toward Howard":"1882","toward downtown":"1865"},"clark-webster|22":{"toward Howard":"1908","toward downtown":"1841"},"clark-wrightwood|22":{"toward Howard":"1911","toward downtown":"1838"},"columbus-illinois|124":{"toward Clinton/Quincy (downtown)":"5513","toward Navy Pier":"5511"},"field-stop|146":{"toward Museum Campus":"4873","toward downtown / Berwyn":"15426"},"grand-halsted|65":{"toward Harlem (west)":"14774","toward Navy Pier (east)":"738"},"grand-racine|65":{"toward Harlem (west)":"780","toward Navy Pier (east)":"15135"},"grand-red|65":{"toward Harlem (west)":"764","toward Navy Pier (east)":"14775"},"illinois-mcclurg|124":{"toward Clinton/Quincy (downtown)":"589","toward Navy Pier":"754"},"michigan-hubbard|151":{"toward Devon/Clark":"1122","toward Union Station (downtown)":"1102"},"navy-pier-terminal|124":{"toward Clinton/Quincy (downtown)":"14161","toward Navy Pier":"14161"},"roosevelt|146":{"toward Museum Campus":"316","toward downtown / Berwyn":"16140"},"shedd-stop|146":{"toward Museum Campus":"4591","toward downtown / Berwyn":"4595"},"stockton-armitage|151":{"toward Devon/Clark":"1141","toward Union Station (downtown)":"1084"},"stockton-fullerton|151":{"toward Devon/Clark":"1144","toward Union Station (downtown)":"1081"},"stockton-webster|151":{"toward Devon/Clark":"1143","toward Union Station (downtown)":"1082"},"washington-state|124":{"toward Clinton/Quincy (downtown)":"18126","toward Navy Pier":"448"}};
-var PLN_RT_CODES={"Blue Line":["Blue"],"Red Line":["Red"],"Brown/Purple Line":["Brn","P"],"Green/Pink Line":["G","Pink"]};
+var PLN_RT_CODES={"Blue Line":["Blue"],"Red Line":["Red"],"Brown/Purple Line":["Brn","P"],"Green/Pink Line":["G","Pink"],"Brown Line":["Brn"],"Purple Line":["P"],"Green Line":["G"],"Pink Line":["Pink"],"Orange Line":["Org"],"Yellow Line":["Y"]};
 function plnLsGet(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } }
 function plnLsSet(k,v){ try{ if(v) localStorage.setItem(k,v); else localStorage.removeItem(k); }catch(e){} }
 var PLN_RELAY_DEFAULT="https://cta-relay.yd9zy8w2j6.workers.dev";
@@ -441,7 +442,7 @@ function plnLiveFill(rides,quiet){
     var span=document.getElementById("liveT"+j); if(!span) return;
     if(rd.mode==="train"){
       if(!cfg.relay&&!cfg.train) return;
-      var mid=(typeof PLN_TRAIN_ID!=="undefined")?PLN_TRAIN_ID[rd.node]:null; if(!mid) return;
+      var mid=rd.gtfs?rd.node:((typeof PLN_TRAIN_ID!=="undefined")?PLN_TRAIN_ID[rd.node]:null); if(!mid) return;
       var ckeyT="T|"+mid+"|"+rd.dir; if(window.__liveCache[ckeyT]){ span.innerHTML=window.__liveCache[ckeyT]; plnLiveMark(span,true); } else if(!quiet){ span.textContent="⏱ Fetching live trains…"; plnLiveMark(span,false); }
       var url="https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx?mapid="+mid+"&max=6&outputType=JSON"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.train));
       plnFetchJSON(url,"ctatt",{keyed:!!(cfg.relay||cfg.train),isErr:function(j){ return !!(j.ctatt&&j.ctatt.errCd&&j.ctatt.errCd!=="0"); }}).then(function(j2){
@@ -464,8 +465,7 @@ function plnLiveFill(rides,quiet){
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
     } else {
       if(!cfg.relay&&!cfg.bus) return;
-      var byDir=(typeof PLN_BUS_ID!=="undefined")?PLN_BUS_ID[rd.node+"|"+rd.route]:null;
-      var stpid=byDir?byDir[rd.dir]:null; if(!stpid) return;
+      var stpid=null; if(rd.gtfs){ stpid=rd.node; } else { var byDir=(typeof PLN_BUS_ID!=="undefined")?PLN_BUS_ID[rd.node+"|"+rd.route]:null; stpid=byDir?byDir[rd.dir]:null; } if(!stpid) return;
       var ckeyB="B|"+stpid+"|"+rd.route; if(window.__liveCache[ckeyB]){ span.innerHTML=window.__liveCache[ckeyB]; plnLiveMark(span,true); } else if(!quiet){ span.textContent="⏱ Fetching live buses…"; plnLiveMark(span,false); }
       var url2="https://www.ctabustracker.com/bustime/api/v2/getpredictions?stpid="+stpid+"&format=json"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.bus));
       plnFetchJSON(url2,"bustime-response",{keyed:!!(cfg.relay||cfg.bus),isErr:function(j){ var e=j["bustime-response"]&&j["bustime-response"].error; return !!(e&&e.length); }}).then(function(j2){
@@ -509,3 +509,187 @@ function plnLiveForm(){
 }
 if(typeof document!=="undefined"&&document.addEventListener&&!window.__liveVisHook){ window.__liveVisHook=1; document.addEventListener("visibilitychange",function(){ if(!document.hidden&&window.__liveRides&&document.getElementById("liveT0")) plnLiveFill(window.__liveRides,true); }); }
 if(typeof document!=="undefined"&&document.getElementById&&document.getElementById("liveSetup")) plnLiveSetupRender();
+
+/* ---- Planner v2: full CTA network from GTFS (gtfs-graph.js) ---- */
+var GT_ON = (typeof GT_NODES!=="undefined" && typeof GT_EDGES!=="undefined" && typeof GT_ROUTES!=="undefined");
+var GT_GRID=null, GT_XFER=(typeof GT_XFER0!=="undefined")?GT_XFER0:null;
+function gtInit(){
+  if(GT_GRID) return;
+  if(!GT_XFER) GT_XFER={};
+  GT_GRID={};
+  GT_NODES.forEach(function(n,i){
+    var k=Math.floor(n[2]/0.004)+":"+Math.floor(n[3]/0.004);
+    (GT_GRID[k]=GT_GRID[k]||[]).push(i);
+  });
+  GT_XFER={};
+}
+function gtXferFor(i){
+  if(GT_XFER[i]!==undefined) return GT_XFER[i];
+  var n=GT_NODES[i], near=gtNear(n[2],n[3],0.10,14), lst=[];
+  near.forEach(function(x){ if(x.i!==i) lst.push([x.i, Math.max(1, Math.round(x.d*20)), x.d]); });
+  GT_XFER[i]=lst; return lst;
+}
+function gtNear(lat,lng,rMi,maxN){
+  var out=[], seen={};
+  var c0=Math.floor(lat/0.004), c1=Math.floor(lng/0.004);
+  var span=Math.max(1, Math.ceil(rMi/69/0.004)+1);
+  for(var a=c0-span;a<=c0+span;a++) for(var b=c1-span;b<=c1+span;b++){
+    var cell=GT_GRID[a+":"+b]; if(!cell) continue;
+    cell.forEach(function(i){
+      if(seen[i]) return; seen[i]=1;
+      var d=plnDist([lat,lng],[GT_NODES[i][2],GT_NODES[i][3]]);
+      if(d<=rMi) out.push({i:i,d:d});
+    });
+  }
+  out.sort(function(x,y){ return x.d-y.d; });
+  return out.slice(0,maxN||99);
+}
+function planRouteGT(fromPin,toPin){
+  gtInit();
+  var NN=GT_NODES.length, SRC=NN, DST=NN+1, TOT=NN+2;
+  var dist=new Float64Array(TOT).fill(Infinity);
+  var prevN=new Int32Array(TOT).fill(-1);
+  var prevK=new Uint8Array(TOT);           // 1 walk, 2 ride, 3 xfer, 4 walkall
+  var prevR=new Int32Array(TOT), prevD=new Uint8Array(TOT);
+  var prevMin=new Float64Array(TOT), prevDist=new Float64Array(TOT);
+  var done=new Uint8Array(TOT);
+  var fromNear=gtNear(fromPin.lat,fromPin.lng,1.05,40);
+  var toNear=gtNear(toPin.lat,toPin.lng,1.05,40);
+  if(!fromNear.length||!toNear.length) return null;
+  function addRail(list,lat,lng){ var seen={}; list.forEach(function(x){ seen[x.i]=1; });
+    GT_NODES.forEach(function(n,ix){ if(n[4]===1&&!seen[ix]){ var d=plnDist([lat,lng],[n[2],n[3]]); if(d<=1.05) list.push({i:ix,d:d}); } }); }
+  addRail(fromNear,fromPin.lat,fromPin.lng); addRail(toNear,toPin.lat,toPin.lng);
+  var toSet={}; toNear.forEach(function(x){ toSet[x.i]=x; });
+  var directD=plnDist([fromPin.lat,fromPin.lng],[toPin.lat,toPin.lng]);
+  var heap=[[0,SRC]];
+  function hPush(c,n){ heap.push([c,n]); var i=heap.length-1; while(i>0){ var p=(i-1)>>1; if(heap[p][0]<=heap[i][0]) break; var t=heap[p]; heap[p]=heap[i]; heap[i]=t; i=p; } }
+  function hPop(){ var top=heap[0], last=heap.pop(); if(heap.length){ heap[0]=last; var i=0; for(;;){ var l=2*i+1, r=l+1, m=i; if(l<heap.length&&heap[l][0]<heap[m][0]) m=l; if(r<heap.length&&heap[r][0]<heap[m][0]) m=r; if(m===i) break; var t=heap[m]; heap[m]=heap[i]; heap[i]=t; i=m; } } return top; }
+  dist[SRC]=0;
+  var found=false;
+  while(heap.length){
+    var top=hPop(), u=top[1], uc=top[0];
+    if(done[u]) continue; done[u]=1;
+    if(u===DST){ found=true; break; }
+    if(uc>dist[u]+1e-9) continue;
+    if(u===SRC){
+      for(var fi=0; fi<fromNear.length; fi++){ var fx=fromNear[fi], fw=Math.max(1,Math.round(fx.d*20)), fn=fx.i;
+        if(dist[SRC]+fw<dist[fn]){ dist[fn]=dist[SRC]+fw; prevN[fn]=SRC; prevK[fn]=1; prevMin[fn]=fw; prevDist[fn]=fx.d; hPush(dist[fn],fn); } }
+      if(directD<=1.2){ var wa=Math.max(1,Math.round(directD*20));
+        if(wa<dist[DST]){ dist[DST]=wa; prevN[DST]=SRC; prevK[DST]=4; prevMin[DST]=wa; prevDist[DST]=directD; hPush(wa,DST); } }
+      continue;
+    }
+    var ts=toSet[u];
+    if(ts){ var w2=Math.max(1,Math.round(ts.d*20));
+      if(dist[u]+w2<dist[DST]){ dist[DST]=dist[u]+w2; prevN[DST]=u; prevK[DST]=1; prevMin[DST]=w2; prevDist[DST]=ts.d; hPush(dist[DST],DST); } }
+    var pk=prevK[u], pr=prevR[u], pd=prevD[u];
+    var edges=GT_EDGES[u]||[];
+    for(var ei=0; ei<edges.length; ei++){
+      var e=edges[ei], sameRun=(pk===2&&pr===e[2]&&pd===e[3]);
+      var w=e[1]/60+(sameRun?0:3), nd=dist[u]+w, tn=e[0];
+      if(nd<dist[tn]){ dist[tn]=nd; prevN[tn]=u; prevK[tn]=2; prevR[tn]=e[2]; prevD[tn]=e[3]; hPush(nd,tn); }
+    }
+    if(pk===2){ // street transfers only make sense right after a ride
+      var xf=gtXferFor(u);
+      for(var xi=0; xi<xf.length; xi++){ var xn=xf[xi][0], xw=xf[xi][1], nd2=dist[u]+xw;
+        if(nd2<dist[xn]){ dist[xn]=nd2; prevN[xn]=u; prevK[xn]=3; prevMin[xn]=xw; prevDist[xn]=xf[xi][2]; hPush(nd2,xn); } }
+    }
+  }
+  if(!found) return null;
+  var path=[], cur=DST;
+  var KIND=["","walk","ride","xfer","walkall"];
+  while(cur!==SRC){ var p=prevN[cur]; if(p<0) return null;
+    path.unshift({from:p,to:cur,e:{kind:KIND[prevK[cur]],route:prevR[cur],dir:prevD[cur],min:prevMin[cur],d:prevDist[cur],to:cur}});
+    cur=p; }
+  var steps=[], rides=[], total=0, coords=[[fromPin.lat,fromPin.lng]], legs=[];
+  function nodeName(i){ return GT_NODES[i][1]; }
+  function nodeCoord(i){ return [GT_NODES[i][2],GT_NODES[i][3]]; }
+  var i=0;
+  while(i<path.length){
+    var sg=path[i];
+    if(sg.e.kind==="ride"){
+      var rt=sg.e.route, dr=sg.e.dir, board=sg.from, exitN=sg.to, secs=0, nstops=0;
+      while(i<path.length&&path[i].e.kind==="ride"&&path[i].e.route===rt&&path[i].e.dir===dr){
+        var ed=(GT_EDGES[path[i].from]||[]).filter(function(x){ return x[0]===path[i].to&&x[2]===rt&&x[3]===dr; })[0];
+        secs+=ed?ed[1]:60; nstops++; exitN=path[i].to; coords.push(nodeCoord(path[i].to)); i++;
+      }
+      var mins=Math.max(1,Math.round(secs/60));
+      total+=mins+3;
+      var R=GT_ROUTES[rt];
+      var isBus=R[1]===3;
+      var lineName=isBus?("#"+R[0]):R[0];
+      var hs=R[2+dr]||"";
+      steps.push((isBus?"🚌":"🚇")+" Board the "+lineName+" at "+nodeName(board)+" (toward "+hs+") → ride "+nstops+(nstops===1?" stop":" stops")+", ~"+mins+" min → exit at "+nodeName(exitN));
+      rides.push({step:steps.length-1,mode:isBus?"bus":"train",line:lineName,route:isBus?String(R[0]).split(" ")[0]:null,node:GT_NODES[board][0],dir:"toward "+hs,boardName:nodeName(board),exitName:nodeName(exitN),gtfs:1});
+    } else if(sg.e.kind==="walkall"){
+      legs.push({step:steps.length,kind:"all",from:[fromPin.lat,fromPin.lng],to:[toPin.lat,toPin.lng],ci:0,toName:toPin.n});
+      total+=sg.e.min||Math.max(1,Math.round(directD*20));
+      steps.push("🚶 Walk the whole way — ~"+(sg.e.min||Math.max(1,Math.round(directD*20)))+" min ("+plnFmtD(directD)+") to "+toPin.n); i++;
+    } else {
+      var wmin=0, wdist=0, lastTo=sg.to;
+      while(i<path.length && (path[i].e.kind==="walk"||path[i].e.kind==="xfer")){ wmin+=path[i].e.min||2; wdist+=path[i].e.d||0; lastTo=path[i].to; i++; }
+      total+=wmin;
+      var isEnd=(lastTo===DST);
+      legs.push({step:steps.length,kind:isEnd?"end":(steps.length===0?"start":"transfer"),from:coords[coords.length-1].slice(),to:isEnd?[toPin.lat,toPin.lng]:nodeCoord(lastTo),ci:coords.length-1,toName:isEnd?toPin.n:nodeName(lastTo)});
+      if(isEnd){ steps.push("🚶 Walk ~"+wmin+" min ("+plnFmtD(wdist)+") to "+toPin.n+" — you're there"); }
+      else { steps.push((steps.length===0?"🚶 Walk ~":"🚶 Transfer: walk ~")+wmin+" min ("+plnFmtD(wdist)+") to "+nodeName(lastTo)); coords.push(nodeCoord(lastTo)); }
+    }
+  }
+  coords.push([toPin.lat,toPin.lng]);
+  return {steps:steps,totalMin:total,coords:coords,rides:rides,walkLegs:legs};
+}
+function planRoute(fromPin,toPin){
+  if(GT_ON){ try{ var r=planRouteGT(fromPin,toPin); if(r) return r; }catch(e){} }
+  return planRouteV1(fromPin,toPin);
+}
+
+function osrmBearing(b){ if(b==null||isNaN(b)) return ""; var dirs=["north","northeast","east","southeast","south","southwest","west","northwest"]; return dirs[Math.round((((b%360)+360)%360)/45)%8]; }
+function osrmInstr(st){
+  var m=st.maneuver||{}, name=st.name||"", mod=m.modifier||"";
+  if(name==="-") name="";
+  if(m.type==="arrive") return "";
+  if(m.type==="depart") return "Head "+osrmBearing(m.bearing_after)+(name?(" on "+name):"");
+  if(m.type==="turn") return "Turn "+mod+(name?(" onto "+name):"");
+  if(m.type==="end of road") return "At the end of the road, turn "+mod+(name?(" onto "+name):"");
+  if(m.type==="fork") return "Keep "+mod+(name?(" onto "+name):"");
+  if(m.type==="merge") return "Merge"+(name?(" onto "+name):"");
+  if(m.type==="roundabout"||m.type==="rotary") return "At the roundabout, take exit "+(m.exit||"")+(name?(" onto "+name):"");
+  if(m.type==="continue"||m.type==="new name") return name?("Continue on "+name):"Continue";
+  return (mod?("Turn "+mod):"Continue")+(name?(" onto "+name):"");
+}
+function plnOsrmEnrich(res){
+  if(!res||!res.walkLegs||!res.walkLegs.length||typeof fetch==="undefined") return;
+  var tok=(window.__routeTok=(window.__routeTok||0)+1);
+  var base=res.coords.map(function(c){ return [c[0],c[1]]; });
+  res.walkLegs.forEach(function(leg){
+    var url="https://router.project-osrm.org/route/v1/foot/"+leg.from[1]+","+leg.from[0]+";"+leg.to[1]+","+leg.to[0]+"?steps=true&overview=full&geometries=geojson";
+    var ctl=(typeof AbortController!=="undefined")?new AbortController():null;
+    var timer=ctl?setTimeout(function(){ try{ ctl.abort(); }catch(e){} },6000):null;
+    fetch(url, ctl?{signal:ctl.signal}:undefined).then(function(r){ return r.json(); }).then(function(j){
+      if(timer) clearTimeout(timer);
+      if(tok!==window.__routeTok) return;
+      if(!j||!j.routes||!j.routes[0]) return;
+      var rt=j.routes[0];
+      var mi=rt.distance/1609.34, mins=Math.max(1,Math.round(mi*20));
+      var out=document.getElementById("planOut"); if(!out||!out.querySelector) return;
+      var ol=out.querySelector("ol"); if(!ol) return;
+      var li=ol.children[leg.step]; if(!li) return;
+      var head=(leg.kind==="all"?"🚶 Walk the whole way — ~":(leg.kind==="transfer"?"🚶 Transfer: walk ~":"🚶 Walk ~"))+mins+" min ("+plnFmtD(mi)+") to "+leg.toName+(leg.kind==="end"?" — you're there":"");
+      var subs=[], raw=(rt.legs&&rt.legs[0])?rt.legs[0].steps:[];
+      raw.forEach(function(st){
+        var ins=osrmInstr(st); if(!ins) return;
+        if(st.distance) ins+=" · "+plnFmtD(st.distance/1609.34);
+        if(subs.length&&subs[subs.length-1]===ins) return;
+        subs.push(ins);
+      });
+      if(subs.length>9) subs=subs.slice(0,9);
+      li.innerHTML=plnEsc(head)+(subs.length?("<ul class='walkSub'>"+subs.map(function(x){ return "<li>"+plnEsc(x)+"</li>"; }).join("")+"</ul>"):"");
+      var geo=(rt.geometry&&rt.geometry.coordinates)?rt.geometry.coordinates.map(function(p){ return [p[1],p[0]]; }):[];
+      if(geo.length>1){
+        var idx=leg.ci;
+        base.splice.apply(base,[idx,2].concat(geo));
+        res.walkLegs.forEach(function(o){ if(o!==leg&&o.ci>idx) o.ci+=geo.length-2; });
+        plnDrawRoute(base);
+      }
+    }).catch(function(){ if(timer) clearTimeout(timer); });
+  });
+}
