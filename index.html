@@ -575,7 +575,7 @@ function planRoute(fromPin,toPin){
  var coords=path.map(function(sg){ return N[sg.from].c; }); coords.push(N["@to"].c);
  return {steps:steps,totalMin:total,coords:coords};
 }
-if(typeof document!=="undefined"&&document.getElementById&&document.getElementById("planBtn")){
+if(typeof document!=="undefined"&&document.getElementById){
  var dayPick=document.getElementById("planDayPick"), actPick=document.getElementById("planActPick");
  function plnFillActs(){
    if(!actPick) return;
