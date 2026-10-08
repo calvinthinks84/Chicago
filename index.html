@@ -273,10 +273,6 @@ function unselectPin(){
 }
 var _ub=document.getElementById("unselBtn"); if(_ub) _ub.addEventListener("click",unselectPin);
 document.querySelectorAll(".fchip").forEach(function(b){ b.addEventListener("click",function(){ setFilter(b.getAttribute("data-f")); }); });
-function showToast(p,d){
- if(!pinInfo) return;
- pinInfo.innerHTML="<p style='margin:2px 0'><strong>\uD83D\uDCE3 You're near — "+fmtD(d)+" away:</strong></p>"+popHTML(p);
-}
 function visible(p){
  if(catFilter==="all") return true;
  var cats=FILTER_CATS[catFilter]||[];
@@ -306,7 +302,7 @@ function checkProximity(pos){
    var d=distM(pos,p);
    rows.push({p:p,d:d,i:i});
    if(d<=radius){
-     if(!alerted[i]){ alerted[i]=true; showToast(p,d); if(userInteracted && navigator.vibrate){ try{navigator.vibrate(60);}catch(_){}} }
+     if(!alerted[i]){ alerted[i]=true; if(userInteracted && navigator.vibrate){ try{navigator.vibrate(60);}catch(_){}} }
    } else if(d>radius*1.6){ alerted[i]=false; }
  });
  rows.sort(function(a,b){return a.d-b.d;});
