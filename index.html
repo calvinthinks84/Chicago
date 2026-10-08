@@ -86,7 +86,7 @@ select,.rad{font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid 
 .itt{display:inline-block;min-width:104px;font-weight:700;color:var(--muted);font-size:13px}
 .itgo{background:none;border:none;padding:0;font:inherit;color:var(--link);text-decoration:underline;text-underline-offset:2px;text-align:left;cursor:pointer}
 .planBtns{display:flex;flex-wrap:wrap;gap:8px}
-.planBtns .btn{flex:1 1 42%;min-width:0}
+.planBtns .btn{flex:1 1 0;min-width:0}
 .planIn{width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;font:inherit;margin:3px 0 8px;background:var(--bg);color:var(--ink);-webkit-text-fill-color:var(--ink)}
 .planIn::placeholder{color:var(--mut);-webkit-text-fill-color:var(--mut);opacity:1}
 
@@ -115,7 +115,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px}
   .wxd{font-size:12px;padding:4px 7px}
   #planPick li{font-size:14.5px}
   #map{height:clamp(300px,52dvh,520px)}
-  .planBtns .btn{flex:1 1 42%}
+  .planBtns .btn{flex:1 1 0}
   #filterBar .fchip{flex:1 1 28%;text-align:center}
   .locRow .btn{padding:8px 6px;font-size:13.5px}
   .poi{gap:6px}
@@ -163,7 +163,7 @@ html,body{overflow-x:clip}
 <div class="planRow"><label>Day <select class="planIn" id="planDayPick"><option value="">📅 Pick a day…</option><option value="tue">Tue Oct 13</option><option value="wed">Wed Oct 14 🎂</option><option value="thu">Thu Oct 15</option><option value="fri">Fri Oct 16</option><option value="sat">Sat Oct 17</option><option value="all">Any day</option></select></label>
 <label>Activity <select class="planIn" id="planActPick"><option value="">Pick a day first…</option></select></label></div>
 <label>Search for place</label><div class="planPickWrap"><input class="planIn" id="planTo" placeholder="Start search" autocomplete="off"><ul id="planPick"></ul></div>
-<p class="planBtns" style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🗺️ Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
+<p class="planBtns" style="margin:4px 0"><button class="btn" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🗺️ Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
 <div id="planOut"></div></div>
 <div id="secMap"><div class="secHead"><h2>🗺️ Map</h2><span class="secMove"><button type="button" class="secMv" data-sec="secMap" data-mv="-1" title="Move section up">▲</button><button type="button" class="secMv" data-sec="secMap" data-mv="1" title="Move section down">▼</button></span><button type="button" class="secTgl" data-c="mapWrap" title="Collapse / expand this section">▸</button></div><div id="mapWrap" class="closed"><div id="map"></div>
 <div class="bar" id="filterBar" style="margin:10px 0 8px"><button class="fchip on" data-f="all">All locations</button><button class="fchip" data-f="food">🍽️ Food</button><button class="fchip" data-f="drinks">🥤 Drinks</button><button class="fchip" data-f="landmark">🏛️ Landmarks</button><button class="fchip" data-f="saved">⭐ Saved</button><button class="fchip" data-f="stop">📍 Stops</button></div></div></div>
@@ -739,7 +739,7 @@ function plnGo(){
      })
      .catch(function(){ out.innerHTML="<p>Place search needs an internet connection — try again in a moment, or pick from the day dropdown (works offline).</p>"; });
  }
- document.getElementById("planBtn").addEventListener("click",plnGo);
+ var _pb=document.getElementById("planBtn"); if(_pb) _pb.addEventListener("click",plnGo);
  var homeBtn=document.getElementById("planHome");
  if(homeBtn) homeBtn.addEventListener("click",function(){ document.getElementById("planTo").value=POIS[0].n; plnGo(); });
  var clearBtn=document.getElementById("planClear");
