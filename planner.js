@@ -429,9 +429,10 @@ var PLN_RT_COLOR={"Blue":"Blue","Red":"Red","Brn":"Brown","P":"Purple","G":"Gree
 var PLN_RT_NAME={"Blue":"Blue Line","Red":"Red Line","Brn":"Brown Line","P":"Purple Line","G":"Green Line","Pink":"Pink Line","Org":"Orange Line","Y":"Yellow Line"};
 function plnClock(ms){ if(!ms) return ""; try{ return new Date(ms).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZone:"America/Chicago"}); }catch(e){ return ""; } }
 function plnBusMs(v){ return plnChiMs(String(v||"").replace(/^(\d{4})(\d{2})(\d{2}) (\d{2}):(\d{2})/,"$1-$2-$3T$4:$5:00")); }
+function plnShortName(n){ return String(n||"").replace(/\s*\([^)]*\)\s*/g," ").replace(/\s+/g," ").trim().replace(/\s+station$/i,""); }
 function plnVeh(rt){ var nm=PLN_RT_NAME[rt], k=PLN_RT_COLOR[rt]; if(!nm) return "Train"; return '<span class="lc'+(k?" lc-"+k:"")+'">'+nm+"</span> train"; }
 function liveMinSpan(x){ return '<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.m+'</span>'; }
-function liveTable(rows,rd){ if(!rows.length) return ""; var bn=plnEsc((rd&&rd.boardName)||""), xn=plnEsc((rd&&rd.exitName)||""); var body=rows.map(function(x){ return "<tr><td>"+(x.veh||"")+(x.dir?("<br><span class=\"liveDir\">"+plnEsc(x.dir)+"</span>"):"")+"<br><span class=\"liveStops\">"+bn+" → "+xn+"</span></td><td>"+bn+"</td><td>"+xn+"</td><td>"+liveMinSpan(x)+"</td><td>"+(x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):"")+"</td><td>"+(x.late?'<span class="lc lc-Red">Late</span>':'<span class="lc lc-Green">On time</span>')+"</td></tr>"; }).join(""); return '<table class="liveTbl"><tr><th>Bus or Train</th><th>Board</th><th>Exit</th><th>Arrival</th><th>Time</th><th>Status</th></tr>'+body+"</table>"; }
+function liveTable(rows,rd){ if(!rows.length) return ""; var bn=plnEsc(plnShortName(rd&&rd.boardName)), xn=plnEsc(plnShortName(rd&&rd.exitName)); var body=rows.map(function(x){ return "<tr><td>"+(x.veh||"")+(x.dir?("<br><span class=\"liveDir\">"+plnEsc(x.dir)+"</span>"):"")+"<br><span class=\"liveStops\">"+bn+" → "+xn+"</span></td><td>"+bn+"</td><td>"+xn+"</td><td>"+liveMinSpan(x)+"</td><td>"+(x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):"")+"</td><td>"+(x.late?'<span class="lc lc-Red">Late</span>':'<span class="lc lc-Green">On time</span>')+"</td></tr>"; }).join(""); return '<table class="liveTbl"><tr><th>Bus or Train</th><th>Board</th><th>Exit</th><th>Arrival</th><th>Time</th><th>Status</th></tr>'+body+"</table>"; }
 function plnLiveMark(span,ok){ if(span) span.className="liveT "+(ok?"ok":"bad"); }
 function plnLiveFill(rides,quiet){
   var cfg=plnLiveCfg(); if(!cfg.relay&&!cfg.train&&!cfg.bus) return;
@@ -459,7 +460,7 @@ function plnLiveFill(rides,quiet){
           var m=Math.round((plnChiMs(e.arrT)-now)/60000);
           ent.push({late:(e.isDly==="1"), veh:plnVeh(e.rt), dir:(e.destNm?("toward "+e.destNm):rd.dir), m:(m<=0?"due":m+" min"), c:plnClock(plnChiMs(e.arrT)), k:k});
         });
-        plnLiveMark(span,true); span.innerHTML="🟢 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains"+liveTable(ent, rd); window.__liveCache[ckeyT]=span.innerHTML;
+        plnLiveMark(span,true); span.innerHTML="<span class=\"liveLbl\">🟢 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains</span>"+liveTable(ent, rd); window.__liveCache[ckeyT]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
     } else {
       if(!cfg.relay&&!cfg.bus) return;
@@ -474,7 +475,7 @@ function plnLiveFill(rides,quiet){
         if(!mine.length){ plnLiveMark(span,false); span.textContent="⏱ No live buses reported right now"; return; }
         var ent=[], dly=false;
         mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; ent.push({late:!!p.dly, veh:"Bus #"+rd.route, dir:((p.rtdir||"")+(p.des?(" to "+p.des):""))||rd.dir, m:((p.prdctdn==="DUE"||parseInt(p.prdctdn,10)<=0)?"due":p.prdctdn+" min"), c:plnClock(plnBusMs(p.prdtm)), k:""}); });
-        plnLiveMark(span,true); span.innerHTML="🟢 Live: next #"+rd.route+" buses"+liveTable(ent, rd); window.__liveCache[ckeyB]=span.innerHTML;
+        plnLiveMark(span,true); span.innerHTML="<span class=\"liveLbl\">🟢 Live: next #"+rd.route+" buses</span>"+liveTable(ent, rd); window.__liveCache[ckeyB]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
     }
   });
