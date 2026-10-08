@@ -260,7 +260,7 @@ function showPin(i,scroll){
  var b2=document.getElementById("unselBtn2"); if(b2) b2.addEventListener("click",unselectPin);
  var pt=document.getElementById("planTo"); if(pt) pt.value=p.n;
  if((typeof myPos!=="undefined"&&myPos)&&(typeof plnRender==="function")) plnRender({n:"📍 Your current location",lat:myPos.lat,lng:myPos.lng},p);
- if(scroll) document.getElementById("pinInfo").scrollIntoView({behavior:"smooth",block:"nearest"});
+ setTimeout(function(){ var pi=document.getElementById("pinInfo"); if(pi) pi.scrollIntoView({behavior:"smooth",block:"start"}); },80);
 }
 function unselectPin(){
  selectedIdx=-1;
