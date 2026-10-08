@@ -87,10 +87,10 @@ select,.rad{font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid 
 .itgo{background:none;border:none;padding:0;font:inherit;color:var(--link);text-decoration:underline;text-underline-offset:2px;text-align:left;cursor:pointer}
 .planBtns{display:flex;flex-wrap:wrap;gap:8px}
 .planBtns .btn{flex:1 1 42%;min-width:0}
-.planIn{width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid #c6ced6;border-radius:11px;font:inherit;margin:3px 0 8px;background:#edf0f3;color:#1c2733;-webkit-text-fill-color:#1c2733}
-.planIn::placeholder{color:#71808e}
-@media (prefers-color-scheme: dark){.planIn{background:#2a323d;color:#e8edf2;-webkit-text-fill-color:#e8edf2;border-color:#3a4552}.planIn::placeholder{color:#93a1b0}}
-.planIn::placeholder{color:#68737d;-webkit-text-fill-color:#68737d;opacity:1}
+.planIn{width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;font:inherit;margin:3px 0 8px;background:var(--bg);color:var(--ink);-webkit-text-fill-color:var(--ink)}
+.planIn::placeholder{color:var(--mut);-webkit-text-fill-color:var(--mut);opacity:1}
+
+
 #planOut{font-size:14.5px;line-height:1.5}
 #planOut ol{margin:6px 0;padding-left:22px}
 #planOut li{margin:7px 0}
@@ -161,7 +161,7 @@ html,body{overflow-x:clip}
 <nav id="secNav"><button type="button" class="snav" data-t="planPanel">🧭 Plan a ride</button><button type="button" class="snav" data-t="map">🗺️ Map</button><button type="button" class="snav" data-t="pinInfo">📍 Pin details</button><button type="button" class="snav" data-t="secItin">🗓️ Itinerary</button><button type="button" class="snav" data-t="addPanel">➕ Add a place</button><button type="button" class="snav" data-t="secNear">📏 Nearest</button></nav><div class="panel" id="planPanel"><h2>🧭 Plan a ride — which bus or train?<button type="button" class="secTgl" data-c="planPanel" title="Collapse / expand this section">▾</button></h2>
 <label>Day <select class="planIn" id="planDayPick"><option value="">📅 Pick a day…</option><option value="tue">Tue Oct 13</option><option value="wed">Wed Oct 14 🎂</option><option value="thu">Thu Oct 15</option><option value="fri">Fri Oct 16</option><option value="sat">Sat Oct 17</option><option value="all">Any day</option></select></label>
 <label>Activity <select class="planIn" id="planActPick"><option value="">Pick a day first…</option></select></label>
-<label>Or type a place</label><div class="planPickWrap"><input class="planIn" id="planTo" placeholder="Where to? Type a place…" autocomplete="off"><ul id="planPick"></ul></div>
+<label>Search for place</label><div class="planPickWrap"><input class="planIn" id="planTo" placeholder="Where to? Type a place…" autocomplete="off"><ul id="planPick"></ul></div>
 <p class="planBtns" style="margin:4px 0"><button class="btn go" id="planBtn">🧭 Show route</button> <button class="btn" id="planHome">🏠 Home</button> <button class="btn" id="planApple">🗺️ Directions</button> <button class="btn" id="planClear">🧹 Clear</button></p>
 <div id="planOut"></div></div>
 <div class="secHead"><h2>🗺️ Map</h2><button type="button" class="secTgl" data-c="mapWrap" title="Collapse / expand this section">▸</button></div><div id="mapWrap" class="closed"><div id="map"></div>
