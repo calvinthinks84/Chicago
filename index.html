@@ -874,6 +874,8 @@ function plnGo(){
  function loadUserPins(){ try{ var a=JSON.parse(localStorage.getItem(LSKEY)||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
  function storeUserPins(a){ try{ localStorage.setItem(LSKEY,JSON.stringify(a)); }catch(e){} }
  function esc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+ function addMi(a,b){ var R=3958.8, dLa=(b.lat-a.lat)*Math.PI/180, dLo=(b.lng-a.lng)*Math.PI/180; var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(h)); }
+ var addOrg=null;
  function webU(u){ u=String(u||"").split(";")[0].trim(); if(!u) return ""; if(!/^https?:\/\//i.test(u)) u="https://"+u; return u; }
  function catFor(osmValue,cuisine){
    var v=String(osmValue||"").toLowerCase(), cu=String(cuisine||"").toLowerCase();
@@ -933,7 +935,7 @@ function plnGo(){
  var feats=[], timer=null, token=0, addCtl=null;
  function renderFeats(){
    if(!listEl) return;
-   listEl.innerHTML=feats.map(function(ft,i){ var pr=ft.properties||{}; var det=[pr.housenumber,pr.street,pr.city].filter(Boolean).join(" "); return "<li data-addpick='"+i+"'>\uD83D\uDCCD "+esc(pr.name||"")+" <span class='pa-addr'>"+esc(det)+"</span></li>"; }).join("");
+   listEl.innerHTML=feats.map(function(ft,i){ var pr=ft.properties||{}; var dtxt=""; if(addOrg&&ft.geometry&&ft.geometry.coordinates){ var dd=addMi(addOrg,{lat:ft.geometry.coordinates[1],lng:ft.geometry.coordinates[0]}); dtxt=" \u00B7 "+(dd<0.1?Math.round(dd*5280)+" ft":dd.toFixed(1)+" mi"); } var det=[pr.housenumber,pr.street,pr.city].filter(Boolean).join(" "); return "<li data-addpick='"+i+"'>\uD83D\uDCCD "+esc(pr.name||"")+" <span class='pa-addr'>"+esc(det)+dtxt+"</span></li>"; }).join("");
  }
  if(qEl){
    qEl.addEventListener("input",function(){
@@ -944,9 +946,11 @@ function plnGo(){
      timer=setTimeout(function(){
        if(addCtl){ try{ addCtl.abort(); }catch(_){} }
        addCtl=(typeof AbortController!=="undefined")?new AbortController():null;
-       fetch("https://photon.komoot.io/api/?limit=8&lang=en&lat=41.8781&lon=-87.6298&q="+encodeURIComponent(q+" Chicago"),{signal:addCtl?addCtl.signal:undefined})
+       var oLat=(typeof myPos!=="undefined"&&myPos)?myPos.lat:41.8781, oLng=(typeof myPos!=="undefined"&&myPos)?myPos.lng:-87.6298;
+       addOrg={lat:oLat,lng:oLng};
+       fetch("https://photon.komoot.io/api/?limit=8&lang=en&lat="+oLat+"&lon="+oLng+"&q="+encodeURIComponent(q+" Chicago"),{signal:addCtl?addCtl.signal:undefined})
         .then(function(r){ return r.json(); })
-        .then(function(pj){ if(tk!==token||!pj||!pj.features) return; feats=pj.features.filter(function(f){ return f.properties&&f.properties.name&&f.geometry&&f.geometry.coordinates; }).slice(0,5); renderFeats(); })
+        .then(function(pj){ if(tk!==token||!pj||!pj.features) return; feats=pj.features.filter(function(f){ return f.properties&&f.properties.name&&f.geometry&&f.geometry.coordinates; }); if(addOrg){ feats.sort(function(a,b){ return addMi(addOrg,{lat:a.geometry.coordinates[1],lng:a.geometry.coordinates[0]})-addMi(addOrg,{lat:b.geometry.coordinates[1],lng:b.geometry.coordinates[0]}); }); } feats=feats.slice(0,5); renderFeats(); })
         .catch(function(){});
      },120);
    });
