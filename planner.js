@@ -476,8 +476,8 @@ function plnLiveFill(rides,quiet){
 function plnLiveSetupRender(){
   var lsu=document.getElementById("liveSetup"); if(!lsu) return;
   var c=plnLiveCfg();
-  if(c.relay||c.train||c.bus) lsu.innerHTML="<span>🔴 <strong>Live times: on</strong></span> <button type='button' class='btn' id='liveEdit'>Edit</button>";
-  else lsu.innerHTML="<span>🔴 <strong>Live times: off</strong> — add your free CTA keys to see real next-train / next-bus times in the steps.</span> <button type='button' class='btn' id='liveEdit'>Set up</button>";
+  if(c.relay||c.train||c.bus) lsu.innerHTML="<span>🟢 <strong>Live times: on</strong></span> <button type='button' class='btn liveOn' id='liveEdit'>Edit</button>";
+  else lsu.innerHTML="<span>🔴 <strong>Live times: off</strong> — add your free CTA keys to see real next-train / next-bus times in the steps.</span> <button type='button' class='btn liveOff' id='liveEdit'>Set up</button>";
   var b=document.getElementById("liveEdit"); if(b) b.addEventListener("click",plnLiveForm);
 }
 function plnLiveForm(){
