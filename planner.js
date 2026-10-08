@@ -176,7 +176,7 @@ if(typeof document!=="undefined"&&document.getElementById){
    var r=planRoute(f,t);
    if(!r){ plnClearRoute(); out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; return; }
    var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps 🗺️</a>";
-   out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p><ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'></span>":"")+"</li>"; }).join("")+"</ol>"+extra;
+   out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p>"+(r.notice?("<p style='margin:6px 0'>ℹ️ "+plnEsc(r.notice)+"</p>"):"")+"<ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'></span>":"")+"</li>"; }).join("")+"</ol>"+extra;
    window.__lastRoute={res:r,from:f,to:t}; var nb=document.getElementById("navBtn"); if(nb) nb.style.display="block"; if(window.__nav&&window.__nav.on&&!window.__navRerender) plnNavEnd();
    plnDrawRoute(r.coords);
    if(r.rides&&r.rides.length&&typeof plnLiveFill==="function") plnLiveFill(r.rides,false);
@@ -549,7 +549,7 @@ function gtNear(lat,lng,rMi,maxN){
   out.sort(function(x,y){ return x.d-y.d; });
   return out.slice(0,maxN||99);
 }
-function planRouteGT(fromPin,toPin){
+function planRouteGT(fromPin,toPin,banSet){
   gtInit();
   var NN=GT_NODES.length, SRC=NN, DST=NN+1, TOT=NN+2;
   var dist=new Float64Array(TOT).fill(Infinity);
@@ -590,6 +590,7 @@ function planRouteGT(fromPin,toPin){
     var edges=GT_EDGES[u]||[];
     for(var ei=0; ei<edges.length; ei++){
       var e=edges[ei], sameRun=(pk===2&&pr===e[2]&&pd===e[3]);
+      if(banSet&&banSet[e[2]+":"+e[3]]) continue;
       var w=e[1]/60+(sameRun?0:3), nd=dist[u]+w, tn=e[0];
       if(nd<dist[tn]){ dist[tn]=nd; prevN[tn]=u; prevK[tn]=2; prevR[tn]=e[2]; prevD[tn]=e[3]; hPush(nd,tn); }
     }
@@ -624,7 +625,7 @@ function planRouteGT(fromPin,toPin){
       var lineName=isBus?("#"+R[0]):R[0];
       var hs=R[2+dr]||"";
       steps.push((isBus?"🚌":"🚇")+" Board the "+lineName+" at "+nodeName(board)+" (toward "+hs+") → ride "+nstops+(nstops===1?" stop":" stops")+", ~"+mins+" min → exit at "+nodeName(exitN));
-      rides.push({step:steps.length-1,mode:isBus?"bus":"train",line:lineName,route:isBus?String(R[0]).split(" ")[0]:null,node:GT_NODES[board][0],dir:"toward "+hs,boardName:nodeName(board),exitName:nodeName(exitN),gtfs:1});
+      rides.push({step:steps.length-1,mode:isBus?"bus":"train",line:lineName,route:isBus?String(R[0]).split(" ")[0]:null,node:GT_NODES[board][0],dir:"toward "+hs,boardName:nodeName(board),exitName:nodeName(exitN),gtfs:1,ridx:rt,gdir:dr});
     } else if(sg.e.kind==="walkall"){
       legs.push({step:steps.length,kind:"all",from:[fromPin.lat,fromPin.lng],to:[toPin.lat,toPin.lng],ci:0,toName:toPin.n});
       total+=sg.e.min||Math.max(1,Math.round(directD*20));
@@ -642,8 +643,40 @@ function planRouteGT(fromPin,toPin){
   coords.push([toPin.lat,toPin.lng]);
   return {steps:steps,totalMin:total,coords:coords,rides:rides,walkLegs:legs};
 }
+function gtNowSvcMin(){
+  if(typeof window!=="undefined"&&window.__nowMin!=null) return window.__nowMin;
+  try{
+    var parts=new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",hour:"numeric",minute:"numeric",hour12:false}).formatToParts(new Date());
+    var h=0,m=0; parts.forEach(function(pp){ if(pp.type==="hour") h=parseInt(pp.value,10)%24; if(pp.type==="minute") m=parseInt(pp.value,10); });
+    var t=h*60+m; if(h<3) t+=1440; return t;
+  }catch(e){ var d=new Date(); var t2=d.getHours()*60+d.getMinutes(); if(d.getHours()<3) t2+=1440; return t2; }
+}
+function gtClock(mins){ var m=((mins%1440)+1440)%1440; var h=Math.floor(m/60), mm=m%60, ap=h<12?"AM":"PM"; var h12=h%12; if(h12===0) h12=12; return h12+":"+(mm<10?"0":"")+mm+" "+ap; }
+function gtRideState(rd){
+  if(typeof GT_SPANS==="undefined"||!rd||rd.ridx==null) return null;
+  var sp=GT_SPANS[rd.ridx]; if(!sp) return null;
+  var one=sp[rd.gdir]; if(!one||one[1]<=one[0]) return null;
+  var now=gtNowSvcMin();
+  if(now>=one[0]&&now<=one[1]) return null;
+  return now<one[0]?{kind:"before",at:one[0]}:{kind:"after",at:one[1]};
+}
 function planRoute(fromPin,toPin){
-  if(GT_ON){ try{ var r=planRouteGT(fromPin,toPin); if(r) return r; }catch(e){} }
+  if(GT_ON){ try{
+    var r=planRouteGT(fromPin,toPin,null);
+    if(r&&r.rides&&typeof GT_SPANS!=="undefined"){
+      var dead=r.rides.map(function(rd){ return {rd:rd,st:gtRideState(rd)}; }).filter(function(x){ return !!x.st; });
+      if(dead.length){
+        var ban={}; dead.forEach(function(x){ ban[x.rd.ridx+":"+x.rd.gdir]=1; });
+        var r2=null; try{ r2=planRouteGT(fromPin,toPin,ban); }catch(e){}
+        if(r2&&r2.rides&&r2.rides.length){
+          r2.notice=dead.map(function(x){ return x.rd.line+" isn't running now ("+(x.st.kind==="before"?("service starts "+gtClock(x.st.at)):("service ended "+gtClock(x.st.at)))+")"; }).join(" · ")+" — routed another way instead.";
+          return r2;
+        }
+        dead.forEach(function(x){ r.steps[x.rd.step]+=" ⚠️ Not running now — "+(x.st.kind==="before"?("service starts "+gtClock(x.st.at)):("service ended "+gtClock(x.st.at)))+"."; x.rd.notRunning=1; });
+      }
+    }
+    if(r) return r;
+  }catch(e){} }
   return planRouteV1(fromPin,toPin);
 }
 
