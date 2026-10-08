@@ -445,7 +445,7 @@ function plnLiveFill(rides,quiet){
       var mid=rd.gtfs?rd.node:((typeof PLN_TRAIN_ID!=="undefined")?PLN_TRAIN_ID[rd.node]:null); if(!mid) return;
       var ckeyT="T|"+mid+"|"+rd.dir; if(window.__liveCache[ckeyT]){ span.innerHTML=window.__liveCache[ckeyT]; plnLiveMark(span,true); } else if(!quiet){ span.textContent="⏱ Fetching live trains…"; plnLiveMark(span,false); }
       var url="https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx?mapid="+mid+"&max=6&outputType=JSON"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.train));
-      plnFetchJSON(url,"ctatt",{keyed:!!(cfg.relay||cfg.train),isErr:function(j){ return !!(j.ctatt&&j.ctatt.errCd&&j.ctatt.errCd!=="0"); }}).then(function(j2){
+      plnFetchJSON(url,"ctatt",{keyed:!!(cfg.relay||cfg.train),isErr:function(j){ return !!(j.ctatt&&j.ctatt.errCd==="101"); }}).then(function(j2){
         if(j2.ctatt.errCd&&j2.ctatt.errCd!=="0"){ plnLiveMark(span,false); span.textContent="⏱ CTA rejected the train key — check it under Live times → Edit"; return; }
         var etas=(j2&&j2.ctatt&&j2.ctatt.eta)||[];
         var codes=PLN_RT_CODES[rd.line]||[];
@@ -468,8 +468,12 @@ function plnLiveFill(rides,quiet){
       var stpid=null; if(rd.gtfs){ stpid=rd.node; } else { var byDir=(typeof PLN_BUS_ID!=="undefined")?PLN_BUS_ID[rd.node+"|"+rd.route]:null; stpid=byDir?byDir[rd.dir]:null; } if(!stpid) return;
       var ckeyB="B|"+stpid+"|"+rd.route; if(window.__liveCache[ckeyB]){ span.innerHTML=window.__liveCache[ckeyB]; plnLiveMark(span,true); } else if(!quiet){ span.textContent="⏱ Fetching live buses…"; plnLiveMark(span,false); }
       var url2="https://www.ctabustracker.com/bustime/api/v2/getpredictions?stpid="+stpid+"&format=json"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.bus));
-      plnFetchJSON(url2,"bustime-response",{keyed:!!(cfg.relay||cfg.bus),isErr:function(j){ var e=j["bustime-response"]&&j["bustime-response"].error; return !!(e&&e.length); }}).then(function(j2){
-        var berr=j2["bustime-response"].error; if(berr&&berr.length){ plnLiveMark(span,false); span.textContent="⏱ CTA rejected the bus key — check it under Live times → Edit"; return; }
+      plnFetchJSON(url2,"bustime-response",{keyed:!!(cfg.relay||cfg.bus),isErr:function(j){ var e=j["bustime-response"]&&j["bustime-response"].error; return !!(e&&e.length&&/key/i.test((e[0]&&e[0].msg)||"")); }}).then(function(j2){
+        var berr=j2["bustime-response"].error; if(berr&&berr.length){ var bmsg=(berr[0]&&berr[0].msg)||""; plnLiveMark(span,false);
+          if(/key/i.test(bmsg)) span.textContent="⏱ CTA rejected the bus key";
+          else if(/no service scheduled/i.test(bmsg)) span.textContent="⏱ No more #"+rd.route+" buses scheduled right now";
+          else span.textContent="⏱ "+(bmsg||"No live buses reported right now");
+          return; }
         var prds=(j2&&j2["bustime-response"]&&j2["bustime-response"].prd)||[];
         var mine=prds.filter(function(p){ return String(p.rt)===String(rd.route); });
         if(!mine.length){ plnLiveMark(span,false); span.textContent="⏱ No live buses reported right now"; return; }
