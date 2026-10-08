@@ -425,6 +425,11 @@ function plnChiMs(str){
 function plnDirTokens(dir){
   return String(dir||"").replace(/^toward\s+/i,"").split("/").map(function(x){ return x.replace(/\(.*?\)/g,"").replace(/^the\s+/i,"").trim().toLowerCase(); }).filter(Boolean);
 }
+var PLN_RT_COLOR={"Blue":"Blue","Red":"Red","Brn":"Brown","P":"Purple","G":"Green","Pink":"Pink","Org":"Orange","Y":"Yellow"};
+function plnClock(ms){ if(!ms) return ""; try{ return new Date(ms).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZone:"America/Chicago"}); }catch(e){ return ""; } }
+function plnBusMs(v){ return plnChiMs(String(v||"").replace(/^(\d{4})(\d{2})(\d{2}) (\d{2}):(\d{2})/,"$1-$2-$3T$4:$5:00")); }
+function liveMinSpan(x){ return '<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.m+'</span>'; }
+function liveTimesRow(ent){ var ts=ent.map(function(x){ return x.c?('<span class="lc'+(x.k?" lc-"+x.k:"")+'">'+x.c+'</span>'):""; }).filter(Boolean); return ts.length?("<br>at "+ts.join(" · ")):""; }
 function plnLiveMark(span,ok){ if(span) span.className="liveT "+(ok?"ok":"bad"); }
 function plnLiveFill(rides,quiet){
   var cfg=plnLiveCfg(); if(!cfg.relay&&!cfg.train&&!cfg.bus) return;
@@ -434,7 +439,7 @@ function plnLiveFill(rides,quiet){
     if(rd.mode==="train"){
       if(!cfg.relay&&!cfg.train) return;
       var mid=(typeof PLN_TRAIN_ID!=="undefined")?PLN_TRAIN_ID[rd.node]:null; if(!mid) return;
-      var ckeyT="T|"+mid+"|"+rd.dir; if(window.__liveCache[ckeyT]){ span.textContent=window.__liveCache[ckeyT]; plnLiveMark(span,true); } else if(!quiet){ span.textContent="⏱ Fetching live trains…"; plnLiveMark(span,false); }
+      var ckeyT="T|"+mid+"|"+rd.dir; if(window.__liveCache[ckeyT]){ span.innerHTML=window.__liveCache[ckeyT]; plnLiveMark(span,true); } else if(!quiet){ span.textContent="⏱ Fetching live trains…"; plnLiveMark(span,false); }
       var url="https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx?mapid="+mid+"&max=6&outputType=JSON"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.train));
       plnFetchJSON(url,"ctatt",{keyed:!!(cfg.relay||cfg.train),isErr:function(j){ return !!(j.ctatt&&j.ctatt.errCd&&j.ctatt.errCd!=="0"); }}).then(function(j2){
         if(j2.ctatt.errCd&&j2.ctatt.errCd!=="0"){ plnLiveMark(span,false); span.textContent="⏱ CTA rejected the train key — check it under Live times → Edit"; return; }
@@ -444,29 +449,30 @@ function plnLiveFill(rides,quiet){
         var mine=etas.filter(function(e){ return codes.indexOf(e.rt)>=0&&toks.some(function(t){ return String(e.stpDe||"").toLowerCase().indexOf(t)>=0; }); });
         if(!mine.length) mine=etas.filter(function(e){ return codes.indexOf(e.rt)>=0; });
         if(!mine.length){ plnLiveMark(span,false); span.textContent="⏱ No live trains reported right now"; return; }
-        var now=Date.now(), parts=[], dly=false;
+        var now=Date.now(), ent=[], dly=false;
         mine.slice(0,3).forEach(function(e){
           if(e.isDly==="1") dly=true;
-          if(e.isApp==="1"){ parts.push("due"); return; }
+          var k=PLN_RT_COLOR[e.rt]||"";
+          if(e.isApp==="1"){ ent.push({m:"due", c:plnClock(plnChiMs(e.arrT)), k:k}); return; }
           var m=Math.round((plnChiMs(e.arrT)-now)/60000);
-          parts.push(m<=0?"due":m+" min");
+          ent.push({m:(m<=0?"due":m+" min"), c:plnClock(plnChiMs(e.arrT)), k:k});
         });
-        plnLiveMark(span,true); span.textContent="🟢 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains "+parts.join(", ")+(dly?" · delays reported":""); window.__liveCache[ckeyT]=span.textContent;
+        plnLiveMark(span,true); span.innerHTML="🟢 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains "+ent.map(liveMinSpan).join(", ")+(dly?" · delays reported":"")+liveTimesRow(ent); window.__liveCache[ckeyT]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
     } else {
       if(!cfg.relay&&!cfg.bus) return;
       var byDir=(typeof PLN_BUS_ID!=="undefined")?PLN_BUS_ID[rd.node+"|"+rd.route]:null;
       var stpid=byDir?byDir[rd.dir]:null; if(!stpid) return;
-      var ckeyB="B|"+stpid+"|"+rd.route; if(window.__liveCache[ckeyB]){ span.textContent=window.__liveCache[ckeyB]; plnLiveMark(span,true); } else if(!quiet){ span.textContent="⏱ Fetching live buses…"; plnLiveMark(span,false); }
+      var ckeyB="B|"+stpid+"|"+rd.route; if(window.__liveCache[ckeyB]){ span.innerHTML=window.__liveCache[ckeyB]; plnLiveMark(span,true); } else if(!quiet){ span.textContent="⏱ Fetching live buses…"; plnLiveMark(span,false); }
       var url2="https://www.ctabustracker.com/bustime/api/v2/getpredictions?stpid="+stpid+"&format=json"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.bus));
       plnFetchJSON(url2,"bustime-response",{keyed:!!(cfg.relay||cfg.bus),isErr:function(j){ var e=j["bustime-response"]&&j["bustime-response"].error; return !!(e&&e.length); }}).then(function(j2){
         var berr=j2["bustime-response"].error; if(berr&&berr.length){ plnLiveMark(span,false); span.textContent="⏱ CTA rejected the bus key — check it under Live times → Edit"; return; }
         var prds=(j2&&j2["bustime-response"]&&j2["bustime-response"].prd)||[];
         var mine=prds.filter(function(p){ return String(p.rt)===String(rd.route); });
         if(!mine.length){ plnLiveMark(span,false); span.textContent="⏱ No live buses reported right now"; return; }
-        var parts=[], dly=false;
-        mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; parts.push((p.prdctdn==="DUE"||parseInt(p.prdctdn,10)<=0)?"due":p.prdctdn+" min"); });
-        plnLiveMark(span,true); span.textContent="🟢 Live: next #"+rd.route+" buses "+parts.join(", ")+(dly?" · delayed":""); window.__liveCache[ckeyB]=span.textContent;
+        var ent=[], dly=false;
+        mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; ent.push({m:((p.prdctdn==="DUE"||parseInt(p.prdctdn,10)<=0)?"due":p.prdctdn+" min"), c:plnClock(plnBusMs(p.prdtm)), k:""}); });
+        plnLiveMark(span,true); span.innerHTML="🟢 Live: next #"+rd.route+" buses "+ent.map(liveMinSpan).join(", ")+(dly?" · delayed":"")+liveTimesRow(ent); window.__liveCache[ckeyB]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
     }
   });
