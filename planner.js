@@ -462,7 +462,7 @@ function plnLiveFill(rides,quiet){
         var mine=prds.filter(function(p){ return String(p.rt)===String(rd.route); });
         if(!mine.length){ span.textContent="⏱ No live buses reported right now"; return; }
         var parts=[], dly=false;
-        mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; parts.push(p.prdctdn==="DUE"?"due":p.prdctdn+" min"); });
+        mine.slice(0,3).forEach(function(p){ if(p.dly) dly=true; parts.push((p.prdctdn==="DUE"||parseInt(p.prdctdn,10)<=0)?"due":p.prdctdn+" min"); });
         span.textContent="🔴 Live: next #"+rd.route+" buses "+parts.join(", ")+(dly?" · delayed":""); window.__liveCache[ckeyB]=span.textContent;
       }).catch(function(){ span.textContent="⏱ Live times unavailable right now"; });
     }
