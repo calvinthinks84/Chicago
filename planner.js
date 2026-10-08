@@ -383,7 +383,8 @@ var PLN_BUS_ID={"adler-stop|146":{"toward Museum Campus":"4877","toward downtown
 var PLN_RT_CODES={"Blue Line":["Blue"],"Red Line":["Red"],"Brown/Purple Line":["Brn","P"],"Green/Pink Line":["G","Pink"]};
 function plnLsGet(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } }
 function plnLsSet(k,v){ try{ if(v) localStorage.setItem(k,v); else localStorage.removeItem(k); }catch(e){} }
-function plnLiveCfg(){ return {train:plnLsGet("chiTrainKey"),bus:plnLsGet("chiBusKey"),relay:plnLsGet("chiRelay").replace(/\/+$/,"")}; }
+var PLN_RELAY_DEFAULT="https://cta-relay.yd9zy8w2j6.workers.dev";
+function plnLiveCfg(){ return {train:plnLsGet("chiTrainKey"),bus:plnLsGet("chiBusKey"),relay:(plnLsGet("chiRelay")||PLN_RELAY_DEFAULT).replace(/\/+$/,"")}; }
 function plnFetchJSON(url,want){
   var cfg=plnLiveCfg(), tries=[];
   if(cfg.relay) tries.push(cfg.relay+"?u="+encodeURIComponent(url));
