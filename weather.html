@@ -81,6 +81,9 @@ html,body{width:100%;overflow-x:hidden}
   h1{font-size:20px}
   .day{gap:8px}
 }
+/* uniform buttons = menu size (2026-10-10) */
+.btn,a.back{height:34px;min-height:34px;padding:0 10px;font-size:13px}
+.pkaddbtn{height:34px;padding:0 10px;font-size:13px}
 </style>
 </head>
 <body>
@@ -106,7 +109,7 @@ html,body{width:100%;overflow-x:hidden}
 <div class="alert" id="packAlerts" style="display:none"></div>
 
 <div class="panel">
-<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><h2 style="margin:0">🧳 Packing list <span class="sub" id="pkCount"></span></h2><button type="button" class="btn" id="pkToggleAll" style="height:34px;padding:0 12px;font-size:13px;flex:0 0 auto">▾ Expand all</button></div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><h2 style="margin:0">🧳 Packing list <span class="sub" id="pkCount"></span></h2><button type="button" class="btn" id="pkToggleAll" style="height:34px;padding:0 10px;font-size:13px;flex:0 0 auto">▾ Expand all</button></div>
 <div id="pkList"></div>
 <p style="margin:12px 0 0"><button type="button" class="btn" id="pkReset">↺ Reset all checks</button></p>
 <p class="sub" style="margin-top:8px">Checks and your added items are saved on this phone only.</p>
