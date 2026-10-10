@@ -143,12 +143,18 @@ html,body{overflow-x:clip}
 .btn,.fchip{height:34px;min-height:34px;padding:0 10px;font-size:13px}
 .locRow .btn,.planBtns .btn,#arrBar .btn,#unselBtn{height:34px;min-height:34px;padding:0 10px;font-size:13px}
 .secTgl,.secMv{font-size:13px}
+/* essentials near me (2026-10-10) */
+#essOut:empty{display:none}
+.essH{font-weight:700;font-size:14px;margin:10px 0 2px}
+.essRow{cursor:pointer;border-radius:10px}
+.essRow:hover{background:var(--hover)}
+.essRow:active{background:var(--hover)}
 </style></head><body>
 <header><div class="wrap"><h1>🗺️ Chicago Trip App</h1>
 <p><strong>Tue Oct 13 – Sat Oct 17, 2026</strong></p>
 <div id="wxStrip"><span class="wxd">🌦️ Loading Chicago weather…</span></div>
 </div></header>
-<nav id="secNav"><button type="button" class="snav" data-t="planPanel">🧭 Plan a ride</button><button type="button" class="snav" data-t="map">🗺️ Map</button><button type="button" class="snav" data-t="pinInfo">📍 Pin details</button><button type="button" class="snav" data-t="secItin">🗓️ Itinerary</button><button type="button" class="snav" data-t="addPanel">➕ Add a place</button><button type="button" class="snav" data-t="secNear">📏 Nearest</button><a class="snav" href="weather.html" style="text-decoration:none">🌦️ Weather &amp; Packing</a></nav>
+<nav id="secNav"><button type="button" class="snav" data-t="planPanel">🧭 Plan a ride</button><button type="button" class="snav" data-t="map">🗺️ Map</button><button type="button" class="snav" data-t="pinInfo">📍 Pin details</button><button type="button" class="snav" data-t="secItin">🗓️ Itinerary</button><button type="button" class="snav" data-t="addPanel">➕ Add a place</button><button type="button" class="snav" data-t="secNear">📏 Nearest</button><a class="snav" href="weather.html" style="text-decoration:none">🌦️ Weather &amp; Packing</a><button type="button" class="snav" id="essBtn" data-t="secNear">🆘 Essentials</button></nav>
 <div class="wrap">
 
 <div class="bar">
@@ -182,7 +188,7 @@ html,body{overflow-x:clip}
 <div class="panel closed" id="pinInfo"><h2>📍 Pin details<span class="secMove"><button type="button" class="secMv" data-sec="pinInfo" data-mv="-1" title="Move section up">▲</button><button type="button" class="secMv" data-sec="pinInfo" data-mv="1" title="Move section down">▼</button></span><button type="button" class="secTgl" data-c="pinInfo" title="Collapse / expand this section">▸</button></h2><div id="pinInfoBody"><p class="legend">Tap any pin on the map — its ⭐ must-try, 🏛️ history, and 🧭 show here, below the map.</p></div></div>
 <div class="panel closed" id="secItin"><h2>🗓️ Itinerary — day by day<span class="secMove"><button type="button" class="secMv" data-sec="secItin" data-mv="-1" title="Move section up">▲</button><button type="button" class="secMv" data-sec="secItin" data-mv="1" title="Move section down">▼</button></span><button type="button" class="secTgl" data-c="secItin" title="Collapse / expand this section">▸</button></h2><p class="legend">Tap any underlined stop to jump to it on the map — its card has the ⭐ must-try, 🏛️ history, and 🧭 bus/train board &amp; exit.</p><details class="itday" open><summary>Tue Oct 13 — Arrival</summary><p class="itrow"><span class="itt">11:45am PT</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Fly Delta LAX → O'Hare</button></p><p class="itrow"><span class="itt">~5:45pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Land at ORD</button></p><p class="itrow"><span class="itt">~5:50pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Blue Line to Grand station, check in at the Fairfield Inn (~7pm)</button></p><p class="itrow"><span class="itt">~7:15pm</span> <button type="button" class="itgo" data-pin="Al's #1 Italian Beef + Chicago Dog">Dinner — Al's #1 Italian Beef + a Chicago dog</button></p></details><details class="itday"><summary>Wed Oct 14 — 🎂 Birthday day</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Millennium Park — The Bean">Millennium Park & The Bean first (fewest crowds)</button></p><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Maggie Daley Park — Play Garden">Maggie Daley Park Play Garden</button></p><p class="itrow"><span class="itt">~10:00am</span> <button type="button" class="itgo" data-pin="Molly's Cupcakes — River East 🎂">Birthday cupcakes — Molly's Cupcakes, River East</button></p><p class="itrow"><span class="itt">11:45am</span> <button type="button" class="itgo" data-pin="Chicago River Architecture Tour">Chicago River architecture tour (your booking)</button></p><p class="itrow"><span class="itt">After tour</span> <button type="button" class="itgo" data-pin="Devil Dawgs — Gold Coast">Chicago dog snack — Devil Dawgs, Gold Coast</button></p><p class="itrow"><span class="itt">1:30–3:30pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">Afternoon</span> <button type="button" class="itgo" data-pin="DuSable Bridge — Michigan Ave">Riverwalk stroll</button></p><p class="itrow"><span class="itt">Evening</span> <button type="button" class="itgo" data-pin="Pizz'Amici — birthday dinner 🎂">Birthday dinner — Pizz'Amici (reserved)</button></p></details><details class="itday"><summary>Thu Oct 15 — Zoo day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Lincoln Park Zoo (free, opens 10)</button></p><p class="itrow"><span class="itt">Bonus</span> <button type="button" class="itgo" data-pin="Peggy Notebaert Nature Museum">Peggy Notebaert Nature Museum — Butterfly Haven, 5 min away</button></p><p class="itrow"><span class="itt">Lunch</span> <button type="button" class="itgo" data-pin="The Wieners Circle — Lincoln Park">Chicago dogs — The Wieners Circle (main pick)</button></p><p class="itrow"><span class="itt">1:00–3:00pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">5:00pm</span> <button type="button" class="itgo" data-pin="Lou Malnati's — River North">Early dinner — Lou Malnati's deep dish (order a salad/apps right away, pies take ~45 min)</button></p><p class="itrow"><span class="itt">After</span> <button type="button" class="itgo" data-pin="Rainbow Cone at Gino's East">Rainbow Cone at Gino's East</button></p></details><details class="itday"><summary>Fri Oct 16 — Navy Pier day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Chicago Children's Museum — Navy Pier">Chicago Children's Museum — Pritzker Playspace first (toddlers-only, morning)</button></p><p class="itrow"><span class="itt">Also today</span> <button type="button" class="itgo" data-pin="Butterfly House — Navy Pier">Butterfly House — Incredible Insects, same pier</button></p><p class="itrow"><span class="itt">Midday</span> <span>Nap: stroller on the pier or a hotel reset (~15 min)</span></p><p class="itrow"><span class="itt">Early dinner</span> <button type="button" class="itgo" data-pin="Beatrix — River North">Beatrix or Eataly — walk-in, your call</button></p><p class="itrow"><span class="itt">Flex</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Fall Fest at Lincoln Park Zoo (Fri–Sun), if energy allows</button></p></details><details class="itday"><summary>Sat Oct 17 — Departure</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Eataly Chicago">Pack up, easy breakfast (Beatrix / Eataly)</button></p><p class="itrow"><span class="itt">11:45am–12pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Leave the hotel — Blue Line Grand → O'Hare (~45 min), arrive ~1:00pm</button></p><p class="itrow"><span class="itt">2:30pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Flight home from ORD</button></p></details></div>
 <div class="panel closed" id="addPanel"><h2>➕ Add a place<span class="secMove"><button type="button" class="secMv" data-sec="addPanel" data-mv="-1" title="Move section up">▲</button><button type="button" class="secMv" data-sec="addPanel" data-mv="1" title="Move section down">▼</button></span><button type="button" class="secTgl" data-c="addPanel" title="Collapse / expand this section">▸</button></h2><p class="legend">Search any place in Chicago — the app gathers its details (address, phone, hours, website) and saves it as one of your pins, on this device.</p><input id="addQ" class="planIn" type="text" placeholder="Type a place name — e.g. Shake Shack" autocomplete="off"><ul id="addList" class="addList"></ul><p id="addStatus" class="legend"></p><p><button type="button" class="btn" id="addExport">📤 Export my added pins</button> <span id="addCount" class="legend"></span></p></div>
-<div class="panel closed" id="secNear"><h2>📍 Nearest to you / the walker<span class="secMove"><button type="button" class="secMv" data-sec="secNear" data-mv="-1" title="Move section up">▲</button><button type="button" class="secMv" data-sec="secNear" data-mv="1" title="Move section down">▼</button></span><button type="button" class="secTgl" data-c="secNear" title="Collapse / expand this section">▸</button></h2><div id="nearList"><p class="legend">Start GPS (or drop the walker on the map) and this list sorts itself by distance.</p></div></div>
+<div class="panel closed" id="secNear"><h2>📍 Nearest to you / the walker<span class="secMove"><button type="button" class="secMv" data-sec="secNear" data-mv="-1" title="Move section up">▲</button><button type="button" class="secMv" data-sec="secNear" data-mv="1" title="Move section down">▼</button></span><button type="button" class="secTgl" data-c="secNear" title="Collapse / expand this section">▸</button></h2><div id="essOut"></div><div id="nearList"><p class="legend">Start GPS (or drop the walker on the map) and this list sorts itself by distance.</p></div></div>
 </div>
 <div id="arrBar"><button type="button" class="btn" id="arrBtn">✥ Arrange sections</button> <button type="button" class="btn" id="secReset" style="display:none">↺ Reset order</button></div>
 <footer><div id="liveSetup" style="margin:0 auto 4px;font-size:13.5px"></div>Built from your Chicago Toddler Trip Pack — Oct 13–17, 2026. Nothing here was booked by Forky.</footer>
@@ -343,6 +349,78 @@ function setWalker(lat,lng,label){
  if(label) statusEl.textContent=label;
  checkProximity(myPos);
 }
+var essResults=[];
+function essEsc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function essShow(i){
+ var it=essResults[i]; if(!it) return;
+ var g={n:it.n, lat:it.lat, lng:it.lng, full:it.full||it.n, tel:it.tel||"", web:it.web||"", hours:it.hours||"", kind:it.kind||""};
+ var to=document.getElementById("planTo"); if(to) to.value=g.n;
+ var out=document.getElementById("planOut"); if(!out) return;
+ if((typeof myPos!=="undefined"&&myPos)&&(typeof plnRender==="function")){ plnRender({n:"📍 Your current location",lat:myPos.lat,lng:myPos.lng},g); }
+ else { out.innerHTML="<p>No live location yet — tap “Current location”, or tap the map / drag the 🚶 walker to set where you are, and the route will show here.</p>"; }
+ if(typeof plnCardHTML==="function") out.innerHTML+=plnCardHTML(g);
+}
+function essFetch(r,pos){
+ var a="(around:"+r+","+pos.lat+","+pos.lng+")";
+ var q="[out:json][timeout:15];(nwr[\"amenity\"~\"^(pharmacy|clinic|hospital|doctors)$\"]"+a+";nwr[\"shop\"~\"^(supermarket|convenience)$\"]"+a+";nwr[\"healthcare\"=\"urgent_care\"]"+a+");out center 60;";
+ function go(ep){
+   var ctl=(typeof AbortController!=="undefined")?new AbortController():null;
+   var to=ctl?setTimeout(function(){ try{ctl.abort();}catch(_){}} ,18000):null;
+   return fetch(ep,{method:"POST",body:"data="+encodeURIComponent(q),signal:ctl?ctl.signal:undefined})
+     .then(function(res){ if(to) clearTimeout(to); return res.json(); });
+ }
+ return go("https://overpass-api.de/api/interpreter").catch(function(){ return go("https://overpass.kumi.systems/api/interpreter"); })
+  .then(function(oj){
+   var items=[], seen={};
+   ((oj&&oj.elements)||[]).forEach(function(el){
+     var t=el.tags||{}; if(!t.name) return;
+     var lat=(typeof el.lat==="number")?el.lat:(el.center&&el.center.lat), lng=(typeof el.lon==="number")?el.lon:(el.center&&el.center.lon);
+     if(typeof lat!=="number"||typeof lng!=="number") return;
+     var grp=null;
+     if(t.amenity==="pharmacy") grp="pharmacy";
+     else if(t.shop==="supermarket"||t.shop==="convenience") grp="grocery";
+     else if(t.amenity==="clinic"||t.amenity==="hospital"||t.amenity==="doctors"||t.healthcare==="urgent_care") grp="medical";
+     if(!grp) return;
+     var street=((t["addr:housenumber"]||"")+" "+(t["addr:street"]||"")).trim();
+     var key=grp+"|"+t.name.toLowerCase()+"|"+street.toLowerCase();
+     if(seen[key]) return; seen[key]=1;
+     var full=[t.name, street, t["addr:city"]||""].filter(Boolean).join(" ");
+     items.push({n:t.name, lat:lat, lng:lng, grp:grp, d:distM(pos,{lat:lat,lng:lng}), street:street,
+       kind:(t.amenity||t.shop||t.healthcare||"").replace(/_/g," "),
+       full:full||t.name, tel:t["contact:phone"]||t.phone||"", web:t["contact:website"]||t.website||"", hours:t.opening_hours||"",
+       boost:(grp==="medical"&&(/urgent/i.test(t.name)||t.amenity==="hospital"))?0:1});
+   });
+   return items;
+  });
+}
+function essGo(){
+ var out=document.getElementById("essOut"); if(!out) return;
+ var pos=(typeof myPos!=="undefined"&&myPos)?myPos:{lat:POIS[0].lat,lng:POIS[0].lng};
+ out.innerHTML="<p class='legend'>🆘 Searching for essentials near you…</p>";
+ essFetch(1500,pos).then(function(items){
+   if(items.length>=3) return items;
+   return essFetch(3500,pos).then(function(more){ return more.length>items.length?more:items; });
+ }).then(function(items){
+   essResults=items;
+   var groups=[["pharmacy","💊 Pharmacy"],["grocery","🛒 Grocery & basics"],["medical","🏥 Urgent care & clinics"]];
+   var icons={pharmacy:"💊",grocery:"🛒",medical:"🏥"};
+   var html="", any=false;
+   groups.forEach(function(g){
+     var rows=items.filter(function(x){ return x.grp===g[0]; }).sort(function(a,b){ return (a.boost-b.boost)||(a.d-b.d); }).slice(0,3);
+     if(!rows.length) return; any=true;
+     html+="<div class='essH'>"+g[1]+"</div>";
+     rows.forEach(function(it){
+       html+="<div class='poi essRow' data-ess='"+items.indexOf(it)+"'><div>"+icons[g[0]]+" <strong>"+essEsc(it.n)+"</strong> <span class='tag'>"+essEsc(it.kind)+"</span>"+(it.street?"<br><span style='color:var(--muted);font-size:13px'>"+essEsc(it.street)+"</span>":"")+"</div><div class='d'>"+fmtD(it.d)+"</div></div>";
+     });
+   });
+   if(!any){ out.innerHTML="<p class='legend'>No essentials found nearby right now — try again in a moment. Your nearest saved places are in the list below.</p>"; return; }
+   out.innerHTML="<p class='legend'>🆘 Essentials near you — live results, tap one for directions.</p>"+html;
+   out.querySelectorAll(".essRow").forEach(function(el){ el.addEventListener("click",function(){ essShow(parseInt(el.getAttribute("data-ess"),10)); }); });
+ }).catch(function(){
+   out.innerHTML="<p class='legend'>Couldn't load essentials (connection trouble) — tap 🆘 Essentials to try again.</p>";
+ });
+}
+(function(){ var b=document.getElementById("essBtn"); if(b) b.addEventListener("click",function(){ essGo(); }); })();
 function showGpsHelp(){ var h=document.getElementById("gpsHelp"); if(h) h.style.display="block"; }
 function hideGpsHelp(){ var h=document.getElementById("gpsHelp"); if(h) h.style.display="none"; }
 function initMap(){
