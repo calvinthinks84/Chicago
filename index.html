@@ -152,6 +152,12 @@ html,body{overflow-x:clip}
 #pinInfoBody>*,#planOut>*{animation:secIn .22s ease}
 .itday[open] .itrow{animation:secIn .22s ease}
 @media (prefers-reduced-motion:reduce){.panel:not(.closed)>*:not(h2),#pinInfoBody>*,#planOut>*,.itday[open] .itrow{animation:none}}
+/* category colors + modern surfaces (2026-10-10) */
+.catDot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:1px}
+body{background:linear-gradient(180deg,#e9eff6,var(--bg) 260px)}
+#secNav{background:color-mix(in srgb,var(--panel) 84%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5)}
+.btn.go,.fchip.on{background:linear-gradient(135deg,#1473d6,#0b5cad);border-color:#0b5cad;color:#fff}
+@media (prefers-color-scheme:dark){body{background:linear-gradient(180deg,#182130,var(--bg) 260px)}}
 </style></head><body>
 <header><div class="wrap"><h1>🗺️ Chicago Trip App</h1>
 <p><strong>Tue Oct 13 – Sat Oct 17, 2026</strong></p>
@@ -251,6 +257,7 @@ var ROUTE=["Fairfield Inn — your hotel (base)","Al's #1 Italian Beef + Chicago
 
 /* ---------- Map + behaviour ---------- */
 var ICONS={stop:"📍",coffee:"☕",boba:"🧋",snack:"🍩",dog:"🌭",food:"🍽️",landmark:"🏛️",saved:"⭐"};
+var CAT_COLORS={stop:"#0b5cad",food:"#d9481c",dog:"#bd7f06",coffee:"#6f4e37",boba:"#9b4d96",snack:"#d6336c",landmark:"#5f3dc4",saved:"#b8860b"};
 var COLORS={stop:"#0b5cad",coffee:"#6f4e37",boba:"#e84393",snack:"#e67e22",dog:"#c0392b",food:"#2a9d8f",landmark:"#a67c00",saved:"#7c3aed"};
 var FILTER_CATS={food:["food","dog","snack"],drinks:["coffee","boba"],landmark:["landmark"],saved:["saved"],stop:["stop"]};
 var catFilter="all";
@@ -269,7 +276,7 @@ function distM(a,b){var R=6371000,dLa=(b.lat-a.lat)*Math.PI/180,dLo=(b.lng-a.lng
 function fmtD(m){var ft=m*3.28084; if(ft<1000) return Math.max(10,Math.round(ft/10)*10)+" ft"; var mi=m/1609.344; return (mi<10?mi.toFixed(1):Math.round(mi))+" mi";}
 function fmtRad(m){return Math.round(m*3.28084/10)*10+" ft";}
 function popHTML(p){
- return "<div class='pop'><h3>"+(ICONS[p.cat]||"📍")+" "+p.n+"</h3>"
+ return "<div class='pop'><h3><span class='catDot' style='background:"+(CAT_COLORS[p.cat]||"#0b5cad")+"'></span>"+(ICONS[p.cat]||"📍")+" "+p.n+"</h3>"
  +"<p>"+p.addr+(p.rate?" · "+p.rate:"")+(p.tel?"<br>📞 <a href='tel:+1"+p.tel.replace(/[^0-9]/g,"")+"'>"+p.tel+"</a>":"")+(p.hours?"<br>🕐 "+p.hours:"")+(p.price?"<br>"+((p.cat==="landmark"||p.cat==="stop")?"🎟️ ":"💲 ")+p.price:"")+"</p><p>"+p.note+"</p>"
  +(p.must?"<p>⭐ <strong>"+(p.cat==="landmark"?"Must-see:":"Must-try:")+"</strong> "+p.must+"</p>":"")
  +(p.hist?"<p>🏛️ <strong>History:</strong> "+p.hist+"</p>":"")
@@ -315,7 +322,7 @@ function refreshMarkers(){
  POIS.forEach(function(p,i){
    var show=(selectedIdx>=0)?(i===selectedIdx):visible(p);
    if(show&&!markers[i]){
-     var ic=L.divIcon({className:"",html:"<div style='background:#0b5cad;color:#fff;border-radius:50%;width:30px;height:30px;line-height:30px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)'>"+(ICONS[p.cat]||"📍")+"</div>",iconSize:[30,30],iconAnchor:[15,15]});
+     var ic=L.divIcon({className:"",html:"<div style='background:"+(CAT_COLORS[p.cat]||"#0b5cad")+";color:#fff;border-radius:50%;width:30px;height:30px;line-height:30px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)'>"+(ICONS[p.cat]||"📍")+"</div>",iconSize:[30,30],iconAnchor:[15,15]});
      markers[i]=L.marker([p.lat,p.lng],{icon:ic}); pinAdd(markers[i]); markers[i].on("click",function(){ showPin(i,true); });
    } else if(!show&&markers[i]){ pinRemove(markers[i]); delete markers[i]; }
  });
@@ -334,7 +341,7 @@ function checkProximity(pos){
  });
  rows.sort(function(a,b){return a.d-b.d;});
  nearList.innerHTML=rows.slice(0,8).map(function(r){
-   return "<div class='poi nearRow' data-i='"+r.i+"'><div>"+(ICONS[r.p.cat]||"📍")+" <strong>"+r.p.n+"</strong> <span class='tag'>"+r.p.cat+"</span><br><span style='color:var(--muted);font-size:13px'>"+r.p.fits+"</span></div><div class='d'>"+fmtD(r.d)+"</div></div>";
+   return "<div class='poi nearRow' data-i='"+r.i+"'><div><span class='catDot' style='background:"+(CAT_COLORS[r.p.cat]||"#0b5cad")+"'></span>"+(ICONS[r.p.cat]||"📍")+" <strong>"+r.p.n+"</strong> <span class='tag'>"+r.p.cat+"</span><br><span style='color:var(--muted);font-size:13px'>"+r.p.fits+"</span></div><div class='d'>"+fmtD(r.d)+"</div></div>";
  }).join("");
  nearList.querySelectorAll(".nearRow").forEach(function(el){
    el.addEventListener("click",function(){ showPin(parseInt(el.getAttribute("data-i"),10),true); });
