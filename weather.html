@@ -60,8 +60,8 @@ a.back{display:inline-flex;align-items:center;height:42px;padding:0 16px;border-
 .pkbody{padding-bottom:2px}
 .wday{border-top:1px solid var(--line);padding:9px 0}
 .wday:first-of-type{border-top:none;padding-top:2px}
-.wday-h{display:flex;justify-content:space-between;gap:8px;font-size:14px}
-.wday-h span{color:var(--muted);font-size:12.5px;text-align:right}
+.wday-h{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;background:none;border:none;font-family:inherit;font-size:14px;color:inherit;cursor:pointer;padding:2px 0;text-align:left}
+.wplan{color:var(--muted);font-size:12.5px;text-align:right;flex:1}
 .wrow{font-size:13.5px;line-height:1.5;margin-top:3px}
 .foot{color:var(--muted);font-size:12.5px;text-align:center;line-height:1.6}
 .btn{display:inline-flex;align-items:center;justify-content:center;height:42px;padding:0 16px;border-radius:999px;background:var(--btn-bg);border:1px solid var(--line);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
@@ -132,11 +132,30 @@ function packFor(date,pp,ws,lo){
   if(extra.length) s+=" Weather adds: "+extra.join(", ")+".";
   return s;
 }
-function wearRow(date,dow,plan,wear,pack){
-  return '<div class="wday"><div class="wday-h"><b>'+dow+" "+date.slice(5).replace("-","/")+'</b><span>'+plan+'</span></div>'
-    +'<div class="wrow">👕 <b>Wear:</b> '+wear+'</div>'
-    +'<div class="wrow">🎒 <b>Day pack:</b> '+pack+'</div></div>';
+function pickOpenDay(){
+  var days=["2026-10-13","2026-10-14","2026-10-15","2026-10-16","2026-10-17"];
+  var today="";
+  try{ today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"}); }catch(e){ today=""; }
+  if(days.indexOf(today)>=0) return today;
+  if(today>days[days.length-1]) return days[days.length-1];
+  return days[0];
 }
+var OPEN_DAY=pickOpenDay();
+function wearRow(date,dow,plan,wear,pack,open){
+  return '<div class="wday"><button type="button" class="wday-h" aria-expanded="'+(open?"true":"false")+'"><b>'+dow+" "+date.slice(5).replace("-","/")+'</b><span class="wplan">'+plan+'</span><span class="pkchev">'+(open?"▾":"▸")+'</span></button>'
+    +'<div class="wbody"'+(open?"":" hidden")+'>'
+    +'<div class="wrow">👕 <b>Wear:</b> '+wear+'</div>'
+    +'<div class="wrow">🎒 <b>Day pack:</b> '+pack+'</div></div></div>';
+}
+document.getElementById("wearDays").addEventListener("click", function(ev){
+  var b=ev.target&&ev.target.closest?ev.target.closest(".wday-h"):null;
+  if(!b) return;
+  var body=b.parentNode.querySelector(".wbody");
+  var open=body.hidden;
+  body.hidden=!open;
+  b.setAttribute("aria-expanded", open?"true":"false");
+  b.querySelector(".pkchev").textContent=open?"▾":"▸";
+});
 function wxRender(d){
   var t=d.daily, out="", wear="", alerts=[];
   var anyRain=false, coldAm=false, windy=false, snow=false;
@@ -150,7 +169,7 @@ function wxRender(d){
       +'<div class="dico">'+w[0]+'</div>'
       +'<div class="dmain"><div class="cond">'+w[1]+'</div><div class="meta">💧 '+(pp==null?"—":pp+"% chance of precip")+' · 💨 Wind to '+ws+' mph</div></div>'
       +'<div class="hilo"><b>'+hi+'°</b> <span>/ '+lo+'°</span></div></div>';
-    wear+=wearRow(t.time[i],DOWS[dt.getDay()],PLANS[t.time[i]]||"",wearFor(hi,lo,pp,ws,t.time[i]),packFor(t.time[i],pp,ws,lo));
+    wear+=wearRow(t.time[i],DOWS[dt.getDay()],PLANS[t.time[i]]||"",wearFor(hi,lo,pp,ws,t.time[i]),packFor(t.time[i],pp,ws,lo),t.time[i]===OPEN_DAY);
     if(pp!=null&&pp>=40) anyRain=true;
     if(lo<=40) coldAm=true;
     if(ws>=20) windy=true;
@@ -183,7 +202,7 @@ fetch("https://api.open-meteo.com/v1/forecast?latitude=41.8908&longitude=-87.629
       ["2026-10-17","Sat","Warmest layers, hat + gloves — coldest, windy departure day."]
     ];
     var fh="";
-    fw.forEach(function(r){ fh+=wearRow(r[0],r[1],PLANS[r[0]]||"",r[2]+" (Offline fallback — open the page with a connection for the live version.)",packFor(r[0],null,0,99)); });
+    fw.forEach(function(r){ fh+=wearRow(r[0],r[1],PLANS[r[0]]||"",r[2]+" (Offline fallback — open the page with a connection for the live version.)",packFor(r[0],null,0,99),r[0]===OPEN_DAY); });
     document.getElementById("wearDays").innerHTML=fh;
   });
 
