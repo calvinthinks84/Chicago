@@ -183,7 +183,7 @@ html,body{overflow-x:clip}
 <div id="arrBar"><button type="button" class="btn" id="arrBtn">✥ Arrange sections</button> <button type="button" class="btn" id="secReset" style="display:none">↺ Reset order</button></div>
 <footer><div id="liveSetup" style="margin:0 auto 4px;font-size:13.5px"></div>Built from your Chicago Toddler Trip Pack — Oct 13–17, 2026. Nothing here was booked by Forky.</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="pins.js?v=fix1"></script>
+<script src="data/pins.js?v=fix1"></script>
 <script>try{var __up=JSON.parse(localStorage.getItem("chiUserPins")||"[]");if(Array.isArray(__up))__up.forEach(function(p){if(p&&p.n&&isFinite(p.lat)&&isFinite(p.lng))POIS.push(p);});}catch(e){}</script>
 <script>
 "use strict";
@@ -452,7 +452,7 @@ document.querySelectorAll(".itgo").forEach(function(b){ b.addEventListener("clic
   if(typeof map!=="undefined"&&map){ map.setView([p.lat,p.lng],16); } setTimeout(function(){ showPin(idx,true); },200);
 });});
 </script>
-<script src="gt-head.js"></script><script src="gt00.js"></script><script src="gt01.js"></script><script src="gt02.js"></script><script src="gt03.js"></script><script src="gt04.js"></script><script src="gt05.js"></script><script src="gt06.js"></script><script src="gt07.js"></script><script src="gt08.js"></script><script src="gt09.js"></script><script src="gt10.js"></script><script src="gt11.js"></script><script src="gt12.js"></script><script src="gt13.js"></script><script src="gt-tail.js"></script><script src="gt-spans.js"></script><script src="planner.js?v=live23"></script>
+<script src="data/gt-head.js"></script><script src="data/gt00.js"></script><script src="data/gt01.js"></script><script src="data/gt02.js"></script><script src="data/gt03.js"></script><script src="data/gt04.js"></script><script src="data/gt05.js"></script><script src="data/gt06.js"></script><script src="data/gt07.js"></script><script src="data/gt08.js"></script><script src="data/gt09.js"></script><script src="data/gt10.js"></script><script src="data/gt11.js"></script><script src="data/gt12.js"></script><script src="data/gt13.js"></script><script src="data/gt-tail.js"></script><script src="data/gt-spans.js"></script><script src="data/planner.js?v=live23"></script>
 <script>
 (function(){
  var el=document.getElementById("wxStrip"); if(!el) return;
