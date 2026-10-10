@@ -100,9 +100,9 @@ html,body{width:100%;overflow-x:hidden}
 <div class="alert" id="packAlerts" style="display:none"></div>
 
 <div class="panel">
-<h2>🧳 Packing list <span class="sub" id="pkCount"></span></h2>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><h2 style="margin:0">🧳 Packing list <span class="sub" id="pkCount"></span></h2><button type="button" class="btn" id="pkToggleAll" style="height:34px;padding:0 12px;font-size:13px;flex:0 0 auto">▾ Expand all</button></div>
 <div id="pkList"></div>
-<p style="margin:12px 0 0;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="pkExpand">▾ Expand all</button><button type="button" class="btn" id="pkCollapse">▸ Collapse all</button><button type="button" class="btn" id="pkReset">↺ Reset all checks</button></p>
+<p style="margin:12px 0 0"><button type="button" class="btn" id="pkReset">↺ Reset all checks</button></p>
 <p class="sub" style="margin-top:8px">Checks are saved on this phone only.</p>
 </div>
 
@@ -311,6 +311,7 @@ document.getElementById("pkList").addEventListener("click", function(ev){
   body.hidden=!open;
   b.setAttribute("aria-expanded", open?"true":"false");
   b.querySelector(".pkchev").textContent=open?"▾":"▸";
+  pkSyncToggle();
 });
 function pkSaveCount(){
   var boxes=document.querySelectorAll("#pkList input"), done=0, st={};
@@ -323,6 +324,17 @@ document.getElementById("pkReset").addEventListener("click", function(){
   document.querySelectorAll("#pkList input").forEach(function(b){ b.checked=false; });
   pkSaveCount();
 });
+function pkAllOpen(){
+  var all=true;
+  document.querySelectorAll("#pkList .pkcat").forEach(function(b){
+    if(b.parentNode.querySelector(".pkbody").hidden) all=false;
+  });
+  return all;
+}
+function pkSyncToggle(){
+  var b=document.getElementById("pkToggleAll");
+  if(b) b.textContent=pkAllOpen()?"▸ Collapse all":"▾ Expand all";
+}
 function pkSetAll(open){
   document.querySelectorAll("#pkList .pkcat").forEach(function(b){
     var body=b.parentNode.querySelector(".pkbody");
@@ -330,9 +342,10 @@ function pkSetAll(open){
     b.setAttribute("aria-expanded", open?"true":"false");
     b.querySelector(".pkchev").textContent=open?"▾":"▸";
   });
+  pkSyncToggle();
 }
-document.getElementById("pkExpand").addEventListener("click", function(){ pkSetAll(true); });
-document.getElementById("pkCollapse").addEventListener("click", function(){ pkSetAll(false); });
+document.getElementById("pkToggleAll").addEventListener("click", function(){ pkSetAll(!pkAllOpen()); });
+pkSyncToggle();
 pkSaveCount();
 </script>
 </body>
