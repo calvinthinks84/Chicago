@@ -143,10 +143,19 @@ html,body{overflow-x:clip}
 .btn,.fchip{height:34px;min-height:34px;padding:0 10px;font-size:13px}
 .locRow .btn,.planBtns .btn,#arrBar .btn,#unselBtn{height:34px;min-height:34px;padding:0 10px;font-size:13px}
 .secTgl,.secMv{font-size:13px}
+/* nearby ideas ticker (2026-10-10): auto-scrolls, hold to stop, tap a chip to open the place */
+#tickBar{overflow:hidden;margin-top:8px;max-width:100%}
+#tickTrack{display:inline-flex;white-space:nowrap;will-change:transform;animation:tickGo 48s linear infinite;padding:2px 0}
+#tickBar:hover #tickTrack,#tickBar.hold #tickTrack{animation-play-state:paused}
+.tickChip{flex:0 0 auto;margin-right:8px;height:34px;min-height:34px;padding:0 10px;font-size:13px;font-weight:600;border-radius:999px;border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);cursor:pointer;font-family:inherit;max-width:270px;overflow:hidden;text-overflow:ellipsis}
+.tickChip:active{transform:scale(.97)}
+@keyframes tickGo{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){#tickTrack{animation:none}#tickBar{overflow-x:auto}}
 </style></head><body>
 <header><div class="wrap"><h1>🗺️ Chicago Trip App</h1>
 <p><strong>Tue Oct 13 – Sat Oct 17, 2026</strong></p>
 <div id="wxStrip"><span class="wxd">🌦️ Loading Chicago weather…</span></div>
+<div id="tickBar" title="Food & activity ideas near where you are — press and hold to stop the scroll, tap a place to open it"><div id="tickTrack"></div></div>
 </div></header>
 <nav id="secNav"><button type="button" class="snav" data-t="planPanel">🧭 Plan a ride</button><button type="button" class="snav" data-t="map">🗺️ Map</button><button type="button" class="snav" data-t="pinInfo">📍 Pin details</button><button type="button" class="snav" data-t="secItin">🗓️ Itinerary</button><button type="button" class="snav" data-t="addPanel">➕ Add a place</button><button type="button" class="snav" data-t="secNear">📏 Nearest</button><a class="snav" href="weather.html" style="text-decoration:none">🌦️ Weather &amp; Packing</a></nav>
 <div class="wrap">
@@ -326,7 +335,37 @@ function checkProximity(pos){
  nearList.querySelectorAll(".nearRow").forEach(function(el){
    el.addEventListener("click",function(){ showPin(parseInt(el.getAttribute("data-i"),10),true); });
  });
+ renderTicker(pos);
 }
+function tickEsc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function renderTicker(pos){
+ var track=document.getElementById("tickTrack"); if(!track||!pos) return;
+ var rows=[];
+ POIS.forEach(function(p,i){
+   if(p.n.indexOf("Fairfield Inn")===0 || p.n.indexOf("O'Hare")!==-1) return;
+   rows.push({p:p,i:i,d:distM(pos,p)});
+ });
+ rows.sort(function(a,b){return a.d-b.d;});
+ var picks=rows.slice(0,14);
+ if(!picks.length) return;
+ var html=picks.map(function(r){
+   return "<button type='button' class='tickChip' data-i='"+r.i+"'>"+(ICONS[r.p.cat]||"📍")+" "+tickEsc(r.p.n)+" · "+fmtD(r.d)+"</button>";
+ }).join("");
+ track.innerHTML=html+html;
+ track.style.animationDuration=Math.max(20,Math.round(picks.length*3.4))+"s";
+}
+(function(){
+ var bar=document.getElementById("tickBar"); if(!bar) return;
+ var resumeT=null;
+ bar.addEventListener("pointerdown",function(){ bar.classList.add("hold"); if(resumeT){ clearTimeout(resumeT); resumeT=null; } });
+ ["pointerup","pointercancel","pointerleave"].forEach(function(ev){
+   bar.addEventListener(ev,function(){ if(resumeT) clearTimeout(resumeT); resumeT=setTimeout(function(){ bar.classList.remove("hold"); },2500); });
+ });
+ bar.addEventListener("click",function(e){
+   var chip=(e.target&&e.target.closest)?e.target.closest(".tickChip"):null;
+   if(chip) showPin(parseInt(chip.getAttribute("data-i"),10),true);
+ });
+})();
 function setWalker(lat,lng,label){
  myPos={lat:lat,lng:lng};
  if(map){
