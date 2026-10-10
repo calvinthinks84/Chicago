@@ -58,6 +58,12 @@ a.back{display:inline-flex;align-items:center;height:42px;padding:0 16px;border-
 .pkgrp:first-child .pkcat{margin-top:0}
 .pkchev{font-size:12px;color:var(--muted)}
 .pkbody{padding-bottom:2px}
+.pk li{display:flex;gap:6px;align-items:flex-start}
+.pk label{flex:1}
+.pkdel{flex:0 0 auto;background:none;border:1px solid var(--line);color:var(--muted);width:26px;height:26px;border-radius:999px;font-size:12px;line-height:1;cursor:pointer;margin-top:6px;padding:0;font-family:inherit}
+.pkadd{display:flex;gap:8px;margin:8px 0 4px}
+.pkaddin{flex:1;min-width:0;font-size:16px;font-family:inherit;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.pkaddbtn{flex:0 0 auto;height:42px;padding:0 14px;border-radius:999px;background:var(--btn-bg);border:1px solid var(--line);color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}
 .wday{border-top:1px solid var(--line);padding:9px 0}
 .wday:first-of-type{border-top:none;padding-top:2px}
 .wday-h{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;background:none;border:none;font-family:inherit;font-size:14px;color:inherit;cursor:pointer;padding:2px 0;text-align:left}
@@ -103,7 +109,7 @@ html,body{width:100%;overflow-x:hidden}
 <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><h2 style="margin:0">🧳 Packing list <span class="sub" id="pkCount"></span></h2><button type="button" class="btn" id="pkToggleAll" style="height:34px;padding:0 12px;font-size:13px;flex:0 0 auto">▾ Expand all</button></div>
 <div id="pkList"></div>
 <p style="margin:12px 0 0"><button type="button" class="btn" id="pkReset">↺ Reset all checks</button></p>
-<p class="sub" style="margin-top:8px">Checks are saved on this phone only.</p>
+<p class="sub" style="margin-top:8px">Checks and your added items are saved on this phone only.</p>
 </div>
 
 <p class="foot">Weather: Open-Meteo forecast for downtown Chicago, in °F and mph.<br>Built for the Chicago Toddler Trip — Oct 13–17, 2026.</p>
@@ -193,13 +199,9 @@ function wxRender(d){
   if(snow) alerts.push("<b>🌨️ Snow is in the forecast</b> for at least one day — warm layers and the toddler hat/mittens are musts, and leave a little extra time to get to O'Hare if it lands on Saturday.");
   if(coldAm) alerts.push("<b>🥶 A cold morning (30s–low 40s)</b> is in the forecast — pack the warm layer for early starts.");
   if(windy) alerts.push("<b>💨 A windy day (20+ mph)</b> is coming — Chicago lake wind makes it feel colder; windproof outer layers help, and hold onto hats on the river tour.");
+  PKWX={rain:anyRain,snow:snow,cold:coldAm,wind:windy};
   var box=document.getElementById("packAlerts");
-  if(alerts.length){ box.innerHTML=alerts.join("<br>"); box.style.display="block";
-    document.querySelectorAll("[data-a]").forEach(function(el){
-      var kinds=el.getAttribute("data-a").split(" ");
-      if((anyRain&&kinds.indexOf("rain")>=0)||(snow&&kinds.indexOf("warm")>=0)||(coldAm&&kinds.indexOf("warm")>=0)||(windy&&kinds.indexOf("wind")>=0)) el.classList.add("hl");
-    });
-  }
+  if(alerts.length){ box.innerHTML=alerts.join("<br>"); box.style.display="block"; pkApplyAlerts(); }
 }
 function ptrDone(){ var el=document.getElementById("ptr"); if(el){ el.style.height="0px"; el.textContent=""; } }
 function loadWx(){
@@ -294,17 +296,64 @@ var PACK=[
 ];
 var KEY="chiPackV1", state={};
 try{ state=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ state={}; }
-var html="";
-PACK.forEach(function(cat,ci){
-  html+='<div class="pkgrp"><button type="button" class="pkcat" aria-expanded="false"><span>'+cat[0]+'</span><span class="pkchev">▸</span></button><div class="pkbody" hidden><ul class="pk">';
-  cat[1].forEach(function(it){
-    html+='<li data-a="'+it[2]+'"><label><input type="checkbox" id="pk-'+it[0]+'"'+(state[it[0]]?" checked":"")+'><span>'+it[1]+"</span></label></li>";
+var CKEY="chiPackCustomV1", custom={added:[],removed:[]};
+try{ var cj=JSON.parse(localStorage.getItem(CKEY)||"null"); if(cj){ if(Array.isArray(cj.added)) custom.added=cj.added; if(Array.isArray(cj.removed)) custom.removed=cj.removed; } }catch(e){}
+function pkSaveCustom(){ try{ localStorage.setItem(CKEY, JSON.stringify(custom)); }catch(e){} }
+var PKWX=null;
+function pkApplyAlerts(){
+  if(!PKWX) return;
+  document.querySelectorAll("#pkList [data-a]").forEach(function(el){
+    var kinds=el.getAttribute("data-a").split(" ");
+    el.classList.toggle("hl", !!((PKWX.rain&&kinds.indexOf("rain")>=0)||(PKWX.snow&&kinds.indexOf("warm")>=0)||(PKWX.cold&&kinds.indexOf("warm")>=0)||(PKWX.wind&&kinds.indexOf("wind")>=0)));
   });
-  html+="</ul></div></div>";
-});
-document.getElementById("pkList").innerHTML=html;
+}
+function pkEsc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function pkItemRow(it){
+  return '<li data-a="'+it[2]+'"><label><input type="checkbox" id="pk-'+it[0]+'"'+(state[it[0]]?" checked":"")+'><span>'+pkEsc(it[1])+'</span></label><button type="button" class="pkdel" data-del="'+it[0]+'" aria-label="Remove this item">✕</button></li>';
+}
+function pkRender(){
+  var cats=document.querySelectorAll("#pkList .pkcat");
+  if(cats.length){
+    var st={};
+    document.querySelectorAll("#pkList input[type=checkbox]").forEach(function(b){ if(b.checked) st[b.id.slice(3)]=1; });
+    state=st;
+  }
+  var openCats={};
+  cats.forEach(function(b,i){ if(b.getAttribute("aria-expanded")==="true") openCats[i]=1; });
+  var h="";
+  PACK.forEach(function(cat,ci){
+    var open=!!openCats[ci];
+    h+='<div class="pkgrp"><button type="button" class="pkcat" aria-expanded="'+(open?"true":"false")+'"><span>'+cat[0]+'</span><span class="pkchev">'+(open?"▾":"▸")+'</span></button><div class="pkbody"'+(open?"":" hidden")+'><ul class="pk">';
+    cat[1].forEach(function(it){ if(custom.removed.indexOf(it[0])<0) h+=pkItemRow(it); });
+    custom.added.forEach(function(it){ if(it.c===ci) h+=pkItemRow([it.id,it.t,""]); });
+    h+='</ul><div class="pkadd"><input type="text" class="pkaddin" data-cat="'+ci+'" placeholder="Add an item…" maxlength="80" autocomplete="off"><button type="button" class="pkaddbtn" data-cat="'+ci+'">＋ Add</button></div></div></div>';
+  });
+  document.getElementById("pkList").innerHTML=h;
+  pkApplyAlerts();
+  pkSyncToggle();
+}
+function pkAddFrom(btn){
+  var inp=btn.parentNode.querySelector(".pkaddin"), v=(inp.value||"").trim();
+  if(!v) return;
+  custom.added.push({id:"u"+Date.now().toString(36)+"_"+custom.added.length, c:parseInt(btn.getAttribute("data-cat"),10), t:v});
+  pkSaveCustom(); pkRender(); pkSaveCount();
+}
+function pkRemove(id){
+  var i=-1;
+  custom.added.forEach(function(it,ix){ if(it.id===id) i=ix; });
+  if(i>=0) custom.added.splice(i,1);
+  else if(custom.removed.indexOf(id)<0) custom.removed.push(id);
+  delete state[id];
+  pkSaveCustom(); pkRender(); pkSaveCount();
+}
+pkRender();
 document.getElementById("pkList").addEventListener("click", function(ev){
-  var b=ev.target&&ev.target.closest?ev.target.closest(".pkcat"):null;
+  var t=ev.target;
+  var del=t&&t.closest?t.closest(".pkdel"):null;
+  if(del){ pkRemove(del.getAttribute("data-del")); return; }
+  var add=t&&t.closest?t.closest(".pkaddbtn"):null;
+  if(add){ pkAddFrom(add); return; }
+  var b=t&&t.closest?t.closest(".pkcat"):null;
   if(!b) return;
   var body=b.parentNode.querySelector(".pkbody");
   var open=body.hidden;
@@ -320,6 +369,13 @@ function pkSaveCount(){
   document.getElementById("pkCount").textContent="— "+done+" of "+boxes.length+" packed";
 }
 document.getElementById("pkList").addEventListener("change", pkSaveCount);
+document.getElementById("pkList").addEventListener("keydown", function(ev){
+  if(ev.key==="Enter"&&ev.target&&ev.target.classList&&ev.target.classList.contains("pkaddin")){
+    ev.preventDefault();
+    var btn=ev.target.parentNode.querySelector(".pkaddbtn");
+    if(btn) pkAddFrom(btn);
+  }
+});
 document.getElementById("pkReset").addEventListener("click", function(){
   document.querySelectorAll("#pkList input").forEach(function(b){ b.checked=false; });
   pkSaveCount();
