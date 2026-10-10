@@ -143,19 +143,10 @@ html,body{overflow-x:clip}
 .btn,.fchip{height:34px;min-height:34px;padding:0 10px;font-size:13px}
 .locRow .btn,.planBtns .btn,#arrBar .btn,#unselBtn{height:34px;min-height:34px;padding:0 10px;font-size:13px}
 .secTgl,.secMv{font-size:13px}
-/* nearby ideas ticker (2026-10-10): auto-scrolls, hold to stop, tap a chip to open the place */
-#tickBar{overflow:hidden;margin-top:8px;max-width:100%}
-#tickTrack{display:inline-flex;white-space:nowrap;will-change:transform;animation:tickGo 48s linear infinite;padding:2px 0}
-#tickBar:hover #tickTrack,#tickBar.hold #tickTrack{animation-play-state:paused}
-.tickChip{flex:0 0 auto;margin-right:8px;height:34px;min-height:34px;padding:0 10px;font-size:13px;font-weight:600;border-radius:999px;border:1px solid var(--btn-line);background:var(--btn-bg);color:var(--ink);cursor:pointer;font-family:inherit;max-width:270px;overflow:hidden;text-overflow:ellipsis}
-.tickChip:active{transform:scale(.97)}
-@keyframes tickGo{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media (prefers-reduced-motion:reduce){#tickTrack{animation:none}#tickBar{overflow-x:auto}}
 </style></head><body>
 <header><div class="wrap"><h1>🗺️ Chicago Trip App</h1>
 <p><strong>Tue Oct 13 – Sat Oct 17, 2026</strong></p>
 <div id="wxStrip"><span class="wxd">🌦️ Loading Chicago weather…</span></div>
-<div id="tickBar" title="Food & activity ideas near where you are — from your pins plus live local data. Press and hold to stop the scroll, tap a place to open it"><div id="tickTrack"></div></div>
 </div></header>
 <nav id="secNav"><button type="button" class="snav" data-t="planPanel">🧭 Plan a ride</button><button type="button" class="snav" data-t="map">🗺️ Map</button><button type="button" class="snav" data-t="pinInfo">📍 Pin details</button><button type="button" class="snav" data-t="secItin">🗓️ Itinerary</button><button type="button" class="snav" data-t="addPanel">➕ Add a place</button><button type="button" class="snav" data-t="secNear">📏 Nearest</button><a class="snav" href="weather.html" style="text-decoration:none">🌦️ Weather &amp; Packing</a></nav>
 <div class="wrap">
@@ -335,97 +326,7 @@ function checkProximity(pos){
  nearList.querySelectorAll(".nearRow").forEach(function(el){
    el.addEventListener("click",function(){ showPin(parseInt(el.getAttribute("data-i"),10),true); });
  });
- renderTicker(pos);
 }
-function tickEsc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
-function tickNorm(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g," ").trim(); }
-var tickLive=[], tickLivePos=null, tickLiveBusy=false, tickLiveAt=0, tickPos=null;
-var TICK_ICONS={restaurant:"🍽️",fast_food:"🍔",cafe:"☕",ice_cream:"🍦",bakery:"🥐",bar:"🍸",pub:"🍺",food_court:"🍽️",attraction:"🏛️",museum:"🏛️",gallery:"🎨",zoo:"🦁",aquarium:"🐠",theme_park:"🎢",park:"🌳",playground:"🛝"};
-function renderTicker(pos){
- var track=document.getElementById("tickTrack"); if(!track||!pos) return;
- tickPos=pos;
- var pinNorm={};
- POIS.forEach(function(p){ pinNorm[tickNorm(p.n.split(" — ")[0])]=p; });
- var cand=[];
- POIS.forEach(function(p,i){
-   if(p.n.indexOf("Fairfield Inn")===0 || p.n.indexOf("O'Hare")!==-1) return;
-   var d=distM(pos,p);
-   cand.push({d:d, html:"<button type='button' class='tickChip' data-i='"+i+"'>"+(ICONS[p.cat]||"📍")+" "+tickEsc(p.n)+" · "+fmtD(d)+"</button>"});
- });
- tickLive.forEach(function(it,li){
-   var pin=pinNorm[tickNorm(it.n)];
-   if(pin && distM(it,pin)<200) return;
-   var d=distM(pos,it);
-   cand.push({d:d, html:"<button type='button' class='tickChip' data-live='"+li+"'>"+it.ic+" "+tickEsc(it.n)+" · "+fmtD(d)+"</button>"});
- });
- cand.sort(function(a,b){return a.d-b.d;});
- var picks=cand.slice(0,14);
- if(!picks.length) return;
- var html=picks.map(function(c){return c.html;}).join("");
- track.innerHTML=html+html;
- track.style.animationDuration=Math.max(20,Math.round(picks.length*3.4))+"s";
- fetchTickLive(pos);
-}
-function fetchTickLive(pos){
- if(tickLiveBusy) return;
- if(tickLivePos && (Date.now()-tickLiveAt)<180000 && distM(pos,tickLivePos)<250) return;
- tickLiveBusy=true;
- function go(r){
-   var tags="\"amenity\"~\"^(restaurant|fast_food|cafe|ice_cream|bakery|bar|pub|food_court)$\"";
-   var tags2="\"tourism\"~\"^(attraction|museum|gallery|zoo|aquarium|theme_park)$\"";
-   var tags3="\"leisure\"~\"^(park|playground)$\"";
-   var around="(around:"+r+","+pos.lat+","+pos.lng+")";
-   var q="[out:json][timeout:9];(node["+tags+"]"+around+";way["+tags+"]"+around+";node["+tags2+"]"+around+";way["+tags2+"]"+around+";node["+tags3+"]"+around+";way["+tags3+"]"+around+");out center 80;";
-   var ctl=(typeof AbortController!=="undefined")?new AbortController():null;
-   var to=ctl?setTimeout(function(){ try{ctl.abort();}catch(_){}} ,11000):null;
-   fetch("https://overpass-api.de/api/interpreter",{method:"POST",body:"data="+encodeURIComponent(q),signal:ctl?ctl.signal:undefined})
-    .then(function(res){ return res.json(); })
-    .then(function(oj){
-      if(to) clearTimeout(to);
-      var items=[], seen={};
-      ((oj&&oj.elements)||[]).forEach(function(el){
-        var t=el.tags||{}; if(!t.name) return;
-        var lat=(typeof el.lat==="number")?el.lat:(el.center&&el.center.lat), lng=(typeof el.lon==="number")?el.lon:(el.center&&el.center.lon);
-        if(typeof lat!=="number"||typeof lng!=="number") return;
-        var key=tickNorm(t.name);
-        if(!key||seen[key]) return; seen[key]=1;
-        var tag=t.amenity||t.tourism||t.leisure||"";
-        var kind=(t.cuisine||tag||"").replace(/_/g," ").replace(/;/g,", ");
-        var full=[t.name, ((t["addr:housenumber"]||"")+" "+(t["addr:street"]||"")).trim(), t["addr:city"]||"", t["addr:state"]||"", t["addr:postcode"]||""].filter(Boolean).join(" ");
-        items.push({n:t.name, lat:lat, lng:lng, ic:TICK_ICONS[tag]||"📍", kind:kind, full:full||t.name, tel:t["contact:phone"]||t.phone||"", web:t["contact:website"]||t.website||"", hours:t.opening_hours||""});
-      });
-      if(items.length<6 && r<3000){ go(3000); return; }
-      tickLive=items; tickLivePos={lat:pos.lat,lng:pos.lng}; tickLiveAt=Date.now(); tickLiveBusy=false;
-      if(tickPos) renderTicker(tickPos);
-    })
-    .catch(function(){ if(to) clearTimeout(to); tickLiveBusy=false; });
- }
- go(1300);
-}
-function tickShowLive(it){
- if(!it) return;
- var g={n:it.n, lat:it.lat, lng:it.lng, full:it.full||it.n, tel:it.tel||"", web:it.web||"", hours:it.hours||"", kind:it.kind||""};
- var to=document.getElementById("planTo"); if(to) to.value=g.n;
- var out=document.getElementById("planOut"); if(!out) return;
- if((typeof myPos!=="undefined"&&myPos)&&(typeof plnRender==="function")){ plnRender({n:"📍 Your current location",lat:myPos.lat,lng:myPos.lng},g); }
- else { out.innerHTML="<p>No live location yet — tap “Current location”, or tap the map / drag the 🚶 walker to set where you are, and the route will show here.</p>"; }
- if(typeof plnCardHTML==="function") out.innerHTML+=plnCardHTML(g);
-}
-(function(){
- var bar=document.getElementById("tickBar"); if(!bar) return;
- var resumeT=null;
- bar.addEventListener("pointerdown",function(){ bar.classList.add("hold"); if(resumeT){ clearTimeout(resumeT); resumeT=null; } });
- ["pointerup","pointercancel","pointerleave"].forEach(function(ev){
-   bar.addEventListener(ev,function(){ if(resumeT) clearTimeout(resumeT); resumeT=setTimeout(function(){ bar.classList.remove("hold"); },2500); });
- });
- bar.addEventListener("click",function(e){
-   var chip=(e.target&&e.target.closest)?e.target.closest(".tickChip"):null;
-   if(!chip) return;
-   var lv=chip.getAttribute("data-live");
-   if(lv!==null&&lv!==undefined){ tickShowLive(tickLive[parseInt(lv,10)]); }
-   else { showPin(parseInt(chip.getAttribute("data-i"),10),true); }
- });
-})();
 function setWalker(lat,lng,label){
  myPos={lat:lat,lng:lng};
  if(map){
