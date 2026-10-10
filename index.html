@@ -361,7 +361,7 @@ function hideGpsHelp(){ var h=document.getElementById("gpsHelp"); if(h) h.style.
 function initMap(){
  if(typeof L==="undefined"){ statusEl.textContent="Map library couldn't load (offline?). The nearest-list and pop-ups need the map library + internet."; return; }
  map=L.map("map").setView([41.8945,-87.6280],13);
- if(window.L&&L.markerClusterGroup){ pinCluster=L.markerClusterGroup({maxClusterRadius:45,spiderfyOnMaxZoom:true,showCoverageOnHover:false,iconCreateFunction:function(c){ return L.divIcon({className:"pinClusterWrap",html:"<div class='pinCluster'>"+c.getChildCount()+"</div>",iconSize:[34,34],iconAnchor:[17,17]}); }}); map.addLayer(pinCluster); }
+ try{ if(window.L&&L.markerClusterGroup){ pinCluster=L.markerClusterGroup({maxClusterRadius:45,spiderfyOnMaxZoom:true,showCoverageOnHover:false,iconCreateFunction:function(c){ return L.divIcon({className:"pinClusterWrap",html:"<div class='pinCluster'>"+c.getChildCount()+"</div>",iconSize:[34,34],iconAnchor:[17,17]}); }}); map.addLayer(pinCluster); } }catch(e){ pinCluster=null; }
  if(map.attributionControl) map.attributionControl.setPrefix(false);
  var darkMq=window.matchMedia("(prefers-color-scheme: dark)");
  var baseOpts={maxZoom:16,attribution:"Esri, HERE, Garmin, © OpenStreetMap contributors"};
