@@ -176,7 +176,7 @@ if(typeof document!=="undefined"&&document.getElementById){
    var r=planRoute(f,t);
    if(!r){ plnClearRoute(); out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; return; }
    var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps 🗺️</a>";
-   out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p>"+(r.notice?("<p style='margin:6px 0'>ℹ️ "+plnEsc(r.notice)+"</p>"):"")+"<ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'></span>":"")+"</li>"; }).join("")+"</ol>"+extra;
+   out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p>"+(r.notice?("<p style='margin:6px 0'>ℹ️ "+plnEsc(r.notice)+"</p>"):"")+"<ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'>⏱ Checking live times…</span>":"")+"</li>"; }).join("")+"</ol>"+extra;
    window.__lastRoute={res:r,from:f,to:t}; var nb=document.getElementById("navBtn"); if(nb) nb.style.display="block"; if(window.__nav&&window.__nav.on&&!window.__navRerender) plnNavEnd();
    plnDrawRoute(r.coords);
    if(r.rides&&r.rides.length&&typeof plnLiveFill==="function") plnLiveFill(r.rides,false);
@@ -442,8 +442,8 @@ function plnLiveFill(rides,quiet){
   rides.forEach(function(rd,j){
     var span=document.getElementById("liveT"+j); if(!span) return;
     if(rd.mode==="train"){
-      if(!cfg.relay&&!cfg.train) return;
-      var mid=rd.gtfs?rd.node:((typeof PLN_TRAIN_ID!=="undefined")?PLN_TRAIN_ID[rd.node]:null); if(!mid) return;
+      if(!cfg.relay&&!cfg.train){ span.textContent=""; return; }
+      var mid=rd.gtfs?rd.node:((typeof PLN_TRAIN_ID!=="undefined")?PLN_TRAIN_ID[rd.node]:null); if(!mid){ span.textContent=""; return; }
       var ckeyT="T|"+mid+"|"+rd.dir; if(window.__liveCache[ckeyT]){ span.innerHTML=window.__liveCache[ckeyT]; plnLiveMark(span,true); } else if(!quiet){ span.textContent="⏱ Fetching live trains…"; plnLiveMark(span,false); }
       var url="https://lapi.transitchicago.com/api/1.0/ttarrivals.aspx?mapid="+mid+"&max=6&outputType=JSON"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.train));
       plnFetchJSON(url,"ctatt",{keyed:!!(cfg.relay||cfg.train),isErr:function(j){ return !!(j.ctatt&&j.ctatt.errCd==="101"); }}).then(function(j2){
@@ -465,8 +465,8 @@ function plnLiveFill(rides,quiet){
         plnLiveMark(span,true); span.innerHTML="<span class=\"liveLbl\">🟢 Live: next "+(codes.length>1?rd.line.split(" ")[0]+" ":"")+"trains</span>"+liveTable(ent, rd); window.__liveCache[ckeyT]=span.innerHTML;
       }).catch(function(){ plnLiveMark(span,false); span.textContent="⏱ Live times unavailable right now"; });
     } else {
-      if(!cfg.relay&&!cfg.bus) return;
-      var stpid=null; if(rd.gtfs){ stpid=rd.node; } else { var byDir=(typeof PLN_BUS_ID!=="undefined")?PLN_BUS_ID[rd.node+"|"+rd.route]:null; stpid=byDir?byDir[rd.dir]:null; } if(!stpid) return;
+      if(!cfg.relay&&!cfg.bus){ span.textContent=""; return; }
+      var stpid=null; if(rd.gtfs){ stpid=rd.node; } else { var byDir=(typeof PLN_BUS_ID!=="undefined")?PLN_BUS_ID[rd.node+"|"+rd.route]:null; stpid=byDir?byDir[rd.dir]:null; } if(!stpid){ span.textContent=""; return; }
       var ckeyB="B|"+stpid+"|"+rd.route; if(window.__liveCache[ckeyB]){ span.innerHTML=window.__liveCache[ckeyB]; plnLiveMark(span,true); } else if(!quiet){ span.textContent="⏱ Fetching live buses…"; plnLiveMark(span,false); }
       var url2="https://www.ctabustracker.com/bustime/api/v2/getpredictions?stpid="+stpid+"&format=json"+(cfg.relay?"":"&key="+encodeURIComponent(cfg.bus));
       plnFetchJSON(url2,"bustime-response",{keyed:!!(cfg.relay||cfg.bus),isErr:function(j){ var e=j["bustime-response"]&&j["bustime-response"].error; return !!(e&&e.length&&/key/i.test((e[0]&&e[0].msg)||"")); }}).then(function(j2){
