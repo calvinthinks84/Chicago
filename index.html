@@ -13,6 +13,7 @@
 <link rel="manifest" href="data:application/octet-stream;base64,eyJiYWNrZ3JvdW5kX2NvbG9yIjoiIzBiNWNhZCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiaWNvbnMiOlt7InNpemVzIjoiMTkyeDE5MiIsInNyYyI6Imljb24tMTkyLnBuZyIsInR5cGUiOiJpbWFnZS9wbmcifSx7InNpemVzIjoiNTEyeDUxMiIsInNyYyI6Imljb24tNTEyLnBuZyIsInR5cGUiOiJpbWFnZS9wbmcifV0sIm5hbWUiOiJDaGljYWdvIFRyaXAgTWFwIiwic2hvcnRfbmFtZSI6IkNoaWNhZ28gTWFwIiwic3RhcnRfdXJsIjoiLi4vaW5kZXguaHRtbCIsInRoZW1lX2NvbG9yIjoiIzBiNWNhZCJ9">
 <title>Chicago Trip App · Oct 13–17, 2026</title><link rel="preconnect" href="https://api.allorigins.win"><link rel="preconnect" href="https://api.codetabs.com">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
 <style>
 :root{
   --bg:#f3f5f7; --ink:#182430; --muted:#66727e; --panel:#ffffff; --line:#e3e8ed;
@@ -95,7 +96,7 @@ select,.rad{font-size:14px;padding:8px 10px;border-radius:10px;border:1px solid 
 #planOut ol{margin:6px 0;padding-left:22px}
 #planOut li{margin:7px 0}
 .planPickWrap{position:relative}
-#planPick{display:none;position:absolute;left:0;right:0;top:calc(100% - 4px);z-index:2000;background:#fff;color:#1c2733;-webkit-text-fill-color:#1c2733;border:1px solid #ccd4dc;border-radius:12px;list-style:none;margin:0;padding:4px;max-height:264px;overflow:auto;box-shadow:0 12px 32px rgba(16,27,38,.22)}
+#planPick{display:none;position:static;margin-top:6px;background:#fff;color:#1c2733;-webkit-text-fill-color:#1c2733;border:1px solid #ccd4dc;border-radius:12px;list-style:none;margin:0;padding:4px;max-height:264px;overflow:auto;box-shadow:0 12px 32px rgba(16,27,38,.22)}
 #planPick li{padding:9px 10px;border-radius:8px;cursor:pointer;font-size:15px;margin:0}
 #planPick li:hover{background:#eef4fa}
 #planPick .pa-addr{color:#68737d;-webkit-text-fill-color:#68737d;font-size:12.5px}
@@ -143,6 +144,14 @@ html,body{overflow-x:clip}
 .btn,.fchip{height:34px;min-height:34px;padding:0 10px;font-size:13px}
 .locRow .btn,.planBtns .btn,#arrBar .btn,#unselBtn{height:34px;min-height:34px;padding:0 10px;font-size:13px}
 .secTgl,.secMv{font-size:13px}
+/* pin clusters + fluid motion (2026-10-10) */
+.marker-cluster{background:none!important}
+.pinCluster{background:#0b5cad;color:#fff;border:2px solid #fff;border-radius:50%;box-shadow:0 1px 5px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;width:34px;height:34px}
+@keyframes secIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.panel:not(.closed)>*:not(h2){animation:secIn .22s ease}
+#pinInfoBody>*,#planOut>*{animation:secIn .22s ease}
+.itday[open] .itrow{animation:secIn .22s ease}
+@media (prefers-reduced-motion:reduce){.panel:not(.closed)>*:not(h2),#pinInfoBody>*,#planOut>*,.itday[open] .itrow{animation:none}}
 </style></head><body>
 <header><div class="wrap"><h1>🗺️ Chicago Trip App</h1>
 <p><strong>Tue Oct 13 – Sat Oct 17, 2026</strong></p>
@@ -187,6 +196,7 @@ html,body{overflow-x:clip}
 <div id="arrBar"><button type="button" class="btn" id="arrBtn">✥ Arrange sections</button> <button type="button" class="btn" id="secReset" style="display:none">↺ Reset order</button></div>
 <footer><div id="liveSetup" style="margin:0 auto 4px;font-size:13.5px"></div>Built from your Chicago Toddler Trip Pack — Oct 13–17, 2026. Nothing here was booked by Forky.</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="data/pins.js?v=fix1"></script>
 <script>try{var __up=JSON.parse(localStorage.getItem("chiUserPins")||"[]");if(Array.isArray(__up))__up.forEach(function(p){if(p&&p.n&&isFinite(p.lat)&&isFinite(p.lng))POIS.push(p);});}catch(e){}</script>
 <script>
@@ -246,6 +256,9 @@ var FILTER_CATS={food:["food","dog","snack"],drinks:["coffee","boba"],landmark:[
 var catFilter="all";
 var statusEl=document.createElement("span"), pinInfo=document.getElementById("pinInfoBody"), nearList=document.getElementById("nearList");
 var map=null, markers={}, walker=null, radius=350;
+var pinCluster=null;
+function pinAdd(m){ if(pinCluster) pinCluster.addLayer(m); else if(map) map.addLayer(m); }
+function pinRemove(m){ if(pinCluster) pinCluster.removeLayer(m); else if(map) map.removeLayer(m); }
 var myPos=null, alerted={}, simTimer=null, simSeg=0, simT=0;
 var selectedIdx=-1;
 var gpsWatchId=null, tapMode=false, gpsHasFix=false;
@@ -303,8 +316,8 @@ function refreshMarkers(){
    var show=(selectedIdx>=0)?(i===selectedIdx):visible(p);
    if(show&&!markers[i]){
      var ic=L.divIcon({className:"",html:"<div style='background:#0b5cad;color:#fff;border-radius:50%;width:30px;height:30px;line-height:30px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)'>"+(ICONS[p.cat]||"📍")+"</div>",iconSize:[30,30],iconAnchor:[15,15]});
-     markers[i]=L.marker([p.lat,p.lng],{icon:ic}).addTo(map).on("click",function(){ showPin(i,true); });
-   } else if(!show&&markers[i]){ map.removeLayer(markers[i]); delete markers[i]; }
+     markers[i]=L.marker([p.lat,p.lng],{icon:ic}); pinAdd(markers[i]); markers[i].on("click",function(){ showPin(i,true); });
+   } else if(!show&&markers[i]){ pinRemove(markers[i]); delete markers[i]; }
  });
 }
 var userInteracted=false;
@@ -348,6 +361,7 @@ function hideGpsHelp(){ var h=document.getElementById("gpsHelp"); if(h) h.style.
 function initMap(){
  if(typeof L==="undefined"){ statusEl.textContent="Map library couldn't load (offline?). The nearest-list and pop-ups need the map library + internet."; return; }
  map=L.map("map").setView([41.8945,-87.6280],13);
+ if(window.L&&L.markerClusterGroup){ pinCluster=L.markerClusterGroup({maxClusterRadius:45,spiderfyOnMaxZoom:true,showCoverageOnHover:false,iconCreateFunction:function(c){ return L.divIcon({className:"pinClusterWrap",html:"<div class='pinCluster'>"+c.getChildCount()+"</div>",iconSize:[34,34],iconAnchor:[17,17]}); }}); map.addLayer(pinCluster); }
  if(map.attributionControl) map.attributionControl.setPrefix(false);
  var darkMq=window.matchMedia("(prefers-color-scheme: dark)");
  var baseOpts={maxZoom:16,attribution:"Esri, HERE, Garmin, © OpenStreetMap contributors"};
@@ -449,6 +463,7 @@ function _fitMap(){ if(map&&map.invalidateSize) map.invalidateSize(); }
 window.addEventListener("resize",function(){ clearTimeout(_rszT); _rszT=setTimeout(_fitMap,200); });
 window.addEventListener("orientationchange",function(){ setTimeout(_fitMap,350); });
 </script><script>
+(function(){ var days=document.querySelectorAll("#secItin .itday"); if(!days||!days.length) return; var chi=new Date(new Date().toLocaleString("en-US",{timeZone:"America/Chicago"})); function p2(n){ return (n<10?"0":"")+n; } var key=chi.getFullYear()+"-"+p2(chi.getMonth()+1)+"-"+p2(chi.getDate()); var mp={"2026-10-13":0,"2026-10-14":1,"2026-10-15":2,"2026-10-16":3,"2026-10-17":4}; if(key in mp){ days.forEach(function(d){ d.removeAttribute("open"); }); if(days[mp[key]]) days[mp[key]].setAttribute("open",""); } })();
 document.querySelectorAll(".itgo").forEach(function(b){ b.addEventListener("click",function(){
  var nm=b.getAttribute("data-pin"); var idx=-1;
  for(var i=0;i<POIS.length;i++){ if(POIS[i].n===nm){ idx=i; break; } }
