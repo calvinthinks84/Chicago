@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Chicago Weather">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11151a" media="(prefers-color-scheme: dark)">
+<title>Chicago Weather &amp; Packing · Oct 13–17, 2026</title>
+<style>
+:root{
+  --bg:#f3f5f7; --ink:#182430; --muted:#66727e; --panel:#ffffff; --line:#e3e8ed;
+  --btn-bg:#ffffff; --btn-line:#ccd4dc; --chip-bg:#edf3fa; --chip-line:#cfdff2;
+  --tag-bg:#eff2f5; --tag-ink:#5d6b77; --toast-bg:#fff8e1; --warn-bg:#fff6e8;
+  --link:#0b5cad; --accent:#0b5cad; --sel:#3f4750; --hover:#eef4fa;
+  --shadow:0 1px 2px rgba(16,27,38,.05),0 6px 18px rgba(16,27,38,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#11151a; --ink:#e9eef3; --muted:#9aa7b3; --panel:#1a2029; --line:#2b333f;
+    --btn-bg:#222a35; --btn-line:#3b4655; --chip-bg:#1d2a44; --chip-line:#33466b;
+    --tag-bg:#262f3c; --tag-ink:#c3cdd8; --toast-bg:#3a3319; --warn-bg:#3a2e18;
+    --link:#8fc3f5; --accent:#5aa5e8; --sel:#5a6572; --hover:#232c39;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3);
+  }}
+
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);-webkit-text-size-adjust:100%}
+.wrap{max-width:480px;margin:0 auto;padding:12px 12px 28px;display:flex;flex-direction:column;gap:12px}
+header{padding:6px 2px 0}
+h1{font-size:21px;margin:0 0 2px}
+.sub{color:var(--muted);font-size:13.5px;margin:0}
+a.back{display:inline-flex;align-items:center;height:42px;padding:0 16px;border-radius:999px;background:var(--btn-bg);border:1px solid var(--line);color:var(--ink);font-size:14px;font-weight:600;text-decoration:none}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+.panel h2{font-size:15.5px;margin:0 0 10px}
+.day{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.day:first-of-type{border-top:none}
+.dow{flex:0 0 86px}
+.dow b{display:block;font-size:14.5px}
+.dow span{font-size:12px;color:var(--muted)}
+.dico{font-size:26px;line-height:1.15}
+.dmain{flex:1;min-width:0}
+.dmain .cond{font-size:14px;font-weight:600}
+.dmain .meta{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.45}
+.hilo{flex:0 0 auto;text-align:right;font-size:14px}
+.hilo b{font-size:16px}
+.hilo span{color:var(--muted)}
+.alert{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;background:var(--panel)}
+.alert b{font-weight:700}
+.pk{margin:0;padding:0;list-style:none}
+.pk li{margin:0}
+.pk label{display:flex;gap:10px;align-items:flex-start;padding:8px 6px;border-radius:10px;cursor:pointer;font-size:14.5px;line-height:1.4}
+.pk input{width:20px;height:20px;flex:0 0 auto;margin:1px 0 0;accent-color:#0b5cad}
+.pk input:checked+span{color:var(--muted);text-decoration:line-through}
+.pk li.hl label{background:rgba(224,158,0,.16);outline:1px solid rgba(224,158,0,.55)}
+.pkcat{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 4px}
+.pkcat:first-child{margin-top:0}
+.foot{color:var(--muted);font-size:12.5px;text-align:center;line-height:1.6}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:42px;padding:0 16px;border-radius:999px;background:var(--btn-bg);border:1px solid var(--line);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>🌦️ Chicago Weather &amp; Packing</h1>
+<p class="sub"><strong>Tue Oct 13 – Sat Oct 17, 2026</strong> · forecast updates every time you open this page</p>
+<p style="margin:10px 0 0"><a class="back" href="index.html">← Back to the map app</a></p>
+</header>
+
+<div class="panel">
+<h2>📅 Trip forecast — Chicago</h2>
+<div id="wxDays"><p class="sub">Loading the forecast…</p></div>
+<p class="sub" id="wxStamp"></p>
+</div>
+
+<div class="alert" id="packAlerts" style="display:none"></div>
+
+<div class="panel">
+<h2>🧳 Packing list <span class="sub" id="pkCount"></span></h2>
+<div id="pkList"></div>
+<p style="margin:12px 0 0"><button type="button" class="btn" id="pkReset">↺ Reset all checks</button></p>
+<p class="sub" style="margin-top:8px">Checks are saved on this phone only.</p>
+</div>
+
+<p class="foot">Weather: Open-Meteo forecast for downtown Chicago, in °F and mph.<br>Built for the Chicago Toddler Trip — Oct 13–17, 2026.</p>
+</div>
+
+<script>
+var WMO={0:["☀️","Clear sky"],1:["🌤️","Mostly clear"],2:["⛅","Partly cloudy"],3:["☁️","Overcast"],45:["🌫️","Foggy"],48:["🌫️","Foggy"],51:["🌦️","Light drizzle"],53:["🌦️","Drizzle"],55:["🌦️","Drizzle"],56:["🌧️","Freezing drizzle"],57:["🌧️","Freezing drizzle"],61:["🌧️","Light rain"],63:["🌧️","Rain"],65:["🌧️","Heavy rain"],66:["🌧️","Freezing rain"],67:["🌧️","Freezing rain"],71:["🌨️","Light snow"],73:["🌨️","Snow"],75:["🌨️","Heavy snow"],77:["🌨️","Snow grains"],80:["🌦️","Light showers"],81:["🌧️","Showers"],82:["🌧️","Heavy showers"],85:["🌨️","Snow showers"],86:["🌨️","Snow showers"],95:["⛈️","Thunderstorm"],96:["⛈️","Thunderstorm + hail"],99:["⛈️","Thunderstorm + hail"]};
+var PLANS={"2026-10-13":"Arrival · Blue Line in","2026-10-14":"🎂 Birthday · river tour","2026-10-15":"Zoo day","2026-10-16":"Navy Pier · Children's Museum","2026-10-17":"Departure · 2:30 pm flight"};
+var DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function wxRender(d){
+  var t=d.daily, out="", alerts=[];
+  var anyRain=false, coldAm=false, windy=false, snow=false;
+  for(var i=0;i<t.time.length;i++){
+    var code=t.weather_code[i], w=WMO[code]||["🌡️","—"];
+    var hi=Math.round(t.temperature_2m_max[i]), lo=Math.round(t.temperature_2m_min[i]);
+    var pp=t.precipitation_probability_max?t.precipitation_probability_max[i]:null;
+    var ws=Math.round(t.wind_speed_10m_max[i]);
+    var dt=new Date(t.time[i]+"T12:00:00");
+    out+='<div class="day"><div class="dow"><b>'+DOWS[dt.getDay()]+" "+t.time[i].slice(5).replace("-","/")+'</b><span>'+(PLANS[t.time[i]]||"")+'</span></div>'
+      +'<div class="dico">'+w[0]+'</div>'
+      +'<div class="dmain"><div class="cond">'+w[1]+'</div><div class="meta">💧 '+(pp==null?"—":pp+"% chance of precip")+' · 💨 Wind to '+ws+' mph</div></div>'
+      +'<div class="hilo"><b>'+hi+'°</b> <span>/ '+lo+'°</span></div></div>';
+    if(pp!=null&&pp>=40) anyRain=true;
+    if(lo<=40) coldAm=true;
+    if(ws>=20) windy=true;
+    if([71,73,75,77,85,86].indexOf(code)>=0) snow=true;
+  }
+  document.getElementById("wxDays").innerHTML=out;
+  document.getElementById("wxStamp").textContent="Forecast pulled just now — it will keep changing until the trip; check again the night before you pack.";
+  if(anyRain) alerts.push("<b>🌧️ Rain is likely</b> at least one day — the highlighted rain items matter.");
+  if(snow) alerts.push("<b>🌨️ Snow is in the forecast</b> for at least one day — warm layers and the toddler hat/mittens are musts, and leave a little extra time to get to O'Hare if it lands on Saturday.");
+  if(coldAm) alerts.push("<b>🥶 A cold morning (30s–low 40s)</b> is in the forecast — pack the warm layer for early starts.");
+  if(windy) alerts.push("<b>💨 A windy day (20+ mph)</b> is coming — Chicago lake wind makes it feel colder; windproof outer layers help, and hold onto hats on the river tour.");
+  var box=document.getElementById("packAlerts");
+  if(alerts.length){ box.innerHTML=alerts.join("<br>"); box.style.display="block";
+    document.querySelectorAll("[data-a]").forEach(function(el){
+      var kinds=el.getAttribute("data-a").split(" ");
+      if((anyRain&&kinds.indexOf("rain")>=0)||(snow&&kinds.indexOf("warm")>=0)||(coldAm&&kinds.indexOf("warm")>=0)||(windy&&kinds.indexOf("wind")>=0)) el.classList.add("hl");
+    });
+  }
+}
+fetch("https://api.open-meteo.com/v1/forecast?latitude=41.8908&longitude=-87.6296&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FChicago&start_date=2026-10-13&end_date=2026-10-17")
+  .then(function(r){ return r.json(); }).then(wxRender)
+  .catch(function(){ document.getElementById("wxDays").innerHTML='<p class="sub">Could not load the forecast (offline?). The packing list below still works.</p>'; });
+
+var PACK=[
+ ["👕 Grown-ups — clothes",[
+   ["jacket","Warm, windproof jacket", "warm wind"],
+   ["layers","Sweaters / fleece layers ×3","warm"],
+   ["pants","Long pants ×3",""],
+   ["shoes","Comfortable walking shoes (zoo + city miles)",""],
+   ["dinner","One nicer outfit — birthday dinner Wed at Pizz'Amici",""],
+   ["sleep","Pajamas + sleepwear",""],
+   ["under","Underwear & socks ×5",""],
+   ["hatg","Hat + light gloves","warm wind"],
+   ["sung","Sunglasses",""] ]],
+ ["🧒 Toddler",[
+   ["tjacket","Warm jacket","warm"],
+   ["tfleece","Fleece mid-layer","warm"],
+   ["that","Hat + mittens","warm wind"],
+   ["toutfits","Outfits ×7 (spares for messes)",""],
+   ["tpj","Pajamas ×2",""],
+   ["diapers","Diapers + wipes — flight days + first night",""],
+   ["tshoes","Shoes + a spare pair",""],
+   ["lovey","Favorite lovey / small blanket",""],
+   ["sippy","Sippy cup + snack pouches",""],
+   ["bibs","Bibs ×3",""] ]],
+ ["🎒 Day bag & stroller",[
+   ["stroller","Stroller",""],
+   ["raincover","Stroller rain cover","rain"],
+   ["carrier","Baby carrier (museums, Navy Pier)",""],
+   ["daypack","Daypack",""],
+   ["shell","Rain shell / compact umbrella","rain"],
+   ["bottles","Refillable water bottles",""],
+   ["charger","Portable charger + cable",""],
+   ["ziplock","Ziplock bags (wet clothes, snacks)","rain"],
+   ["sunscreen","Sunscreen (fall sun at the zoo)",""],
+   ["sanitizer","Hand sanitizer + tissues",""] ]],
+ ["✈️ Flight & carry-on",[
+   ["tablet","Toddler tablet + headphones",""],
+   ["toys","New sticker books / small toys for the plane",""],
+   ["fsnacks","Snacks for both flights",""],
+   ["sparekid","Spare toddler outfit in the carry-on",""],
+   ["spareadult","Spare shirt for a grown-up in the carry-on",""],
+   ["bottle","Empty water bottle (fill after security)",""],
+   ["meds","Children's pain reliever + grown-up basics",""],
+   ["lipbalm","Lip balm (dry cabin + lake wind)","wind"] ]],
+ ["📄 Documents & misc",[
+   ["ids","IDs + boarding passes (Tue out, Sat 2:30 pm back)",""],
+   ["ventra","Ventra / contactless card for CTA",""],
+   ["cards","Credit card + a little cash",""],
+   ["laundry","Laundry bag",""],
+   ["firstaid","Bandages + mini first aid",""] ]]
+];
+var KEY="chiPackV1", state={};
+try{ state=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ state={}; }
+var html="";
+PACK.forEach(function(cat){
+  html+='<div class="pkcat">'+cat[0]+'</div><ul class="pk">';
+  cat[1].forEach(function(it){
+    html+='<li data-a="'+it[2]+'"><label><input type="checkbox" id="pk-'+it[0]+'"'+(state[it[0]]?" checked":"")+'><span>'+it[1]+"</span></label></li>";
+  });
+  html+="</ul>";
+});
+document.getElementById("pkList").innerHTML=html;
+function pkSaveCount(){
+  var boxes=document.querySelectorAll("#pkList input"), done=0, st={};
+  boxes.forEach(function(b){ if(b.checked){ done++; st[b.id.slice(3)]=1; } });
+  try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){}
+  document.getElementById("pkCount").textContent="— "+done+" of "+boxes.length+" packed";
+}
+document.getElementById("pkList").addEventListener("change", pkSaveCount);
+document.getElementById("pkReset").addEventListener("click", function(){
+  document.querySelectorAll("#pkList input").forEach(function(b){ b.checked=false; });
+  pkSaveCount();
+});
+pkSaveCount();
+</script>
+</body>
+</html>
