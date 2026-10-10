@@ -1,1 +1,0 @@
-var GTD=JSON.parse(GT_S.join(""));var GT_NODES=GTD[0],GT_ROUTES=GTD[1],GT_EDGES=GTD[2],GT_XFER0=GTD[3];
