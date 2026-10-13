@@ -192,7 +192,7 @@ body{background:linear-gradient(180deg,#e9eff6,var(--bg) 260px)}
 <p class="planBtns" style="margin:8px 0 2px"><button type="button" class="btn" id="navVoice">🔊 Voice: on</button><button type="button" class="btn" id="navNext">Next ▸</button><button type="button" class="btn" id="navEnd">■ End</button></p>
 </div>
 <div id="planOut"></div></div>
-<div id="secMap"><div class="secHead"><h2>🗺️ Map</h2><span class="secMove"><button type="button" class="secMv" data-sec="secMap" data-mv="-1" title="Move section up">▲</button><button type="button" class="secMv" data-sec="secMap" data-mv="1" title="Move section down">▼</button></span><button type="button" class="secTgl" data-c="mapWrap" title="Collapse / expand this section">▸</button></div><div id="mapWrap" class="closed"><div id="map"></div>
+<div id="secMap"><div class="secHead"><h2>🗺️ Map</h2><span class="secMove"><button type="button" class="secMv" data-sec="secMap" data-mv="-1" title="Move section up">▲</button><button type="button" class="secMv" data-sec="secMap" data-mv="1" title="Move section down">▼</button></span><button type="button" class="secTgl" data-c="mapWrap" title="Collapse / expand this section">▸</button></div><div id="mapWrap" class="closed"><div id="map"></div><div id="planeBar" style="display:none;padding:8px 2px 0;font-size:13.5px"></div>
 <div class="bar" id="filterBar" style="margin:10px 0 8px"><button class="fchip on" data-f="all">All locations</button><button class="fchip" data-f="food">🍽️ Food</button><button class="fchip" data-f="drinks">🥤 Drinks</button><button class="fchip" data-f="landmark">🏛️ Landmarks</button><button class="fchip" data-f="saved">⭐ Saved</button><button class="fchip" data-f="stop">📍 Stops</button></div></div></div>
 <div class="panel closed" id="pinInfo"><h2>📍 Pin details<span class="secMove"><button type="button" class="secMv" data-sec="pinInfo" data-mv="-1" title="Move section up">▲</button><button type="button" class="secMv" data-sec="pinInfo" data-mv="1" title="Move section down">▼</button></span><button type="button" class="secTgl" data-c="pinInfo" title="Collapse / expand this section">▸</button></h2><div id="pinInfoBody"><p class="legend">Tap any pin on the map — its ⭐ must-try, 🏛️ history, and 🧭 show here, below the map.</p></div></div>
 <div class="panel closed" id="secItin"><h2>🗓️ Itinerary — day by day<span class="secMove"><button type="button" class="secMv" data-sec="secItin" data-mv="-1" title="Move section up">▲</button><button type="button" class="secMv" data-sec="secItin" data-mv="1" title="Move section down">▼</button></span><button type="button" class="secTgl" data-c="secItin" title="Collapse / expand this section">▸</button></h2><p class="legend">Tap any underlined stop to jump to it on the map — its card has the ⭐ must-try, 🏛️ history, and 🧭 bus/train board &amp; exit.</p><details class="itday" open><summary>Tue Oct 13 — Arrival</summary><p class="itrow"><span class="itt">11:45am PT</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Fly Delta LAX → O'Hare</button></p><p class="itrow"><span class="itt">~5:45pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Land at ORD</button></p><p class="itrow"><span class="itt">~5:50pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Blue Line to Grand station, check in at the Fairfield Inn (~7pm)</button></p><p class="itrow"><span class="itt">~7:15pm</span> <button type="button" class="itgo" data-pin="Al's #1 Italian Beef + Chicago Dog">Dinner — Al's #1 Italian Beef + a Chicago dog</button></p></details><details class="itday"><summary>Wed Oct 14 — 🎂 Birthday day</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Millennium Park — The Bean">Millennium Park & The Bean first (fewest crowds)</button></p><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Maggie Daley Park — Play Garden">Maggie Daley Park Play Garden</button></p><p class="itrow"><span class="itt">~10:00am</span> <button type="button" class="itgo" data-pin="Molly's Cupcakes — River East 🎂">Birthday cupcakes — Molly's Cupcakes, River East</button></p><p class="itrow"><span class="itt">11:45am</span> <button type="button" class="itgo" data-pin="Chicago River Architecture Tour">Chicago River architecture tour (your booking)</button></p><p class="itrow"><span class="itt">After tour</span> <button type="button" class="itgo" data-pin="Devil Dawgs — Gold Coast">Chicago dog snack — Devil Dawgs, Gold Coast</button></p><p class="itrow"><span class="itt">1:30–3:30pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">Afternoon</span> <button type="button" class="itgo" data-pin="DuSable Bridge — Michigan Ave">Riverwalk stroll</button></p><p class="itrow"><span class="itt">Evening</span> <button type="button" class="itgo" data-pin="Pizz'Amici — birthday dinner 🎂">Birthday dinner — Pizz'Amici (reserved)</button></p></details><details class="itday"><summary>Thu Oct 15 — Zoo day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Lincoln Park Zoo (free, opens 10)</button></p><p class="itrow"><span class="itt">Bonus</span> <button type="button" class="itgo" data-pin="Peggy Notebaert Nature Museum">Peggy Notebaert Nature Museum — Butterfly Haven, 5 min away</button></p><p class="itrow"><span class="itt">Lunch</span> <button type="button" class="itgo" data-pin="The Wieners Circle — Lincoln Park">Chicago dogs — The Wieners Circle (main pick)</button></p><p class="itrow"><span class="itt">1:00–3:00pm</span> <button type="button" class="itgo" data-pin="Fairfield Inn — your hotel (base)">Nap window back at the hotel</button></p><p class="itrow"><span class="itt">5:00pm</span> <button type="button" class="itgo" data-pin="Lou Malnati's — River North">Early dinner — Lou Malnati's deep dish (order a salad/apps right away, pies take ~45 min)</button></p><p class="itrow"><span class="itt">After</span> <button type="button" class="itgo" data-pin="Rainbow Cone at Gino's East">Rainbow Cone at Gino's East</button></p></details><details class="itday"><summary>Fri Oct 16 — Navy Pier day</summary><p class="itrow"><span class="itt">10:00am</span> <button type="button" class="itgo" data-pin="Chicago Children's Museum — Navy Pier">Chicago Children's Museum — Pritzker Playspace first (toddlers-only, morning)</button></p><p class="itrow"><span class="itt">Also today</span> <button type="button" class="itgo" data-pin="Butterfly House — Navy Pier">Butterfly House — Incredible Insects, same pier</button></p><p class="itrow"><span class="itt">Midday</span> <span>Nap: stroller on the pier or a hotel reset (~15 min)</span></p><p class="itrow"><span class="itt">Early dinner</span> <button type="button" class="itgo" data-pin="Beatrix — River North">Beatrix or Eataly — walk-in, your call</button></p><p class="itrow"><span class="itt">Flex</span> <button type="button" class="itgo" data-pin="Lincoln Park Zoo">Fall Fest at Lincoln Park Zoo (Fri–Sun), if energy allows</button></p></details><details class="itday"><summary>Sat Oct 17 — Departure</summary><p class="itrow"><span class="itt">Morning</span> <button type="button" class="itgo" data-pin="Eataly Chicago">Pack up, easy breakfast (Beatrix / Eataly)</button></p><p class="itrow"><span class="itt">11:45am–12pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Leave the hotel — Blue Line Grand → O'Hare (~45 min), arrive ~1:00pm</button></p><p class="itrow"><span class="itt">2:30pm</span> <button type="button" class="itgo" data-pin="✈️ O'Hare (ORD)">Flight home from ORD</button></p></details></div>
@@ -204,7 +204,7 @@ body{background:linear-gradient(180deg,#e9eff6,var(--bg) 260px)}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="data/pins.js?v=fix1"></script>
-<script>try{var __up=JSON.parse(localStorage.getItem("chiUserPins")||"[]");if(Array.isArray(__up))__up.forEach(function(p){if(p&&p.n&&isFinite(p.lat)&&isFinite(p.lng))POIS.push(p);});}catch(e){}</script>
+<script>try{var __up=JSON.parse(sessionStorage.getItem("chiUserPins")||"[]");if(Array.isArray(__up))__up.forEach(function(p){if(p&&p.n&&isFinite(p.lat)&&isFinite(p.lng))POIS.push(p);});}catch(e){}</script>
 <script>
 "use strict";
 /* ---------- Data: itinerary stops + suggestions. fits = why it matches the trip criteria ---------- */
@@ -464,6 +464,33 @@ initMap();
 if(window.navigator.standalone){ statusEl.textContent="Running as your Home Screen app. Tap Current location in Chicago to start walk-near details."; }
 /* Default: use current GPS location when the app opens (the Current location button stops/starts it). */
 setTimeout(function(){ if(gpsWatchId===null){ try{ startGps(); }catch(_){} } },600);
+/* Live plane position on travel days (ADS-B, keyless). Shows only when a position is found. */
+var PLANE_DAYS={"2026-10-13":{cs:"DAL2368",label:"DL2368",hex:"a442f3"},"2026-10-17":{cs:"",label:"",hex:""}};
+var planeMk=null;
+function planeDay(){ try{ return PLANE_DAYS[new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"})]||null; }catch(_){ return null; } }
+function planeShow(lat,lng,trk,altFt,mph,ground,cfg){
+ var bar=document.getElementById("planeBar"); if(!bar||typeof L==="undefined"||!map) return;
+ var ic=L.divIcon({className:"",html:"<div style='background:#fff;border:2px solid #0b5cad;border-radius:50%;width:32px;height:32px;line-height:28px;text-align:center;box-shadow:0 1px 5px rgba(0,0,0,.45)'><span style='display:inline-block;font-size:17px;transform:rotate("+Math.round((trk||0)-45)+"deg)'>✈️</span></div>",iconSize:[32,32],iconAnchor:[16,16]});
+ if(!planeMk){ planeMk=L.marker([lat,lng],{icon:ic,zIndexOffset:1000}).addTo(map); } else { planeMk.setLatLng([lat,lng]); planeMk.setIcon(ic); }
+ var t=new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZone:"America/Chicago"});
+ bar.style.display="block";
+ bar.innerHTML="✈️ <strong>"+cfg.label+"</strong> · "+(ground?"on the ground":(altFt?Math.round(altFt).toLocaleString("en-US")+" ft":"in flight")+(mph?" · "+Math.round(mph)+" mph":""))+" · updated "+t+" CT";
+}
+function planePoll(){
+ var cfg=planeDay(); if(!cfg||!cfg.cs) return;
+ fetch("https://api.adsb.lol/v2/callsign/"+cfg.cs).then(function(r){ return r.json(); }).then(function(j){
+   var a=j&&j.ac&&j.ac[0];
+   if(a&&typeof a.lat==="number"&&typeof a.lon==="number"){ planeShow(a.lat,a.lon,a.track,(typeof a.alt_baro==="number"?a.alt_baro:null),(a.gs?a.gs*1.15078:null),a.alt_baro==="ground",cfg); return; }
+   throw new Error("nopos");
+ }).catch(function(){
+   if(!cfg.hex) return;
+   fetch("https://opensky-network.org/api/states/all?icao24="+cfg.hex).then(function(r){ return r.json(); }).then(function(j){
+     var s=j&&j.states&&j.states[0]; if(!s||typeof s[6]!=="number") return;
+     planeShow(s[6],s[5],s[10],(typeof s[7]==="number"?s[7]*3.28084:null),(typeof s[9]==="number"?s[9]*2.23694:null),!!s[8],cfg);
+   }).catch(function(){});
+ });
+}
+if(planeDay()){ planePoll(); setInterval(planePoll,60000); }
 function hsRefresh(){ try{ var sa=(window.navigator.standalone===true)||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches); if(!sa) return; if(sessionStorage.getItem("__hsR")) return; sessionStorage.setItem("__hsR","1"); location.reload(); }catch(e){} }
 hsRefresh();
 window.addEventListener("pageshow",function(e){ if(e.persisted){ try{ sessionStorage.removeItem("__hsR"); }catch(_){} hsRefresh(); } });
@@ -526,8 +553,8 @@ document.querySelectorAll(".itgo").forEach(function(b){ b.addEventListener("clic
 <script>
 (function(){
  var LSKEY="chiUserPins";
- function loadUserPins(){ try{ var a=JSON.parse(localStorage.getItem(LSKEY)||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
- function storeUserPins(a){ try{ localStorage.setItem(LSKEY,JSON.stringify(a)); }catch(e){} }
+ function loadUserPins(){ try{ var a=JSON.parse(sessionStorage.getItem(LSKEY)||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+ function storeUserPins(a){ try{ sessionStorage.setItem(LSKEY,JSON.stringify(a)); }catch(e){} }
  function esc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
  function addMi(a,b){ var R=3958.8, dLa=(b.lat-a.lat)*Math.PI/180, dLo=(b.lng-a.lng)*Math.PI/180; var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(h)); }
  var addOrg=null;
@@ -661,12 +688,12 @@ var _secAnchor=null;
 function secParentEl(){ var f=document.getElementById("planPanel"); return f?f.parentNode:null; }
 function secOrderNow(){ var par=secParentEl(); var ids=[]; if(!par) return ids; Array.prototype.forEach.call(par.children,function(ch){ if(ch.id&&SECIDS[ch.id]) ids.push(ch.id); }); return ids; }
 function secApply(order){ var par=secParentEl(); if(!par) return; if(_secAnchor===null){ var l=document.getElementById("secNear"); _secAnchor=l?l.nextElementSibling:null; } order.forEach(function(id){ var el=document.getElementById(id); if(el) par.insertBefore(el,_secAnchor); }); }
-function secSave(){ try{ localStorage.setItem("chiSecOrder",JSON.stringify(secOrderNow())); }catch(e){} }
+function secSave(){ try{ sessionStorage.setItem("chiSecOrder",JSON.stringify(secOrderNow())); }catch(e){} }
 document.querySelectorAll(".secMv").forEach(function(b){ b.addEventListener("click",function(){ var id=b.getAttribute("data-sec"); var d=parseInt(b.getAttribute("data-mv"),10); var o=secOrderNow(); var i=o.indexOf(id); var j=i+d; if(i<0||j<0||j>=o.length) return; var t=o[i]; o[i]=o[j]; o[j]=t; secApply(o); secSave(); if(id==="secMap") setTimeout(function(){ if(typeof map!=="undefined"&&map&&map.invalidateSize) map.invalidateSize(); },80); }); });
 (function(){ var ab=document.getElementById("arrBtn"), rs=document.getElementById("secReset");
  if(ab) ab.addEventListener("click",function(){ var on=document.body.classList.toggle("arranging"); ab.textContent=on?"\u2713 Done":"\u2725 Arrange"; if(rs) rs.style.display=on?"":"none"; });
- if(rs) rs.addEventListener("click",function(){ try{ localStorage.removeItem("chiSecOrder"); }catch(e){} secApply(SECDEF.slice()); });
- try{ var saved=JSON.parse(localStorage.getItem("chiSecOrder")||"null"); if(saved&&saved.length===SECDEF.length&&saved.every(function(x){ return SECIDS[x]; })) secApply(saved); }catch(e){}
+ if(rs) rs.addEventListener("click",function(){ try{ sessionStorage.removeItem("chiSecOrder"); }catch(e){} secApply(SECDEF.slice()); });
+ try{ var saved=JSON.parse(sessionStorage.getItem("chiSecOrder")||"null"); if(saved&&saved.length===SECDEF.length&&saved.every(function(x){ return SECIDS[x]; })) secApply(saved); }catch(e){}
 })();
 </script>
 </body></html>
