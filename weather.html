@@ -305,10 +305,10 @@ var PACK=[
    ["firstaid","Bandages + mini first aid",""] ]]
 ];
 var KEY="chiPackV1", state={};
-try{ state=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ state={}; }
+try{ state=JSON.parse(sessionStorage.getItem(KEY)||"{}"); }catch(e){ state={}; }
 var CKEY="chiPackCustomV1", custom={added:[],removed:[]};
-try{ var cj=JSON.parse(localStorage.getItem(CKEY)||"null"); if(cj){ if(Array.isArray(cj.added)) custom.added=cj.added; if(Array.isArray(cj.removed)) custom.removed=cj.removed; } }catch(e){}
-function pkSaveCustom(){ try{ localStorage.setItem(CKEY, JSON.stringify(custom)); }catch(e){} }
+try{ var cj=JSON.parse(sessionStorage.getItem(CKEY)||"null"); if(cj){ if(Array.isArray(cj.added)) custom.added=cj.added; if(Array.isArray(cj.removed)) custom.removed=cj.removed; } }catch(e){}
+function pkSaveCustom(){ try{ sessionStorage.setItem(CKEY, JSON.stringify(custom)); }catch(e){} }
 var PKWX=null;
 function pkApplyAlerts(){
   if(!PKWX) return;
@@ -375,7 +375,7 @@ document.getElementById("pkList").addEventListener("click", function(ev){
 function pkSaveCount(){
   var boxes=document.querySelectorAll("#pkList input"), done=0, st={};
   boxes.forEach(function(b){ if(b.checked){ done++; st[b.id.slice(3)]=1; } });
-  try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){}
+  try{ sessionStorage.setItem(KEY, JSON.stringify(st)); }catch(e){}
   document.getElementById("pkCount").textContent="— "+done+" of "+boxes.length+" packed";
 }
 document.getElementById("pkList").addEventListener("change", pkSaveCount);

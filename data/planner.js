@@ -748,7 +748,7 @@ function plnOsrmEnrich(res){
 }
 
 /* ---- Navigation mode: live GPS follow, advancing steps, voice, reroute ---- */
-var PLN_NAV={on:false,watch:null,seq:[],idx:0,res:null,dest:null,lastPos:null,offTicks:0,lastReroute:0,lastPan:0,dot:null,heading:null,lineNext:null,lineDone:null,zoomed:false,voice:(function(){ try{ return localStorage.getItem("chiNavVoice")!=="0"; }catch(e){ return true; } })()};
+var PLN_NAV={on:false,watch:null,seq:[],idx:0,res:null,dest:null,lastPos:null,offTicks:0,lastReroute:0,lastPan:0,dot:null,heading:null,lineNext:null,lineDone:null,zoomed:false,voice:(function(){ try{ return sessionStorage.getItem("chiNavVoice")!=="0"; }catch(e){ return true; } })()};
 window.__nav=PLN_NAV;
 function plnNavEl(id){ return document.getElementById(id); }
 function plnNavSpeak(txt){ if(!PLN_NAV.voice||typeof speechSynthesis==="undefined") return; try{ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(String(txt).replace(/[\uD83D\uDEB6\uD83D\uDE8C\uD83D\uDE87\uD83E\uDD6C\u23F1\uD83D\uDFE2\uD83D\uDD34]/g,"")); u.rate=1.05; speechSynthesis.speak(u); }catch(e){} }
@@ -918,5 +918,5 @@ if(typeof document!=="undefined"&&document.getElementById){
   var __nb=document.getElementById("navBtn"); if(__nb) __nb.addEventListener("click",plnNavStart);
   var __ne=document.getElementById("navEnd"); if(__ne) __ne.addEventListener("click",plnNavEnd);
   var __nn=document.getElementById("navNext"); if(__nn) __nn.addEventListener("click",function(){ plnNavAdvance(); });
-  var __nv=document.getElementById("navVoice"); if(__nv) __nv.addEventListener("click",function(){ PLN_NAV.voice=!PLN_NAV.voice; try{ localStorage.setItem("chiNavVoice",PLN_NAV.voice?"1":"0"); }catch(e){} __nv.textContent=PLN_NAV.voice?"🔊 Voice: on":"🔇 Voice: off"; if(PLN_NAV.voice) plnNavSpeak("Voice on"); });
+  var __nv=document.getElementById("navVoice"); if(__nv) __nv.addEventListener("click",function(){ PLN_NAV.voice=!PLN_NAV.voice; try{ sessionStorage.setItem("chiNavVoice",PLN_NAV.voice?"1":"0"); }catch(e){} __nv.textContent=PLN_NAV.voice?"🔊 Voice: on":"🔇 Voice: off"; if(PLN_NAV.voice) plnNavSpeak("Voice on"); });
 }
