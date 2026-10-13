@@ -167,7 +167,7 @@ body{background:linear-gradient(180deg,#e9eff6,var(--bg) 260px)}
 <div class="wrap">
 
 <div class="bar">
-<div class="locRow"><button class="btn go" id="gpsBtn">📍 Current location</button><button class="btn" id="tapLocBtn">👆 Pin drop</button><button class="btn go" id="locTglBtn">📍 Location: On</button></div>
+<div class="locRow"><button class="btn go" id="gpsBtn">📍 Current location</button><button class="btn" id="tapLocBtn">👆 Pin drop</button></div>
 <button class="btn" id="unselBtn" style="display:none">✕ Unselect — show all pins</button>
 </div>
 <div id="gpsHelp">
@@ -448,18 +448,7 @@ function startGps(){
    handleGpsErr(e);
  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
-/* Location on/off toggle — the app default is ON: on open it starts GPS automatically.
-   Turning it off stops live GPS and the app won't use GPS again until it's back on. */
-var locAuto=true; try{ locAuto=localStorage.getItem("chiLocAutoV1")!=="0"; }catch(_){}
-function locPref(on){ locAuto=on; try{ localStorage.setItem("chiLocAutoV1",on?"1":"0"); }catch(_){} locSync(); }
-function locSync(){ var t=document.getElementById("locTglBtn"); if(!t) return; t.textContent=locAuto?"📍 Location: On":"📍 Location: Off"; t.classList.toggle("go",locAuto); }
-document.getElementById("gpsBtn").addEventListener("click",function(){ locPref(gpsWatchId===null); startGps(); });
-var locTgl=document.getElementById("locTglBtn");
-if(locTgl) locTgl.addEventListener("click",function(){
- if(locAuto){ locPref(false); if(gpsWatchId!==null) startGps(); else statusEl.textContent="Location is off — the app won't use your GPS. Tap “📍 Location: Off” to turn it back on; it will start automatically when the app opens."; }
- else{ locPref(true); if(gpsWatchId===null) startGps(); }
-});
-locSync();
+document.getElementById("gpsBtn").addEventListener("click",startGps);
 var retryBtn=document.getElementById("gpsRetryBtn"); if(retryBtn) retryBtn.addEventListener("click",function(){ hideGpsHelp(); if(gpsWatchId!==null){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; } startGps(); });
 var helpClose=document.getElementById("gpsHelpClose"); if(helpClose) helpClose.addEventListener("click",hideGpsHelp);
 document.getElementById("tapLocBtn").addEventListener("click",function(){
@@ -473,7 +462,8 @@ document.getElementById("tapLocBtn").addEventListener("click",function(){
 });
 initMap();
 if(window.navigator.standalone){ statusEl.textContent="Running as your Home Screen app. Tap Current location in Chicago to start walk-near details."; }
-if(locAuto){ setTimeout(function(){ if(gpsWatchId===null){ try{ startGps(); }catch(_){} } },600); }
+/* Default: use current GPS location when the app opens (the Current location button stops/starts it). */
+setTimeout(function(){ if(gpsWatchId===null){ try{ startGps(); }catch(_){} } },600);
 function hsRefresh(){ try{ var sa=(window.navigator.standalone===true)||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches); if(!sa) return; if(sessionStorage.getItem("__hsR")) return; sessionStorage.setItem("__hsR","1"); location.reload(); }catch(e){} }
 hsRefresh();
 window.addEventListener("pageshow",function(e){ if(e.persisted){ try{ sessionStorage.removeItem("__hsR"); }catch(_){} hsRefresh(); } });
