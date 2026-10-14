@@ -91,7 +91,7 @@ html,body{width:100%;overflow-x:hidden}
 /* forecast gradient (2026-10-10) */
 .panel:has(#wxDays){background:linear-gradient(180deg,rgba(20,115,214,.12),rgba(20,115,214,0) 130px),var(--panel)}
 @media (prefers-color-scheme:dark){.panel:has(#wxDays){background:linear-gradient(180deg,rgba(56,150,255,.16),rgba(56,150,255,0) 130px),var(--panel)}}
-</style>
+.pksync{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}.pksync input{height:42px;border:1px solid var(--line);border-radius:10px;padding:0 10px;font-size:16px;background:var(--panel);color:var(--ink);font-family:inherit}</style>
 </head>
 <body>
 <div class="wrap">
@@ -119,6 +119,12 @@ html,body{width:100%;overflow-x:hidden}
 <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><h2 style="margin:0">🧳 Packing list <span class="sub" id="pkCount"></span></h2><button type="button" class="btn" id="pkToggleAll" style="height:34px;padding:0 10px;font-size:13px;flex:0 0 auto">▾ Expand all</button></div>
 <div id="pkList"></div>
 <p style="margin:12px 0 0"><button type="button" class="btn" id="pkReset">↺ Reset all checks</button></p>
+<div class="pksync">
+<p style="margin:0 0 6px"><b>📱 Multi-device sync</b></p>
+<p style="margin:0;display:flex;gap:8px"><input type="text" id="pkCode" placeholder="Choose a sync code (e.g. family-trip-26)" maxlength="32" autocomplete="off" style="flex:1;min-width:0"><button type="button" class="btn" id="pkCodeBtn" style="flex:0 0 auto">Set code</button></p>
+<p class="sub" id="pkSyncStatus" style="margin:6px 0 0">Not syncing — this list lives on this device only.</p>
+<p class="sub" style="margin:4px 0 0">Enter the <b>same code</b> on each phone and the list stays in step on all of them. It stays saved until someone taps “Reset all checks”.</p>
+</div>
 <p class="sub" style="margin-top:8px">Checks and your added items are saved on this phone only.</p>
 </div>
 
@@ -304,11 +310,29 @@ var PACK=[
    ["laundry","Laundry bag",""],
    ["firstaid","Bandages + mini first aid",""] ]]
 ];
-var KEY="chiPackV1", state={};
-try{ state=JSON.parse(sessionStorage.getItem(KEY)||"{}"); }catch(e){ state={}; }
-var CKEY="chiPackCustomV1", custom={added:[],removed:[]};
-try{ var cj=JSON.parse(sessionStorage.getItem(CKEY)||"null"); if(cj){ if(Array.isArray(cj.added)) custom.added=cj.added; if(Array.isArray(cj.removed)) custom.removed=cj.removed; } }catch(e){}
-function pkSaveCustom(){ try{ sessionStorage.setItem(CKEY, JSON.stringify(custom)); }catch(e){} }
+var KEY="chiPackV1", CKEY="chiPackCustomV1", DKEY="chiPackDocV1";
+var state={}, custom={added:[],removed:[]};
+function pkLoadDoc(){
+  try{ var d=JSON.parse(localStorage.getItem(DKEY)||"null"); if(d&&d.checks&&d.custom) return d; }catch(e){}
+  var d2={checks:{},custom:{added:[],removed:[]},updatedAt:0};
+  try{ var c=JSON.parse(sessionStorage.getItem(KEY)||localStorage.getItem(KEY)||"{}"); if(c&&typeof c==="object") d2.checks=c; }catch(e){}
+  try{ var j=JSON.parse(sessionStorage.getItem(CKEY)||localStorage.getItem(CKEY)||"null"); if(j){ if(Array.isArray(j.added)) d2.custom.added=j.added; if(Array.isArray(j.removed)) d2.custom.removed=j.removed; } }catch(e){}
+  return d2;
+}
+var pkDoc=pkLoadDoc();
+state=pkDoc.checks; custom=pkDoc.custom;
+var pkApplying=false, pkNoHarvest=false, pkPushTimer=null, pkPulled=false, pkPushPending=false;
+var pkLastJson=JSON.stringify({checks:state,custom:custom});
+function pkPersist(){
+  pkDoc.checks=state; pkDoc.custom=custom;
+  var j=JSON.stringify({checks:pkDoc.checks,custom:pkDoc.custom});
+  var changed=(j!==pkLastJson);
+  if(changed&&!pkApplying) pkDoc.updatedAt=Date.now();
+  try{ localStorage.setItem(DKEY, JSON.stringify(pkDoc)); }catch(e){}
+  pkLastJson=JSON.stringify({checks:pkDoc.checks,custom:pkDoc.custom});
+  if(changed&&!pkApplying) pkSchedulePush();
+}
+function pkSaveCustom(){ pkPersist(); }
 var PKWX=null;
 function pkApplyAlerts(){
   if(!PKWX) return;
@@ -323,7 +347,7 @@ function pkItemRow(it){
 }
 function pkRender(){
   var cats=document.querySelectorAll("#pkList .pkcat");
-  if(cats.length){
+  if(cats.length&&!pkNoHarvest){
     var st={};
     document.querySelectorAll("#pkList input[type=checkbox]").forEach(function(b){ if(b.checked) st[b.id.slice(3)]=1; });
     state=st;
@@ -375,7 +399,7 @@ document.getElementById("pkList").addEventListener("click", function(ev){
 function pkSaveCount(){
   var boxes=document.querySelectorAll("#pkList input"), done=0, st={};
   boxes.forEach(function(b){ if(b.checked){ done++; st[b.id.slice(3)]=1; } });
-  try{ sessionStorage.setItem(KEY, JSON.stringify(st)); }catch(e){}
+  state=st; pkPersist();
   document.getElementById("pkCount").textContent="— "+done+" of "+boxes.length+" packed";
 }
 document.getElementById("pkList").addEventListener("change", pkSaveCount);
@@ -413,6 +437,67 @@ function pkSetAll(open){
 document.getElementById("pkToggleAll").addEventListener("click", function(){ pkSetAll(!pkAllOpen()); });
 pkSyncToggle();
 pkSaveCount();
+/* ---- multi-device sync via the trip relay (Cloudflare KV) ---- */
+var PK_RELAY=(function(){ try{ return localStorage.getItem("chiRelay")||"https://cta-relay.yd9zy8w2j6.workers.dev"; }catch(e){ return "https://cta-relay.yd9zy8w2j6.workers.dev"; } })();
+function pkCode(){ try{ return (localStorage.getItem("chiPackCode")||"").trim(); }catch(e){ return ""; } }
+function pkSyncMsg(t){ var el=document.getElementById("pkSyncStatus"); if(el) el.textContent=t; }
+function pkSyncUrl(){ return PK_RELAY.replace(/\/+$/,"")+"/pack?c="+encodeURIComponent(pkCode()); }
+function pkSchedulePush(){
+  if(!pkCode()){ pkSyncMsg("Not syncing — this list lives on this device only."); return; }
+  if(!pkPulled){ pkPushPending=true; return; }
+  pkSyncMsg("Syncing…");
+  if(pkPushTimer) clearTimeout(pkPushTimer);
+  pkPushTimer=setTimeout(pkPush, 700);
+}
+function pkPush(){
+  if(!pkCode()) return;
+  fetch(pkSyncUrl(), {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(pkDoc)})
+    .then(function(r){
+      if(r.status===501){ pkSyncMsg("Sync isn't set up on the relay yet — the list is saved on this device. (One Cloudflare step is still needed.)"); return; }
+      if(!r.ok) throw new Error("http "+r.status);
+      pkSyncMsg("☁️ Synced · "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+" — visible on every device with this code.");
+    })
+    .catch(function(){ pkSyncMsg("Sync failed (offline?) — the list is saved on this device."); });
+}
+function pkPull(){
+  if(!pkCode()){ pkSyncMsg("Not syncing — this list lives on this device only."); pkPulled=true; return; }
+  fetch(pkSyncUrl()).then(function(r){
+    if(r.status===501){ pkSyncMsg("Sync isn't set up on the relay yet — the list is saved on this device. (One Cloudflare step is still needed.)"); return null; }
+    if(!r.ok) throw new Error("http "+r.status);
+    return r.json();
+  }).then(function(d){
+    pkPulled=true;
+    if(!d||d.empty){ pkSyncMsg("☁️ Sync on — nothing stored yet for this code."); pkPush(); return; }
+    if(d.updatedAt&&d.updatedAt>pkDoc.updatedAt){
+      pkApplying=true;
+      pkDoc={checks:d.checks||{}, custom:d.custom||{added:[],removed:[]}, updatedAt:d.updatedAt};
+      state=pkDoc.checks; custom=pkDoc.custom;
+      pkLastJson=JSON.stringify({checks:state,custom:custom});
+      try{ localStorage.setItem(DKEY, JSON.stringify(pkDoc)); }catch(e){}
+      pkNoHarvest=true; pkRender(); pkNoHarvest=false; pkSaveCount();
+      pkApplying=false;
+      pkSyncMsg("☁️ Synced · updated from another device just now.");
+    } else {
+      pkSyncMsg("☁️ Synced · up to date on all devices with this code.");
+      if(d.updatedAt&&d.updatedAt<pkDoc.updatedAt) pkPush();
+    }
+    if(pkPushPending){ pkPushPending=false; pkPush(); }
+  }).catch(function(){ pkPulled=true; pkSyncMsg("Couldn't reach sync — the list is saved on this device."); });
+}
+(function(){
+  var inp=document.getElementById("pkCode"), btn=document.getElementById("pkCodeBtn");
+  if(inp) inp.value=pkCode();
+  function setCode(){
+    var v=(inp.value||"").trim();
+    try{ if(v) localStorage.setItem("chiPackCode", v); else localStorage.removeItem("chiPackCode"); }catch(e){}
+    pkPulled=false; pkPushPending=false;
+    pkPull();
+  }
+  if(btn) btn.addEventListener("click", setCode);
+  if(inp) inp.addEventListener("keydown", function(ev){ if(ev.key==="Enter"){ ev.preventDefault(); setCode(); } });
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) pkPull(); });
+  pkPull();
+})();
 </script>
 </body>
 </html>
