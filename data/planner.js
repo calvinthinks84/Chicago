@@ -223,7 +223,7 @@ function plnStopOpts(rd,which,f,t,single){
    var rpKey=f.lat.toFixed(5)+","+f.lng.toFixed(5)+"|"+(t.n||"");
    if(!window.__routePins||window.__routePins.key!==rpKey) window.__routePins={key:rpKey,board:null,exit:null};
    var activePins=(window.__routePins.board!=null||window.__routePins.exit!=null)?{board:window.__routePins.board,exit:window.__routePins.exit}:null;
-   var r=planRoute(f,t,activePins);
+   var r=planRoute(f,t,activePins,(typeof window!=="undefined"&&window.__routeMode)||null);
    if(!r){ plnClearRoute(); out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; return; }
    var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps 🗺️</a>";
    var orgLine="From where you are", poorWarn="";
@@ -362,7 +362,9 @@ function plnGo(){
  var homeBtn=document.getElementById("planHome");
  if(homeBtn) homeBtn.addEventListener("click",function(){ document.getElementById("planTo").value=POIS[0].n; plnGo(); });
  var clearBtn=document.getElementById("planClear");
- if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; if(typeof plnFillActs==="function") plnFillActs(); document.getElementById("planOut").innerHTML=""; var hb2=document.getElementById("planHome"); if(hb2&&hb2.classList) hb2.classList.remove("on"); if(typeof unselectPin==="function") unselectPin(); });
+ if(clearBtn) clearBtn.addEventListener("click",function(){ document.getElementById("planTo").value=""; var dp=document.getElementById("planDayPick"); if(dp) dp.value=""; var pm=document.getElementById("planMode"); if(pm) pm.value=""; if(typeof window!=="undefined") window.__routeMode=null; if(typeof plnFillActs==="function") plnFillActs(); document.getElementById("planOut").innerHTML=""; var hb2=document.getElementById("planHome"); if(hb2&&hb2.classList) hb2.classList.remove("on"); if(typeof unselectPin==="function") unselectPin(); });
+ var modeEl=document.getElementById("planMode");
+ if(modeEl) modeEl.addEventListener("change",function(){ window.__routeMode=modeEl.value||null; var lr=window.__lastRoute; if(lr&&lr.from&&lr.to) plnRender({n:lr.from.n,lat:lr.from.lat,lng:lr.from.lng,__fresh:1},lr.to); });
  var toEl=document.getElementById("planTo"), pickEl=document.getElementById("planPick");
  var plnPickTimer=null, plnPickToken=0, plnPickBase=null, plnLiveFeats=[], plnPickCtl=null;
  function hidePick(){ if(pickEl) pickEl.style.display="none"; }
@@ -611,7 +613,7 @@ function gtNear(lat,lng,rMi,maxN){
   out.sort(function(x,y){ return x.d-y.d; });
   return out.slice(0,maxN||99);
 }
-function planRouteGT(fromPin,toPin,banSet,pins){
+function planRouteGT(fromPin,toPin,banSet,pins,mode){
   gtInit();
   var NN=GT_NODES.length, SRC=NN, DST=NN+1, TOT=NN+2;
   var dist=new Float64Array(TOT).fill(Infinity);
@@ -659,6 +661,7 @@ function planRouteGT(fromPin,toPin,banSet,pins){
     for(var ei=0; ei<edges.length; ei++){
       var e=edges[ei], sameRun=(pk===2&&pr===e[2]&&pd===e[3]);
       if(banSet&&banSet[e[2]+":"+e[3]]) continue;
+      if(mode){ var RR=GT_ROUTES[e[2]], eIsBus=RR&&RR[1]===3; if((mode==="bus"&&!eIsBus)||(mode==="train"&&eIsBus)) continue; }
       var w=e[1]/60+(sameRun?0:3), nd=dist[u]+w, tn=e[0];
       if(nd<dist[tn]){ dist[tn]=nd; prevN[tn]=u; prevK[tn]=2; prevR[tn]=e[2]; prevD[tn]=e[3]; hPush(nd,tn); }
     }
@@ -733,9 +736,9 @@ function plnWalkPlan(f,t){
   var mins=Math.max(1,Math.round(d*20));
   return { steps:["🚶 Walk ~"+mins+" min ("+plnFmtD(d)+") to "+t.n+" — you're there"], totalMin:mins, coords:[[f.lat,f.lng],[t.lat,t.lng]], rides:[], walkLegs:[{step:0,kind:"all",from:[f.lat,f.lng],to:[t.lat,t.lng],ci:0,toName:t.n}] };
 }
-function planRoute(fromPin,toPin,pins){
+function planRouteMode(fromPin,toPin,pins,mode){
   if(GT_ON){ try{
-    var r=planRouteGT(fromPin,toPin,null,pins);
+    var r=planRouteGT(fromPin,toPin,null,pins,mode);
     if(r&&r.rides&&typeof GT_SPANS!=="undefined"){
       var ban={}, notes=[], cur=r, guard=0;
       function deadOf(rr){ return rr.rides.map(function(rd){ return {rd:rd,st:gtRideState(rd)}; }).filter(function(x){ return !!x.st; }); }
@@ -743,7 +746,7 @@ function planRoute(fromPin,toPin,pins){
         var dead=deadOf(cur);
         if(!dead.length) break;
         dead.forEach(function(x){ ban[x.rd.ridx+":"+x.rd.gdir]=1; var nt=x.rd.line+" isn't running now ("+(x.st.kind==="before"?("service starts "+gtClock(x.st.at)):("service ended "+gtClock(x.st.at)))+")"; if(notes.indexOf(nt)<0) notes.push(nt); });
-        var r2=null; try{ r2=planRouteGT(fromPin,toPin,ban,pins); }catch(e){}
+        var r2=null; try{ r2=planRouteGT(fromPin,toPin,ban,pins,mode); }catch(e){}
         if(!r2||!r2.rides) break;
         cur=r2; guard++;
       }
@@ -756,8 +759,17 @@ function planRoute(fromPin,toPin,pins){
       if(cur){ if(pins) cur.pins=pins; return cur; }
     }
     if(r){ if(pins) r.pins=pins; return r; }
-    if(pins){ var rp=planRouteGT(fromPin,toPin,null,null); if(rp){ rp.notice="Couldn't route through your selected stop — showing the fastest option instead."; return rp; } }
+    if(pins){ var rp=planRouteGT(fromPin,toPin,null,null,mode); if(rp){ rp.notice="Couldn't route through your selected stop — showing the fastest option instead."; return rp; } }
   }catch(e){} }
+  return null;
+}
+function planRoute(fromPin,toPin,pins,mode){
+  var res=planRouteMode(fromPin,toPin,pins,mode);
+  if(res) return res;
+  if(mode){ /* Only force bus+train together when the chosen mode has no route at all */
+    var res2=planRouteMode(fromPin,toPin,pins,null);
+    if(res2){ res2.notice="No "+mode+"-only route from here — showing the fastest option, which also uses the "+(mode==="bus"?"train":"bus")+"."; return res2; }
+  }
   return planRouteV1(fromPin,toPin);
 }
 
