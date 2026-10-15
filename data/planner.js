@@ -167,6 +167,44 @@ if(typeof document!=="undefined"&&document.getElementById){
    ]).addTo(map);
    try{ map.fitBounds(window.__routeLine.getBounds().pad(0.18)); }catch(_){ }
  }
+var GT_SEQIDX={};
+function gtSeqIdx(rt,dir){
+ var k=rt+":"+dir; if(GT_SEQIDX[k]) return GT_SEQIDX[k];
+ var nx={}, pv={};
+ for(var u=0;u<GT_NODES.length;u++){ var es=GT_EDGES[u]||[]; for(var i=0;i<es.length;i++){ var e=es[i]; if(e[2]===rt&&e[3]===dir){ if(nx[u]==null) nx[u]=e[0]; if(pv[e[0]]==null) pv[e[0]]=u; } } }
+ GT_SEQIDX[k]={nx:nx,pv:pv}; return GT_SEQIDX[k];
+}
+function gtChain(rt,dir,idx){
+ var m=gtSeqIdx(rt,dir), back=[], fwd=[], seen={}, cur=idx;
+ seen[cur]=1;
+ while(m.pv[cur]!=null&&!seen[m.pv[cur]]){ cur=m.pv[cur]; seen[cur]=1; back.unshift(cur); }
+ cur=idx;
+ while(m.nx[cur]!=null&&!seen[m.nx[cur]]){ cur=m.nx[cur]; seen[cur]=1; fwd.push(cur); }
+ return back.concat([idx],fwd);
+}
+/* Cross-street picker for a ride's board/exit stop: the other stops on the same
+   route+direction within a reasonable walk of the trip end they serve. */
+function plnStopOpts(rd,which,f,t,single){
+ if(!rd||!rd.gtfs||rd.boardIdx==null||typeof GT_NODES==="undefined") return "";
+ var cur=(which==="board")?rd.boardIdx:rd.exitIdx, anchor=(which==="board")?f:t;
+ var chain=gtChain(rd.ridx,rd.gdir,cur);
+ if(chain.length<2) return "";
+ var curPos=chain.indexOf(cur);
+ var list=chain.map(function(ix,pos){ return {ix:ix,pos:pos,d:plnDist([anchor.lat,anchor.lng],[GT_NODES[ix][2],GT_NODES[ix][3]])}; })
+  .filter(function(x){
+    if(!(x.d<=0.75||x.ix===cur)) return false;
+    if(single){ var bPos=chain.indexOf(rd.boardIdx), ePos=chain.indexOf(rd.exitIdx);
+      if(bPos>=0&&ePos>=0){ if(which==="board"&&x.pos>=ePos) return false; if(which==="exit"&&x.pos<=bPos) return false; } }
+    return true;
+  });
+ list.sort(function(a,b){ return a.d-b.d; });
+ if(list.length<2) return "";
+ var h="<div style='margin-top:6px'><label style='font-size:12px;color:var(--mut)'>"+(which==="board"?"Board at":"Exit at")+"</label><br><select data-pin='"+which+"' style='height:34px;font-size:13px;max-width:100%;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)'>";
+ h+="<option value=''>↺ Auto (fastest)</option>";
+ list.forEach(function(x){ h+="<option value='"+x.ix+"'"+(x.ix===cur?" selected":"")+">"+plnEsc(GT_NODES[x.ix][1])+" · "+plnFmtD(x.d)+" walk</option>"; });
+ h+="</select></div>";
+ return h;
+}
  function plnRender(f,t,afterFn){
    var isCurLoc=!!(f&&!f.cat&&String(f.n||"").indexOf("Your current location")>=0);
    if(isCurLoc&&!f.__fresh&&typeof window!=="undefined"&&typeof window.freshPos==="function"&&typeof window.__posInfo==="function"&&window.__posInfo().kind!=="manual"){
@@ -182,7 +220,10 @@ if(typeof document!=="undefined"&&document.getElementById){
    var hb=document.getElementById("planHome"); if(hb&&hb.classList) hb.classList.toggle("on",!!(typeof POIS!=="undefined"&&POIS[0]&&t===POIS[0]));
    if(!t.cat&&typeof map!=="undefined"&&map) map.setView([t.lat,t.lng],15);
    var appleAddr=encodeURIComponent(t.n+(t.addr?" "+t.addr:"")+" Chicago IL");
-   var r=planRoute(f,t);
+   var rpKey=f.lat.toFixed(5)+","+f.lng.toFixed(5)+"|"+(t.n||"");
+   if(!window.__routePins||window.__routePins.key!==rpKey) window.__routePins={key:rpKey,board:null,exit:null};
+   var activePins=(window.__routePins.board!=null||window.__routePins.exit!=null)?{board:window.__routePins.board,exit:window.__routePins.exit}:null;
+   var r=planRoute(f,t,activePins);
    if(!r){ plnClearRoute(); out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; return; }
    var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps 🗺️</a>";
    var orgLine="From where you are", poorWarn="";
@@ -194,8 +235,13 @@ if(typeof document!=="undefined"&&document.getElementById){
      else { orgLine="From Fairfield Inn — GPS hasn't locked yet, so this route starts at the hotel";
        poorWarn="<p style='margin:6px 0'>⚠️ For directions from where you actually are, tap 📍 Current location first, or use <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Apple Maps directions</a>, which use your phone's own location directly.</p>"; }
    }
-   out.innerHTML="<p style='margin:6px 0'><strong>"+orgLine+" \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p>"+poorWarn+(r.notice?("<p style='margin:6px 0'>ℹ️ "+plnEsc(r.notice)+"</p>"):"")+"<ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'>⏱ Checking live times…</span>":"")+"</li>"; }).join("")+"</ol>"+extra;
+   out.innerHTML="<p style='margin:6px 0'><strong>"+orgLine+" \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p>"+poorWarn+(r.notice?("<p style='margin:6px 0'>ℹ️ "+plnEsc(r.notice)+"</p>"):"")+"<ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); var pick=""; if(rj>=0){ var single=(r.rides.length===1); if(rj===0) pick+=plnStopOpts(r.rides[0],"board",f,t,single); if(rj===r.rides.length-1) pick+=plnStopOpts(r.rides[r.rides.length-1],"exit",f,t,single); } return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'>⏱ Checking live times…</span>":"")+pick+"</li>"; }).join("")+"</ol>"+extra;
    window.__lastRoute={res:r,from:f,to:t}; var nb=document.getElementById("navBtn"); if(nb) nb.style.display="block"; if(window.__nav&&window.__nav.on&&!window.__navRerender) plnNavEnd();
+   if(out.querySelectorAll){ var sels=out.querySelectorAll("select[data-pin]"); for(var si=0;si<sels.length;si++){ (function(sel){ sel.addEventListener("change",function(){
+     var kind=sel.getAttribute("data-pin"), v=sel.value, st=window.__routePins;
+     if(st){ if(kind==="board") st.board=(v==="")?null:parseInt(v,10); else st.exit=(v==="")?null:parseInt(v,10); }
+     plnRender({n:f.n,lat:f.lat,lng:f.lng,__fresh:1},t);
+   }); })(sels[si]); } }
    plnDrawRoute(r.coords);
    if(r.rides&&r.rides.length&&typeof plnLiveFill==="function") plnLiveFill(r.rides,false);
    if(r.walkLegs&&r.walkLegs.length&&typeof plnOsrmEnrich==="function") plnOsrmEnrich(r);
@@ -565,7 +611,7 @@ function gtNear(lat,lng,rMi,maxN){
   out.sort(function(x,y){ return x.d-y.d; });
   return out.slice(0,maxN||99);
 }
-function planRouteGT(fromPin,toPin,banSet){
+function planRouteGT(fromPin,toPin,banSet,pins){
   gtInit();
   var NN=GT_NODES.length, SRC=NN, DST=NN+1, TOT=NN+2;
   var dist=new Float64Array(TOT).fill(Infinity);
@@ -576,11 +622,17 @@ function planRouteGT(fromPin,toPin,banSet){
   var done=new Uint8Array(TOT);
   var fromNear=gtNear(fromPin.lat,fromPin.lng,1.05,40);
   var toNear=gtNear(toPin.lat,toPin.lng,1.05,40);
-  if(!fromNear.length||!toNear.length) return null;
+  if((!fromNear.length&&!(pins&&pins.board!=null))||(!toNear.length&&!(pins&&pins.exit!=null))) return null;
   function addRail(list,lat,lng){ var seen={}; list.forEach(function(x){ seen[x.i]=1; });
     GT_NODES.forEach(function(n,ix){ if(n[4]===1&&!seen[ix]){ var d=plnDist([lat,lng],[n[2],n[3]]); if(d<=1.05) list.push({i:ix,d:d}); } }); }
   addRail(fromNear,fromPin.lat,fromPin.lng); addRail(toNear,toPin.lat,toPin.lng);
   var toSet={}; toNear.forEach(function(x){ toSet[x.i]=x; });
+  /* User-selected stops: the first ride must board at pins.board, the last ride
+     must exit at pins.exit (walk edges then reach only those stops). A pin too
+     far from its trip end can't be honored — bail so the caller falls back
+     with a notice instead of producing an absurd walk. */
+  if(pins&&pins.board!=null&&GT_NODES[pins.board]){ var bd=plnDist([fromPin.lat,fromPin.lng],[GT_NODES[pins.board][2],GT_NODES[pins.board][3]]); if(bd>1.6) return null; fromNear=[{i:pins.board,d:bd}]; }
+  if(pins&&pins.exit!=null&&GT_NODES[pins.exit]){ var xd=plnDist([toPin.lat,toPin.lng],[GT_NODES[pins.exit][2],GT_NODES[pins.exit][3]]); if(xd>1.6) return null; toNear=[{i:pins.exit,d:xd}]; toSet={}; toSet[pins.exit]=toNear[0]; }
   var directD=plnDist([fromPin.lat,fromPin.lng],[toPin.lat,toPin.lng]);
   var heap=[[0,SRC]];
   function hPush(c,n){ heap.push([c,n]); var i=heap.length-1; while(i>0){ var p=(i-1)>>1; if(heap[p][0]<=heap[i][0]) break; var t=heap[p]; heap[p]=heap[i]; heap[i]=t; i=p; } }
@@ -641,7 +693,7 @@ function planRouteGT(fromPin,toPin,banSet){
       var lineName=isBus?("#"+R[0]):R[0];
       var hs=R[2+dr]||"";
       steps.push((isBus?"🚌":"🚇")+" Board the "+lineName+" at "+nodeName(board)+" (toward "+hs+") → ride "+nstops+(nstops===1?" stop":" stops")+", ~"+mins+" min → exit at "+nodeName(exitN));
-      rides.push({step:steps.length-1,mode:isBus?"bus":"train",line:lineName,route:isBus?String(R[0]).split(" ")[0]:null,node:GT_NODES[board][0],dir:"toward "+hs,boardName:nodeName(board),exitName:nodeName(exitN),gtfs:1,ridx:rt,gdir:dr});
+      rides.push({step:steps.length-1,mode:isBus?"bus":"train",line:lineName,route:isBus?String(R[0]).split(" ")[0]:null,node:GT_NODES[board][0],dir:"toward "+hs,boardName:nodeName(board),exitName:nodeName(exitN),gtfs:1,ridx:rt,gdir:dr,boardIdx:board,exitIdx:exitN});
     } else if(sg.e.kind==="walkall"){
       legs.push({step:steps.length,kind:"all",from:[fromPin.lat,fromPin.lng],to:[toPin.lat,toPin.lng],ci:0,toName:toPin.n});
       total+=sg.e.min||Math.max(1,Math.round(directD*20));
@@ -681,9 +733,9 @@ function plnWalkPlan(f,t){
   var mins=Math.max(1,Math.round(d*20));
   return { steps:["🚶 Walk ~"+mins+" min ("+plnFmtD(d)+") to "+t.n+" — you're there"], totalMin:mins, coords:[[f.lat,f.lng],[t.lat,t.lng]], rides:[], walkLegs:[{step:0,kind:"all",from:[f.lat,f.lng],to:[t.lat,t.lng],ci:0,toName:t.n}] };
 }
-function planRoute(fromPin,toPin){
+function planRoute(fromPin,toPin,pins){
   if(GT_ON){ try{
-    var r=planRouteGT(fromPin,toPin,null);
+    var r=planRouteGT(fromPin,toPin,null,pins);
     if(r&&r.rides&&typeof GT_SPANS!=="undefined"){
       var ban={}, notes=[], cur=r, guard=0;
       function deadOf(rr){ return rr.rides.map(function(rd){ return {rd:rd,st:gtRideState(rd)}; }).filter(function(x){ return !!x.st; }); }
@@ -691,7 +743,7 @@ function planRoute(fromPin,toPin){
         var dead=deadOf(cur);
         if(!dead.length) break;
         dead.forEach(function(x){ ban[x.rd.ridx+":"+x.rd.gdir]=1; var nt=x.rd.line+" isn't running now ("+(x.st.kind==="before"?("service starts "+gtClock(x.st.at)):("service ended "+gtClock(x.st.at)))+")"; if(notes.indexOf(nt)<0) notes.push(nt); });
-        var r2=null; try{ r2=planRouteGT(fromPin,toPin,ban); }catch(e){}
+        var r2=null; try{ r2=planRouteGT(fromPin,toPin,ban,pins); }catch(e){}
         if(!r2||!r2.rides) break;
         cur=r2; guard++;
       }
@@ -701,9 +753,10 @@ function planRoute(fromPin,toPin){
         return wp;
       }
       if(cur&&cur!==r&&notes.length) cur.notice=notes.join(" · ")+" — routed another way instead.";
-      if(cur) return cur;
+      if(cur){ if(pins) cur.pins=pins; return cur; }
     }
-    if(r) return r;
+    if(r){ if(pins) r.pins=pins; return r; }
+    if(pins){ var rp=planRouteGT(fromPin,toPin,null,null); if(rp){ rp.notice="Couldn't route through your selected stop — showing the fastest option instead."; return rp; } }
   }catch(e){} }
   return planRouteV1(fromPin,toPin);
 }
