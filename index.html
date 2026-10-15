@@ -268,23 +268,39 @@ function pinAdd(m){ if(pinCluster) pinCluster.addLayer(m); else if(map) map.addL
 function pinRemove(m){ if(pinCluster) pinCluster.removeLayer(m); else if(map) map.removeLayer(m); }
 var myPos=null, alerted={}, simTimer=null, simSeg=0, simT=0;
 var selectedIdx=-1;
-var gpsWatchId=null, tapMode=false, gpsHasFix=false;
+var gpsWatchId=null, tapMode=false, gpsHasFix=false, accCircle=null;
 window.__posKind="default"; window.__gpsAccFt=null; window.__gpsTs=0;
 window.__posInfo=function(){ return {kind:window.__posKind, accFt:window.__gpsAccFt, ageS: window.__gpsTs?Math.max(0,Math.round((Date.now()-window.__gpsTs)/1000)):null}; };
-/* Best available position: freshens the GPS fix first (up to maxMs) unless the
-   user set the walker manually or a good fix is already fresh. */
+function gpsMi(a,b,c,d){ var R=3958.8, dLa=(c-a)*Math.PI/180, dLo=(d-b)*Math.PI/180; var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(h)); }
+window.__jumpCand=null; window.__jumpN=0;
+/* Best available position: samples fixes for up to maxMs and keeps the best,
+   unless the user set the walker manually or a good fix is already fresh.
+   A web page only ever gets the position iOS hands to websites — it cannot
+   pull the native Maps apps' location — so this squeezes the most out of it. */
 window.freshPos=function(maxMs){
  return new Promise(function(res){
   function cur(){ if(typeof myPos!=="undefined"&&myPos) res({lat:myPos.lat,lng:myPos.lng}); else res(null); }
   if(window.__posKind==="manual"||!navigator.geolocation){ cur(); return; }
   var age=Date.now()-(window.__gpsTs||0);
   if(window.__posKind==="gps"&&age<20000&&window.__gpsAccFt&&window.__gpsAccFt<=1000){ cur(); return; }
-  var done=false, to=setTimeout(function(){ if(!done){ done=true; cur(); } }, maxMs||6000);
-  try{
-   navigator.geolocation.getCurrentPosition(function(g){ if(done) return; done=true; clearTimeout(to); handleGpsPos(g); cur(); },
-    function(e){ if(done) return; done=true; clearTimeout(to); cur(); },
-    {enableHighAccuracy:true, timeout:(maxMs||6000), maximumAge:0});
-  }catch(_){ if(!done){ done=true; clearTimeout(to); cur(); } }
+  var done=false, startTs=window.__gpsTs||0, tempWatch=null, retried=false;
+  function finish(){ if(done) return; done=true; clearTimeout(to); clearInterval(iv); if(tempWatch!==null){ try{ navigator.geolocation.clearWatch(tempWatch); }catch(_){}}
+    cur(); }
+  var to=setTimeout(finish, maxMs||6000);
+  var iv=setInterval(function(){ if(window.__gpsTs>startTs&&window.__gpsAccFt&&window.__gpsAccFt<=300) finish(); },400);
+  function oneShot(){
+   try{
+    navigator.geolocation.getCurrentPosition(function(g){ handleGpsPos(g);
+      if(window.__gpsTs>startTs&&window.__gpsAccFt&&window.__gpsAccFt<=300){ finish(); return; }
+      /* The fix was held by the jump filter — one more sample confirms or clears it */
+      if(window.__jumpCand&&!retried){ retried=true; setTimeout(function(){ if(!done) oneShot(); }, Math.min(800, Math.max(150, (maxMs||6000)/3))); }
+     },
+     function(e){ if(e&&e.code===1) finish(); },
+     {enableHighAccuracy:true, timeout:(maxMs||6000), maximumAge:0});
+   }catch(_){}
+  }
+  oneShot();
+  if(typeof gpsWatchId==="undefined"||gpsWatchId===null){ try{ tempWatch=navigator.geolocation.watchPosition(handleGpsPos,function(){},{enableHighAccuracy:true,maximumAge:5000}); }catch(_){}}
  });
 };
 
@@ -377,6 +393,13 @@ function setWalker(lat,lng,label){
      });
    }
    else walker.setLatLng([lat,lng]);
+   try{
+     if(window.__posKind==="gps"&&window.__gpsAccFt){
+       var rM=window.__gpsAccFt/3.28084;
+       if(accCircle){ accCircle.setLatLng([lat,lng]); accCircle.setRadius(rM); }
+       else accCircle=L.circle([lat,lng],{radius:rM,color:"#2f7bff",weight:1,fillColor:"#2f7bff",fillOpacity:0.12,interactive:false}).addTo(map);
+     } else if(accCircle){ map.removeLayer(accCircle); accCircle=null; }
+   }catch(_){}
  }
  if(label) statusEl.textContent=label;
  checkProximity(myPos);
@@ -413,6 +436,19 @@ function initMap(){
    to use Geolocation service"); that only clears in Safari / Home Screen. */
 function handleGpsPos(g){
  var accFt=g.coords.accuracy?Math.round(g.coords.accuracy*3.28084):null, nowMs=Date.now();
+ /* Jump filter: a sudden teleport (>0.5 mi from the last fix, close in time) is
+    usually a bad Wi-Fi/cell fix, not movement. Hold it until a second fix agrees
+    with the new spot — then it's real (or the old spot was the wrong one). */
+ if(window.__posKind==="gps"&&typeof myPos!=="undefined"&&myPos&&window.__gpsTs&&(nowMs-window.__gpsTs)<120000){
+   var dMi=gpsMi(myPos.lat,myPos.lng,g.coords.latitude,g.coords.longitude);
+   if(dMi>0.5){
+     var jc=window.__jumpCand;
+     if(jc&&gpsMi(jc.lat,jc.lng,g.coords.latitude,g.coords.longitude)<=0.2){ window.__jumpN++; }
+     else { window.__jumpCand={lat:g.coords.latitude,lng:g.coords.longitude}; window.__jumpN=1; }
+     if(window.__jumpN<2){ if(typeof statusEl!=="undefined"&&statusEl) statusEl.textContent="GPS jumped unexpectedly — confirming your location before moving the walker…"; return; }
+     window.__jumpCand=null; window.__jumpN=0;
+   } else { window.__jumpCand=null; window.__jumpN=0; }
+ }
  /* Ignore a much worse fix right after a good one (downtown GPS drift) */
  if(window.__gpsTs&&(nowMs-window.__gpsTs)<45000&&accFt&&window.__gpsAccFt&&accFt>Math.max(1000,window.__gpsAccFt*2.5)) return;
  window.__gpsAccFt=accFt; window.__gpsTs=nowMs; window.__posKind="gps";
