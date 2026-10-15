@@ -167,7 +167,16 @@ if(typeof document!=="undefined"&&document.getElementById){
    ]).addTo(map);
    try{ map.fitBounds(window.__routeLine.getBounds().pad(0.18)); }catch(_){ }
  }
- function plnRender(f,t){
+ function plnRender(f,t,afterFn){
+   var isCurLoc=!!(f&&!f.cat&&String(f.n||"").indexOf("Your current location")>=0);
+   if(isCurLoc&&!f.__fresh&&typeof window!=="undefined"&&typeof window.freshPos==="function"&&typeof window.__posInfo==="function"&&window.__posInfo().kind!=="manual"){
+     var out0=document.getElementById("planOut"); if(out0) out0.innerHTML="<p>📍 Updating your location for accuracy…</p>";
+     window.freshPos(6000).then(function(np){
+       var f2={n:f.n,lat:(np&&typeof np.lat==="number")?np.lat:f.lat,lng:(np&&typeof np.lng==="number")?np.lng:f.lng,__fresh:1};
+       plnRender(f2,t,afterFn);
+     });
+     return;
+   }
    if(window.__liveTimer){ clearInterval(window.__liveTimer); window.__liveTimer=null; }
    var out=document.getElementById("planOut");
    var hb=document.getElementById("planHome"); if(hb&&hb.classList) hb.classList.toggle("on",!!(typeof POIS!=="undefined"&&POIS[0]&&t===POIS[0]));
@@ -176,12 +185,19 @@ if(typeof document!=="undefined"&&document.getElementById){
    var r=planRoute(f,t);
    if(!r){ plnClearRoute(); out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; return; }
    var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps 🗺️</a>";
-   out.innerHTML="<p style='margin:6px 0'><strong>From where you are \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p>"+(r.notice?("<p style='margin:6px 0'>ℹ️ "+plnEsc(r.notice)+"</p>"):"")+"<ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'>⏱ Checking live times…</span>":"")+"</li>"; }).join("")+"</ol>"+extra;
+   var orgLine="From where you are";
+   if(isCurLoc&&typeof window!=="undefined"&&typeof window.__posInfo==="function"){
+     var pi=window.__posInfo();
+     if(pi.kind==="gps"){ orgLine="From your current location"; if(pi.accFt){ orgLine+=" (±"+pi.accFt+" ft"; if(pi.ageS!=null) orgLine+=", updated "+(pi.ageS<5?"just now":pi.ageS+"s ago"); orgLine+=")"; } }
+     else if(pi.kind==="manual"){ orgLine="From the spot you set on the map"; }
+     else { orgLine="From Fairfield Inn — GPS hasn't locked yet, so this route starts at the hotel"; }
+   }
+   out.innerHTML="<p style='margin:6px 0'><strong>"+orgLine+" \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p>"+(r.notice?("<p style='margin:6px 0'>ℹ️ "+plnEsc(r.notice)+"</p>"):"")+"<ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'>⏱ Checking live times…</span>":"")+"</li>"; }).join("")+"</ol>"+extra;
    window.__lastRoute={res:r,from:f,to:t}; var nb=document.getElementById("navBtn"); if(nb) nb.style.display="block"; if(window.__nav&&window.__nav.on&&!window.__navRerender) plnNavEnd();
    plnDrawRoute(r.coords);
    if(r.rides&&r.rides.length&&typeof plnLiveFill==="function") plnLiveFill(r.rides,false);
    if(r.walkLegs&&r.walkLegs.length&&typeof plnOsrmEnrich==="function") plnOsrmEnrich(r);
-  
+   if(afterFn){ try{ afterFn(); }catch(e){} }
  }
  function plnEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function plnWeb(u){ u=String(u||"").split(";")[0].trim(); if(!u) return ""; if(!/^https?:\/\//i.test(u)) u="https://"+u; return u; }
@@ -231,7 +247,7 @@ function plnShowLive(ft){
  var out=document.getElementById("planOut");
  var g=plnFeatureToPlace(ft,((document.getElementById("planTo")||{}).value||"").trim());
  document.getElementById("planTo").value=g.n;
- if(typeof myPos!=="undefined"&&myPos){ plnRender({n:"\uD83D\uDCCD Your current location",lat:myPos.lat,lng:myPos.lng},g); }
+ if(typeof myPos!=="undefined"&&myPos){ plnRender({n:"\uD83D\uDCCD Your current location",lat:myPos.lat,lng:myPos.lng},g,function(){ out.innerHTML+=plnCardHTML(g); plnEnrich(g,out); }); return; }
  else { out.innerHTML="<p>No live location yet \u2014 tap \u201CCurrent location\u201D, or tap the map / drag the \uD83D\uDEB6 walker to set where you are, and the route will show here.</p>"; }
  out.innerHTML+=plnCardHTML(g);
  plnEnrich(g,out);
@@ -248,9 +264,7 @@ function plnPhotonMulti(f,txt,out){
 }
 function plnMi(a,b){ var R=3958.8, dLa=(b.lat-a.lat)*Math.PI/180, dLo=(b.lng-a.lng)*Math.PI/180; var h=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(h)); }
 function plnGoPlace(f,g,out){
- plnRender(f,g);
- out.innerHTML+=plnCardHTML(g);
- plnEnrich(g,out);
+ plnRender(f,g,function(){ out.innerHTML+=plnCardHTML(g); plnEnrich(g,out); });
 }
 function plnShowCands(f,txt,cands,out){
  var ded=[];
