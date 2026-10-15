@@ -269,6 +269,24 @@ function pinRemove(m){ if(pinCluster) pinCluster.removeLayer(m); else if(map) ma
 var myPos=null, alerted={}, simTimer=null, simSeg=0, simT=0;
 var selectedIdx=-1;
 var gpsWatchId=null, tapMode=false, gpsHasFix=false;
+window.__posKind="default"; window.__gpsAccFt=null; window.__gpsTs=0;
+window.__posInfo=function(){ return {kind:window.__posKind, accFt:window.__gpsAccFt, ageS: window.__gpsTs?Math.max(0,Math.round((Date.now()-window.__gpsTs)/1000)):null}; };
+/* Best available position: freshens the GPS fix first (up to maxMs) unless the
+   user set the walker manually or a good fix is already fresh. */
+window.freshPos=function(maxMs){
+ return new Promise(function(res){
+  function cur(){ if(typeof myPos!=="undefined"&&myPos) res({lat:myPos.lat,lng:myPos.lng}); else res(null); }
+  if(window.__posKind==="manual"||!navigator.geolocation){ cur(); return; }
+  var age=Date.now()-(window.__gpsTs||0);
+  if(window.__posKind==="gps"&&age<20000&&window.__gpsAccFt&&window.__gpsAccFt<=1000){ cur(); return; }
+  var done=false, to=setTimeout(function(){ if(!done){ done=true; cur(); } }, maxMs||6000);
+  try{
+   navigator.geolocation.getCurrentPosition(function(g){ if(done) return; done=true; clearTimeout(to); handleGpsPos(g); cur(); },
+    function(e){ if(done) return; done=true; clearTimeout(to); cur(); },
+    {enableHighAccuracy:true, timeout:(maxMs||6000), maximumAge:0});
+  }catch(_){ if(!done){ done=true; clearTimeout(to); cur(); } }
+ });
+};
 
 function gmaps(p){return "https://maps.apple.com/?q="+encodeURIComponent(p.n+" "+p.addr+" Chicago IL");}
 function gdir(p){return "https://maps.apple.com/?daddr="+encodeURIComponent(p.n+" "+p.addr+" Chicago IL")+"&dirflg=t";}
@@ -353,7 +371,7 @@ function setWalker(lat,lng,label){
    if(!walker){
      walker=L.marker([lat,lng],{draggable:true,icon:L.divIcon({className:"",html:"<div style='background:#111;color:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-size:15px;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.5)'>🚶</div>",iconSize:[28,28],iconAnchor:[14,14]})}).addTo(map);
      walker.on("dragend",function(){
-       var ll=walker.getLatLng();
+       var ll=walker.getLatLng(); window.__posKind="manual";
        tapMode=false; var tb=document.getElementById("tapLocBtn"); if(tb){tb.classList.remove("active"); tb.textContent="👆 Pin drop";}
        setWalker(ll.lat,ll.lng,"You moved the walker — pop-ups check this spot. Drag it anytime, or tap Current location for live GPS.");
      });
@@ -383,6 +401,7 @@ function initMap(){
  L.polyline(pts,{color:"#0b5cad",weight:3,opacity:.55,dashArray:"6 6"}).addTo(map);
  map.on("click",function(e){
    if(!tapMode) return;
+   window.__posKind="manual";
    tapMode=false; var tb=document.getElementById("tapLocBtn"); if(tb){tb.classList.remove("active"); tb.textContent="👆 Pin drop";}
    setWalker(e.latlng.lat,e.latlng.lng,"Your location is set to where you tapped — pop-ups fired for pins nearby. Drag the 🚶 walker to move it, or tap the button again to re-place it.");
  });
@@ -393,6 +412,10 @@ function initMap(){
    origin is denied by Permissions-Policy ("Origin does not have permission
    to use Geolocation service"); that only clears in Safari / Home Screen. */
 function handleGpsPos(g){
+ var accFt=g.coords.accuracy?Math.round(g.coords.accuracy*3.28084):null, nowMs=Date.now();
+ /* Ignore a much worse fix right after a good one (downtown GPS drift) */
+ if(window.__gpsTs&&(nowMs-window.__gpsTs)<45000&&accFt&&window.__gpsAccFt&&accFt>Math.max(1000,window.__gpsAccFt*2.5)) return;
+ window.__gpsAccFt=accFt; window.__gpsTs=nowMs; window.__posKind="gps";
  gpsHasFix=true; hideGpsHelp();
  var btn=document.getElementById("gpsBtn"); if(btn) btn.textContent="📍 Live GPS on — tap to stop";
  setWalker(g.coords.latitude,g.coords.longitude,"Live GPS on · accuracy ~"+Math.round(g.coords.accuracy*3.28084)+" ft. Walking… pop-ups fire within "+fmtRad(radius)+" of a pin.");
@@ -413,9 +436,13 @@ function handleGpsErr(e){
  } else {
    statusEl.textContent="GPS didn't come through ("+(e&&e.message?e.message:"unknown error")+"). See the help below, or tap the map to set your location manually.";
  }
- showGpsHelp();
- var btn=document.getElementById("gpsBtn"); if(btn) btn.textContent="📍 Current location";
- if(gpsWatchId!==null && navigator.geolocation){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; }
+ if(code===1||blockedByOrigin){
+   showGpsHelp();
+   var btn=document.getElementById("gpsBtn"); if(btn) btn.textContent="📍 Current location";
+   if(gpsWatchId!==null && navigator.geolocation){ try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){} gpsWatchId=null; }
+ }
+ /* code 2/3 (unavailable / timeout): status text above is enough — keep the watch
+    alive so a later fix still lands, and don't flash the help box. */
 }
 function startGps(){
  var btn=document.getElementById("gpsBtn");
@@ -443,9 +470,12 @@ function startGps(){
      gpsWatchId=navigator.geolocation.watchPosition(handleGpsPos,handleGpsErr,{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
    }
  },function(e){
-   /* If the one-shot fails for a policy block, don't start a watch that will spam errors */
+   /* Denied is final; a timeout/unavailable one-shot is not — start the watch anyway
+      so a fix can still land as signal improves, instead of staying on the default. */
    if(e && e.code===1){ handleGpsErr(e); return; }
-   handleGpsErr(e);
+   statusEl.textContent="GPS is taking a while to lock — downtown buildings and being indoors can block it. Still trying in the background; directions will use the best position available.";
+   if(btn) btn.textContent="📍 Locating…";
+   if(gpsWatchId===null){ gpsWatchId=navigator.geolocation.watchPosition(handleGpsPos,handleGpsErr,{enableHighAccuracy:true,maximumAge:5000}); }
  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
 document.getElementById("gpsBtn").addEventListener("click",startGps);
