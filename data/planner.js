@@ -185,14 +185,16 @@ if(typeof document!=="undefined"&&document.getElementById){
    var r=planRoute(f,t);
    if(!r){ plnClearRoute(); out.innerHTML="<p>No simple bus/train route found from where you are to "+t.n+". <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Open directions in Apple Maps 🗺️</a></p>"; return; }
    var extra=t.addr?"":" <br><a href='https://maps.apple.com/?q="+appleAddr+"' target='_blank' rel='noopener'>See it in Apple Maps 🗺️</a>";
-   var orgLine="From where you are";
+   var orgLine="From where you are", poorWarn="";
    if(isCurLoc&&typeof window!=="undefined"&&typeof window.__posInfo==="function"){
      var pi=window.__posInfo();
-     if(pi.kind==="gps"){ orgLine="From your current location"; if(pi.accFt){ orgLine+=" (±"+pi.accFt+" ft"; if(pi.ageS!=null) orgLine+=", updated "+(pi.ageS<5?"just now":pi.ageS+"s ago"); orgLine+=")"; } }
+     if(pi.kind==="gps"){ orgLine="From your current location"; if(pi.accFt){ orgLine+=" (±"+pi.accFt+" ft"; if(pi.ageS!=null) orgLine+=", updated "+(pi.ageS<5?"just now":pi.ageS+"s ago"); orgLine+=")"; }
+       if(pi.accFt>800) poorWarn="<p style='margin:6px 0'>⚠️ GPS accuracy is rough right now (±"+pi.accFt+" ft) — if the start point looks off, set it with 👆 Pin drop, or use <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Apple Maps directions</a>, which use your phone's own location directly.</p>"; }
      else if(pi.kind==="manual"){ orgLine="From the spot you set on the map"; }
-     else { orgLine="From Fairfield Inn — GPS hasn't locked yet, so this route starts at the hotel"; }
+     else { orgLine="From Fairfield Inn — GPS hasn't locked yet, so this route starts at the hotel";
+       poorWarn="<p style='margin:6px 0'>⚠️ For directions from where you actually are, tap 📍 Current location first, or use <a href='https://maps.apple.com/?daddr="+appleAddr+"&dirflg=t' target='_blank' rel='noopener'>Apple Maps directions</a>, which use your phone's own location directly.</p>"; }
    }
-   out.innerHTML="<p style='margin:6px 0'><strong>"+orgLine+" \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p>"+(r.notice?("<p style='margin:6px 0'>ℹ️ "+plnEsc(r.notice)+"</p>"):"")+"<ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'>⏱ Checking live times…</span>":"")+"</li>"; }).join("")+"</ol>"+extra;
+   out.innerHTML="<p style='margin:6px 0'><strong>"+orgLine+" \u2192 "+t.n+"</strong> · ~"+r.totalMin+" min door to door (approx, incl. average waits)</p>"+poorWarn+(r.notice?("<p style='margin:6px 0'>ℹ️ "+plnEsc(r.notice)+"</p>"):"")+"<ol>"+r.steps.map(function(x,xi){ var rj=-1; (r.rides||[]).forEach(function(rd,j){ if(rd.step===xi) rj=j; }); return "<li>"+x+(rj>=0?"<span class='liveT' id='liveT"+rj+"'>⏱ Checking live times…</span>":"")+"</li>"; }).join("")+"</ol>"+extra;
    window.__lastRoute={res:r,from:f,to:t}; var nb=document.getElementById("navBtn"); if(nb) nb.style.display="block"; if(window.__nav&&window.__nav.on&&!window.__navRerender) plnNavEnd();
    plnDrawRoute(r.coords);
    if(r.rides&&r.rides.length&&typeof plnLiveFill==="function") plnLiveFill(r.rides,false);
